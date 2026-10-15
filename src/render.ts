@@ -11,6 +11,7 @@ import { files, type CityTree } from './model/city.js';
 import type { ResolvedSource } from './source/resolve.js';
 import { highlights, type Highlights } from './summary.js';
 import { parseDays } from './util/duration.js';
+import { writeLitematic } from './write/litematic.js';
 import { writeSchem } from './write/schem.js';
 
 export interface RenderResult {
@@ -57,6 +58,10 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
     if (format === 'schem') {
       const file = join(cfg.out, `${base}.schem`);
       await writeSchem(file, built.grid, meta);
+      outputs.push({ format, file });
+    } else if (format === 'litematic') {
+      const file = join(cfg.out, `${base}.litematic`);
+      await writeLitematic(file, built.grid, meta);
       outputs.push({ format, file });
     } else if (format === 'json') {
       const file = join(cfg.out, `${base}.city.json`);
