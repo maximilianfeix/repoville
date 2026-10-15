@@ -251,6 +251,9 @@ body.ready .progress{opacity:0}
 .foot{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:10.5px;color:rgba(246,241,228,.45);pointer-events:none!important;padding:0 12px}
 .foot a{color:var(--dia);pointer-events:auto}
 .labels{position:absolute;inset:0}
+.mc-note{position:absolute;right:16px;bottom:30px;max-width:300px;font-size:11px;color:var(--mute);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+.mc-note a{color:var(--dia)}
+@media (max-width:720px){.mc-note{bottom:auto;top:62px;right:10px}}
 .label{all:unset;position:absolute;left:0;top:0;cursor:pointer;pointer-events:auto;font:600 11px var(--mono);color:var(--bone);background:rgba(28,30,36,.82);border:1px solid var(--line);border-radius:4px;padding:2px 6px;white-space:nowrap;will-change:transform}
 .label.d1{font:400 12px var(--px);color:var(--sand)}
 .label:hover{border-color:var(--dia)}

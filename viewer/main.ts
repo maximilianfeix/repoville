@@ -1,6 +1,6 @@
 import { inflateSync } from 'fflate';
 import {
-  ACESFilmicToneMapping, AdditiveBlending, Box3, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
+  ACESFilmicToneMapping, AdditiveBlending, Box3, DataArrayTexture, LinearMipmapLinearFilter, NearestFilter, RGBAFormat, UnsignedByteType, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
   HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
@@ -9,6 +9,8 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { decodePayload, fillChunk, type BuildingRow, type Payload } from './format.js';
 import { greedyMesh } from './mesher.js';
+import { buildDetailLayers, familyOf, FAMILIES, TILE } from './textures.js';
+import { loadMcLayers } from './mctextures.js';
 
 declare global {
   interface Window {
@@ -148,8 +150,81 @@ function main() {
   const progress = el('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Building the city' });
   ui.append(progress);
 
+  // ---------- Pixel detail textures (procedural, original) ----------
+  const detailTex = new DataArrayTexture(buildDetailLayers(), TILE, TILE, FAMILIES.length);
+  detailTex.format = RGBAFormat;
+  detailTex.type = UnsignedByteType;
+  detailTex.magFilter = NearestFilter;
+  detailTex.minFilter = LinearMipmapLinearFilter;
+  detailTex.generateMipmaps = true;
+  detailTex.needsUpdate = true;
+  const sideLayer = m.states.map((st) => FAMILIES.indexOf(familyOf(st)));
+  const topLayer = m.states.map((st, i) => (/_log|_stem|pillar/.test(st) ? FAMILIES.indexOf('logTop') : sideLayer[i]!));
+  const detail = { value: params.get('textures') === '0' ? 0 : 1 };
+  // Optional original textures, fetched at runtime (see mctextures.ts). A 1-layer placeholder until loaded.
+  const mcMap = { value: new DataArrayTexture(new Uint8Array([128, 128, 128, 255]), 1, 1, 1) };
+  mcMap.value.needsUpdate = true;
+  const mcMode = { value: 0 };
+  let mcLoaded: Promise<void> | null = null;
+  function enableMcTextures(on: boolean) {
+    if (!on) {
+      mcMode.value = 0;
+      return Promise.resolve();
+    }
+    if (!mcLoaded) {
+      progress.style.setProperty('--p', '0');
+      document.body.classList.remove('ready');
+      mcLoaded = loadMcLayers(m.states, m.colors, (d, t) => progress.style.setProperty('--p', String(d / t))).then((layers) => {
+        const t = new DataArrayTexture(layers, 16, 16, m.states.length * 2);
+        t.format = RGBAFormat;
+        t.type = UnsignedByteType;
+        t.colorSpace = SRGBColorSpace;
+        t.magFilter = NearestFilter;
+        t.minFilter = LinearMipmapLinearFilter;
+        t.generateMipmaps = true;
+        t.needsUpdate = true;
+        mcMap.value = t;
+        document.body.classList.add('ready');
+      });
+    }
+    return mcLoaded.then(() => {
+      mcMode.value = 1;
+    });
+  }
+
   // ---------- City meshes (progressive, nearest chunks first) ----------
   const material = new MeshLambertMaterial({ vertexColors: true });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.detailMap = { value: detailTex };
+    shader.uniforms.detailStrength = detail;
+    shader.uniforms.mcMap = mcMap;
+    shader.uniforms.mcMode = mcMode;
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform float detailStrength;\nuniform float mcMode;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        {
+          vec2 st = vTex.xy;
+          vec2 gx = dFdx(st), gy = dFdy(st);
+          float layer = mod(vTex.z, 64.0);
+          float pid = floor(vTex.z / 64.0 + 0.001);
+          if (mcMode > 0.5) {
+            // Original textures: colour from the texture, light and AO from the mesh.
+            float face = vUp > 0.5 ? 0.0 : 1.0;
+            vec3 mc = textureGrad(mcMap, vec3(fract(st), pid * 2.0 + face), gx, gy).rgb;
+            diffuseColor.rgb = mc * vTex.w;
+          } else {
+            // Gradients from the continuous coordinate keep mip selection stable across tile seams.
+            float dd = textureGrad(detailMap, vec3(fract(st), layer), gx, gy).r * (255.0 / 128.0);
+            diffuseColor.rgb *= mix(1.0, dd, detailStrength);
+          }
+        }`,
+      );
+  };
   const ox = -m.width / 2;
   const oz = -m.length / 2;
   const queue: Array<[number, number]> = [];
@@ -211,13 +286,14 @@ function main() {
       const sz = Math.min(CHUNK, m.length - z0);
       const top = fillChunk(p, x0, z0, sx, sz, vox);
       // The dense array keeps the full-height stride; meshing only walks up to this chunk's top.
-      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo);
+      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo, { side: sideLayer, top: topLayer, origin: [x0, z0] });
       state.chunksDone++;
       progress.style.setProperty('--p', String(state.chunksDone / state.chunks));
       if (!out.quads) continue;
       const geo = new BufferGeometry();
       geo.setAttribute('position', new BufferAttribute(out.positions, 3));
       geo.setAttribute('normal', new BufferAttribute(out.normals, 3));
+      geo.setAttribute('tex', new BufferAttribute(out.tex, 4));
       geo.setAttribute('color', new BufferAttribute(out.colors, 3));
       geo.setIndex(new BufferAttribute(out.indices, 1));
       geo.computeBoundingSphere();
@@ -333,6 +409,8 @@ function main() {
     <button data-metric="age" aria-pressed="false">Age</button>
     <button data-metric="todos" aria-pressed="false">TODO density</button>
     <div class="menu-h">Scene</div>
+    <label><input type="checkbox" id="rv-textures" checked> Pixel textures</label>
+    <label title="Loads the original block textures from jsDelivr at runtime"><input type="checkbox" id="rv-mc"> Minecraft textures</label>
     <label><input type="checkbox" id="rv-labels" checked> District labels</label>
     <label><input type="checkbox" id="rv-flames" checked> Flames</label>
     <label><input type="checkbox" id="rv-shadows"> Shadows</label>`;
@@ -670,6 +748,26 @@ function main() {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-metric]');
     if (b) setMetric(b.dataset.metric as Metric);
   });
+  const texBox = viewMenu.querySelector<HTMLInputElement>('#rv-textures')!;
+  texBox.checked = detail.value === 1;
+  texBox.addEventListener('change', () => (detail.value = texBox.checked ? 1 : 0));
+  const mcBox = viewMenu.querySelector<HTMLInputElement>('#rv-mc')!;
+  const mcNote = el('div', { class: 'mc-note' }, 'Minecraft textures © Mojang, loaded by your browser from <a href="https://github.com/misode/mcmeta" target="_blank" rel="noopener">misode/mcmeta</a>. Not bundled with Repoville.');
+  mcNote.hidden = true;
+  ui.append(mcNote);
+  mcBox.addEventListener('change', () => {
+    void enableMcTextures(mcBox.checked).catch(() => {
+      mcBox.checked = false;
+      mcNote.textContent = 'Could not load Minecraft textures (offline?).';
+      mcNote.hidden = false;
+    });
+    mcNote.hidden = !mcBox.checked;
+  });
+  if (params.get('mc') === '1') {
+    mcBox.checked = true;
+    mcNote.hidden = false;
+    void enableMcTextures(true);
+  }
   const labelsBox = viewMenu.querySelector<HTMLInputElement>('#rv-labels')!;
   labelsBox.addEventListener('change', () => (showLabels = labelsBox.checked));
   const flamesBox = viewMenu.querySelector<HTMLInputElement>('#rv-flames')!;
