@@ -5,13 +5,15 @@
  */
 export interface MeshOut {
   positions: Float32Array;
+  normals: Float32Array;
   colors: Float32Array;
   indices: Uint32Array;
   quads: number;
 }
 
-// Shade per face direction: +x, -x, +y, -y, +z, -z.
-const SHADE = [0.82, 0.7, 1.0, 0.5, 0.9, 0.62];
+// Baked shade per face direction (+x, -x, +y, -y, +z, -z). Kept mild because
+// the viewer also lights the scene; it keeps faces distinct without lights.
+const SHADE = [0.94, 0.9, 1.0, 0.8, 0.96, 0.88];
 
 export function greedyMesh(
   vox: Uint16Array,
@@ -21,7 +23,10 @@ export function greedyMesh(
   colors: number[],
   kinds: number[],
   offset: [number, number, number],
+  /** Convert sRGB palette colours to linear (for lit three.js materials). */
+  linear = false,
 ): MeshOut {
+  const lin = (c: number) => (linear ? Math.pow(c, 2.2) : c);
   const bx = sx + 2;
   const bz = sz + 2;
   const solid = (x: number, y: number, z: number): number => {
@@ -31,11 +36,13 @@ export function greedyMesh(
   const dims = [sx, sy, sz];
   let pos = new Float32Array(4096 * 12);
   let col = new Float32Array(4096 * 12);
+  let nor = new Float32Array(4096 * 12);
   let idx = new Uint32Array(4096 * 6);
   let quads = 0;
   const grow = () => {
     const p2 = new Float32Array(pos.length * 2); p2.set(pos); pos = p2;
     const c2 = new Float32Array(col.length * 2); c2.set(col); col = c2;
+    const n2 = new Float32Array(nor.length * 2); n2.set(nor); nor = n2;
     const i2 = new Uint32Array(idx.length * 2); i2.set(idx); idx = i2;
   };
 
@@ -102,9 +109,14 @@ export function greedyMesh(
             }
             const rgb = colors[id] ?? 0x808080;
             const glow = kinds[id] === 2 ? 1 : shade;
-            const r = (((rgb >> 16) & 255) / 255) * glow;
-            const g = (((rgb >> 8) & 255) / 255) * glow;
-            const bl = ((rgb & 255) / 255) * glow;
+            const r = lin(((rgb >> 16) & 255) / 255) * glow;
+            const g = lin(((rgb >> 8) & 255) / 255) * glow;
+            const bl = lin((rgb & 255) / 255) * glow;
+            let np = quads * 12;
+            for (let k = 0; k < 4; k++) {
+              nor[np + d] = side === 0 ? 1 : -1;
+              np += 3;
+            }
             let cp = quads * 12;
             for (const c of corners) {
               // Cheap ambient occlusion: walls darken toward the street.
@@ -127,5 +139,5 @@ export function greedyMesh(
       }
     }
   }
-  return { positions: pos.slice(0, quads * 12), colors: col.slice(0, quads * 12), indices: idx.slice(0, quads * 6), quads };
+  return { positions: pos.slice(0, quads * 12), normals: nor.slice(0, quads * 12), colors: col.slice(0, quads * 12), indices: idx.slice(0, quads * 6), quads };
 }
