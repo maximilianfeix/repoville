@@ -26,7 +26,7 @@
 
 ## What you get
 
-- **A 3D city in one HTML file.** No Minecraft needed: orbit, fly, search, click a building for its facts, switch to a plain metric view. Works offline and on GitHub Pages.
+- **A 3D city in one HTML file.** No Minecraft needed: orbit, fly, search, click a building for its facts, switch to a plain metric view. Pixel textures, soft shadows, ambient occlusion. Works offline and on GitHub Pages.
 - **Minecraft exports.** Sponge `.schem` v3 for WorldEdit and `.litematic` for Litematica, targeting Java Edition 1.21.11 by default.
 - **Local and private.** Analysis runs on your machine. Nothing is uploaded, there is no telemetry, and the city file holds paths and counts, never file contents.
 
@@ -54,6 +54,19 @@ Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers 
   <tr>
     <td align="center">Viewer: search, guide, building card</td>
     <td align="center">Metric view: churn as plain columns</td>
+  </tr>
+</table>
+
+### Up close
+
+<table>
+  <tr>
+    <td><img src="docs/media/ripgrep-closeup.jpg" alt="ripgrep city with Repoville's own pixel textures"></td>
+    <td><img src="docs/media/ripgrep-mc.jpg" alt="The same view with Minecraft textures loaded at runtime"></td>
+  </tr>
+  <tr>
+    <td align="center">Repoville's own pixel textures (default)</td>
+    <td align="center">Optional Minecraft textures, fetched by your browser at runtime (© Mojang, not bundled)</td>
   </tr>
 </table>
 
