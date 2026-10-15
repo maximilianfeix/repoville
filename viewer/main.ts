@@ -6,6 +6,7 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { decodePayload, fillChunk, type BuildingRow, type Payload } from './format.js';
 import { greedyMesh } from './mesher.js';
 
@@ -158,7 +159,47 @@ function main() {
   queue.sort((a, b) => Math.hypot(a[0] - cxm, a[1] - czm) - Math.hypot(b[0] - cxm, b[1] - czm));
   state.chunks = queue.length;
   const vox = new Uint16Array((CHUNK + 2) * (CHUNK + 2) * m.height);
-  const cityMeshes: Mesh[] = [];
+  // Baked AO costs ~10% more quads and ~15% fps; it pays off where people zoom in,
+  // so huge cities (React, Linux) skip it unless ?ao=1.
+  const bakeAo = params.get('ao') === '1' || (params.get('ao') !== '0' && m.width * m.length <= 400_000);
+  let cityMeshes: Mesh[] = [];
+  const chunkOf = new Map<Mesh, [number, number]>();
+
+  /**
+   * After loading, merge 8×8 chunks into one geometry per region: about 1,000
+   * draw calls (plus the same again for shadows) become a few dozen.
+   */
+  function mergeRegions() {
+    const groups = new Map<string, Mesh[]>();
+    for (const mesh of cityMeshes) {
+      const [cx, cz] = chunkOf.get(mesh)!;
+      const k = `${cx >> 3},${cz >> 3}`;
+      const g = groups.get(k);
+      if (g) g.push(mesh);
+      else groups.set(k, [mesh]);
+    }
+    const merged: Mesh[] = [];
+    for (const meshes of groups.values()) {
+      const geo = meshes.length === 1 ? meshes[0]!.geometry : mergeGeometries(meshes.map((x) => x.geometry));
+      if (!geo) {
+        merged.push(...meshes);
+        continue;
+      }
+      geo.computeBoundingSphere();
+      const mesh = new Mesh(geo, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.visible = metric === 'none';
+      scene.add(mesh);
+      merged.push(mesh);
+      for (const old of meshes) {
+        scene.remove(old);
+        if (old.geometry !== geo) old.geometry.dispose();
+      }
+    }
+    cityMeshes = merged;
+    sun.shadow.needsUpdate = true;
+  }
 
   function meshNext(budgetMs: number) {
     const t0 = performance.now();
@@ -170,7 +211,7 @@ function main() {
       const sz = Math.min(CHUNK, m.length - z0);
       const top = fillChunk(p, x0, z0, sx, sz, vox);
       // The dense array keeps the full-height stride; meshing only walks up to this chunk's top.
-      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true);
+      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo);
       state.chunksDone++;
       progress.style.setProperty('--p', String(state.chunksDone / state.chunks));
       if (!out.quads) continue;
@@ -186,11 +227,13 @@ function main() {
       mesh.visible = metric === 'none';
       scene.add(mesh);
       cityMeshes.push(mesh);
+      chunkOf.set(mesh, [cx, cz]);
       state.quads += out.quads;
       if (cityMeshes.length % 48 === 0) sun.shadow.needsUpdate = true;
     }
     if (!queue.length) sun.shadow.needsUpdate = true;
     if (!queue.length && !state.ready) {
+      if (params.get('merge') !== '0') mergeRegions();
       state.ready = true;
       document.body.classList.add('ready');
       if (quality === 'high' && !userQuality) {

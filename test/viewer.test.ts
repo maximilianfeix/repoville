@@ -52,3 +52,21 @@ describe('greedyMesh', () => {
     expect(m.quads).toBe(5);
   });
 });
+
+describe('ambient occlusion', () => {
+  it('darkens floor corners next to a block and leaves open floor bright', () => {
+    const sx = 3, sy = 2, sz = 3;
+    const bx = sx + 2, bz = sz + 2;
+    const vox = new Uint16Array(bx * bz * sy);
+    const at = (x: number, y: number, z: number) => (y * bz + (z + 1)) * bx + (x + 1);
+    for (let z = 0; z < sz; z++) for (let x = 0; x < sx; x++) vox[at(x, 0, z)] = 1;
+    vox[at(1, 1, 1)] = 2;
+    const m = greedyMesh(vox, sx, sy, sz, [0, 0xffffff, 0xffffff], [0, 1, 1], [0, 0, 0]);
+    // Collect brightness of upward-facing vertices at y = 1 (the floor top).
+    const floor: number[] = [];
+    for (let i = 0; i < m.positions.length / 3; i++) {
+      if (m.normals[i * 3 + 1] === 1 && m.positions[i * 3 + 1] === 1) floor.push(m.colors[i * 3]!);
+    }
+    expect(Math.min(...floor)).toBeLessThan(Math.max(...floor) * 0.9);
+  });
+});

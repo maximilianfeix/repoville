@@ -14,6 +14,11 @@ export interface MeshOut {
 // Baked shade per face direction (+x, -x, +y, -y, +z, -z). Kept mild because
 // the viewer also lights the scene; it keeps faces distinct without lights.
 const SHADE = [0.94, 0.9, 1.0, 0.8, 0.96, 0.88];
+/** Brightness per AO level (0 = fully occluded corner, 3 = open). */
+const AO_LEVEL = [0.5, 0.68, 0.85, 1];
+/** Corner offsets along the face's u and v axes, in quad corner order. */
+const CORNER_U = [-1, 1, 1, -1];
+const CORNER_V = [-1, -1, 1, 1];
 
 export function greedyMesh(
   vox: Uint16Array,
@@ -25,6 +30,8 @@ export function greedyMesh(
   offset: [number, number, number],
   /** Convert sRGB palette colours to linear (for lit three.js materials). */
   linear = false,
+  /** Bake per-vertex ambient occlusion on upward faces (costs ~10% more quads). */
+  ao = true,
 ): MeshOut {
   const lin = (c: number) => (linear ? Math.pow(c, 2.2) : c);
   const bx = sx + 2;
@@ -34,6 +41,8 @@ export function greedyMesh(
     return vox[(y * bz + (z + 1)) * bx + (x + 1)]!;
   };
   const dims = [sx, sy, sz];
+  // Glass, foliage and thin blocks barely block light.
+  const occludes = (id: number) => (id && kinds[id] !== 3 && kinds[id] !== 4 ? 1 : 0);
   let pos = new Float32Array(4096 * 12);
   let col = new Float32Array(4096 * 12);
   let nor = new Float32Array(4096 * 12);
@@ -64,25 +73,52 @@ export function greedyMesh(
         for (x[v] = 0; x[v] < dv; x[v]++) {
           for (x[u] = 0; x[u] < du; x[u]++, n++) {
             const a = solid(x[0]!, x[1]!, x[2]!);
-            const b = solid(x[0]! + q[0]! * dir, x[1]! + q[1]! * dir, x[2]! + q[2]! * dir);
-            mask[n] = a && (!b || (kinds[b] === 3 && kinds[a] !== 3)) ? a : 0;
+            const ax = x[0]! + q[0]! * dir, ay = x[1]! + q[1]! * dir, az = x[2]! + q[2]! * dir;
+            const b = solid(ax, ay, az);
+            if (!(a && (!b || (kinds[b] === 3 && kinds[a] !== 3)))) {
+              mask[n] = 0;
+              continue;
+            }
+            // Per-corner ambient occlusion (0fps): look at the cells around the air
+            // cell in the face plane. Packed into the mask so greedy merging only
+            // joins faces with identical shading.
+            let ao4 = 0xff;
+            // AO only on upward faces (ground, roofs): that is where it reads from the
+            // usual 3/4 view, and walls stay fully merged (quads matter most there).
+            if (ao && kinds[a] !== 2 && d === 1 && side === 0) {
+              ao4 = 0;
+              for (let c = 0; c < 4; c++) {
+                const su = CORNER_U[c]!, sv = CORNER_V[c]!;
+                const o1 = [ax, ay, az]; o1[u]! += su;
+                const o2 = [ax, ay, az]; o2[v]! += sv;
+                const o3 = [ax, ay, az]; o3[u]! += su; o3[v]! += sv;
+                const s1 = occludes(solid(o1[0]!, o1[1]!, o1[2]!));
+                const s2 = occludes(solid(o2[0]!, o2[1]!, o2[2]!));
+                const cc = occludes(solid(o3[0]!, o3[1]!, o3[2]!));
+                const level = s1 && s2 ? 0 : 3 - (s1 + s2 + cc);
+                ao4 |= level << (c * 2);
+              }
+            }
+            mask[n] = a | (ao4 << 16);
           }
         }
         // Merge rectangles.
         n = 0;
         for (let j = 0; j < dv; j++) {
           for (let i = 0; i < du; ) {
-            const id = mask[n]!;
-            if (!id) {
+            const key = mask[n]!;
+            const id = key & 0xffff;
+            const ao4 = key >>> 16;
+            if (!key) {
               i++;
               n++;
               continue;
             }
             let w = 1;
-            while (i + w < du && mask[n + w] === id) w++;
+            while (i + w < du && mask[n + w] === key) w++;
             let h = 1;
             outer: for (; j + h < dv; h++) {
-              for (let k = 0; k < w; k++) if (mask[n + k + h * du] !== id) break outer;
+              for (let k = 0; k < w; k++) if (mask[n + k + h * du] !== key) break outer;
             }
             // Emit the quad.
             const base = [0, 0, 0];
@@ -118,17 +154,20 @@ export function greedyMesh(
               np += 3;
             }
             let cp = quads * 12;
-            for (const c of corners) {
-              // Cheap ambient occlusion: walls darken toward the street.
-              const ao = kinds[id] === 2 ? 1 : 0.68 + 0.32 * Math.min(1, c[1]! / 22);
+            const lv = [ao4 & 3, (ao4 >> 2) & 3, (ao4 >> 4) & 3, (ao4 >> 6) & 3];
+            for (let k = 0; k < 4; k++) {
+              // Corner AO plus a gentle darkening toward street level.
+              const ao = kinds[id] === 2 ? 1 : AO_LEVEL[lv[k]!]! * (0.86 + 0.14 * Math.min(1, corners[k]![1]! / 18));
               col[cp++] = r * ao;
               col[cp++] = g * ao;
               col[cp++] = bl * ao;
             }
             // Counter-clockwise when seen from outside (u × v points along +d).
             const ip = quads * 6;
-            if (side === 0) idx.set([vi, vi + 1, vi + 2, vi, vi + 2, vi + 3], ip);
-            else idx.set([vi, vi + 2, vi + 1, vi, vi + 3, vi + 2], ip);
+            // Flip the diagonal so AO interpolates without the classic seam.
+            const flip = lv[0]! + lv[2]! < lv[1]! + lv[3]!;
+            if (side === 0) idx.set(flip ? [vi + 1, vi + 2, vi + 3, vi + 1, vi + 3, vi] : [vi, vi + 1, vi + 2, vi, vi + 2, vi + 3], ip);
+            else idx.set(flip ? [vi + 1, vi + 3, vi + 2, vi + 1, vi, vi + 3] : [vi, vi + 2, vi + 1, vi, vi + 3, vi + 2], ip);
             quads++;
             // Clear the merged area.
             for (let l = 0; l < h; l++) for (let k = 0; k < w; k++) mask[n + k + l * du] = 0;

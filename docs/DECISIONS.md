@@ -33,3 +33,8 @@ Running log of choices made while building Repoville. Newest at the bottom of ea
 - litemapy runs from a local venv (`.cache/py`, Python 3.11); Python 3.9 hung during install.
 - **Golden snapshot** = sha256 of the *decoded* NBT (gzip headers differ per OS) + a summary (dimensions, palette, block counts, burning and mossy buildings) for the town fixture. `UPDATE_GOLDEN=1 npm test` rewrites it.
 - Measured on an M-series Mac: React 4.5 s (schem + litematic, warm), Linux 25.1 s warm, 769 MB peak RSS.
+
+## 2026-10-15 — Viewer AO
+
+- **AO only on upward faces and only for cities ≤ 400,000 blocks² by default.** Full 0fps AO added 29 % quads on React; up-faces only +10 % quads but still −15 % fps in headless Chromium, and the gain is invisible from the overview camera. Small/mid repos (where people zoom in) get it; `?ao=1` forces it.
+- **Region merge (8×8 chunks) after load** made no measurable difference in headless Chromium (GPU-bound) but cuts ~1,000 draw calls for CPU-bound machines; kept.

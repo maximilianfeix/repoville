@@ -9,6 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-15 22:45 (tick 1): PR #9 baked AO (0fps, AO-aware greedy merge, diagonal flip) on upward faces, auto-on for cities ≤ 400k blocks² (`?ao=1/0` override); region merge after load. Measured (headless, load avg 5.5): React AO on 36–37 fps vs 42–43 off without shadows → AO auto-off for big cities; ripgrep with AO 60 fps. Region merge: no measurable change in headless (GPU-bound), kept for real CPUs. Nether ground → blackstone.
 - 2026-10-15 22:00: GitHub Pages live at https://maximilianfeix.github.io/repoville/ (gh-pages branch via `scripts/build-site.ts` + `scripts/deploy-pages.sh`), demos React / Linux / ripgrep / fzf / repoville, real social preview. README rewritten with real renders and measured numbers. Brand system `docs/brand/DESIGN.md`, `VOICE.md`, assets in `assets/brand/`. Labels, issue templates, issues #3–#8.
 - 2026-10-15 21:55: PR #2 (stacked on #1): downtown mirroring, street-edge footprints, pocket parks + ponds, street hierarchy, district roof grammar, static shadow map, ACES, downtown camera.
 - 2026-10-15: Days 1–5 of the original plan (scan, gitlog, layout+LOD, voxel/schem/litematic, viewer) — see DECISIONS.md.
@@ -18,7 +19,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ### P0 — city looks art-directed
 - [ ] Apply research findings (composition: downtown clustering / parks / plaza greens / value hierarchy) — research notes in `docs/engineering/visual-research.md`.
-- [x] Static shadow map. [ ] Baked per-vertex AO (perf-research #4), packed attributes (#2), region merge (#5).
+- [x] Static shadow map. [x] Baked per-vertex AO (perf-research #4, size-gated), packed attributes (#2), region merge (#5).
 - [ ] Mobile portrait hero framing (landing hero crops the city on 390 px); hero camera presets that frame the city well at 16:9, 2:1 and mobile portrait.
 - [ ] Visual audit doc `docs/engineering/visual-audit.md` with before/after.
 
