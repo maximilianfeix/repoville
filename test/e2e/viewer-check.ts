@@ -15,16 +15,23 @@ const positional = args.filter((a, i) => !a.startsWith('--') && !args[i - 1]?.st
 const html = resolve(positional[0]!);
 const shot = positional[1] ? resolve(positional[1]) : null;
 const maxMb = flag('--max-mb', 5);
+const width = flag('--width', 1280);
+const height = flag('--height', 720);
+const settleMs = flag('--settle', 0);
+const hi = args.indexOf('--hash');
+const hash = hi === -1 ? '' : args[hi + 1]!;
+const qi = args.indexOf('--query');
+const query = qi === -1 ? '' : `?${args[qi + 1]}`;
 const minFps = flag('--min-fps', 0);
 
 const mb = statSync(html).size / 1024 / 1024;
 const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
-const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const page = await browser.newPage({ viewport: { width, height } });
 const errors: string[] = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 const t0 = Date.now();
-await page.goto(pathToFileURL(html).href);
+await page.goto(pathToFileURL(html).href + query + (hash ? `#${hash}` : ''));
 await page.waitForFunction('window.__repoville && window.__repoville.ready === true', null, { timeout: 120_000 });
 const readyMs = Date.now() - t0;
 // Measure frame rate over 3 seconds while the camera orbits.
@@ -39,6 +46,7 @@ const fps = (await page.evaluate(`new Promise((resolve) => {
   };
   requestAnimationFrame(tick);
 })`)) as number;
+if (settleMs) await page.waitForTimeout(settleMs);
 const stats = (await page.evaluate('window.__repoville')) as { quads: number; buildings: number } | undefined;
 const png = await page.screenshot();
 if (shot) writeFileSync(shot, png);
