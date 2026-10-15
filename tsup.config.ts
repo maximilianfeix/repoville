@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'tsup';
+
+const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
 
 export default defineConfig([
   {
@@ -10,6 +13,7 @@ export default defineConfig([
     noExternal: [/.*/],
     splitting: false,
     clean: true,
+    define: { 'process.env.REPOVILLE_VERSION': JSON.stringify(version) },
     banner: { js: '#!/usr/bin/env node\nimport { createRequire as __rvCreateRequire } from "node:module";\nconst require = __rvCreateRequire(import.meta.url);' },
   },
   {
