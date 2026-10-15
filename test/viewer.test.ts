@@ -70,3 +70,23 @@ describe('ambient occlusion', () => {
     expect(Math.min(...floor)).toBeLessThan(Math.max(...floor) * 0.9);
   });
 });
+
+import { mcTextureName } from '../viewer/mctextures.js';
+import { familyOf } from '../viewer/textures.js';
+
+describe('texture mapping', () => {
+  it('maps block states to original texture file names', () => {
+    expect(mcTextureName('minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]', 'side')).toBe('spruce_planks');
+    expect(mcTextureName('minecraft:oak_log[axis=y]', 'top')).toBe('oak_log_top');
+    expect(mcTextureName('minecraft:quartz_pillar[axis=y]', 'side')).toBe('quartz_pillar_side');
+    expect(mcTextureName('minecraft:grass_block[snowy=false]', 'top')).toBe('grass_block_top');
+    expect(mcTextureName('minecraft:deepslate_tile_slab[type=bottom,waterlogged=false]', 'top')).toBe('deepslate_tiles');
+  });
+  it('assigns procedural detail families', () => {
+    expect(familyOf('minecraft:bricks')).toBe('bricks');
+    expect(familyOf('minecraft:stone_bricks')).toBe('stoneBricks');
+    expect(familyOf('minecraft:oak_planks')).toBe('planks');
+    expect(familyOf('minecraft:light_blue_stained_glass')).toBe('glass');
+    expect(familyOf('minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]')).toBe('leaves');
+  });
+});
