@@ -59,6 +59,10 @@ Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers 
   </tr>
 </table>
 
+### After dark
+
+<a href="https://maximilianfeix.github.io/repoville/r/facebook/react/?time=night#f=packages/react-reconciler/src/ReactFiberWorkLoop.js"><img src="docs/media/react-night.png" alt="React's downtown at night: towers with warmly lit windows" width="100%"></a>
+
 ### Up close
 
 <table>

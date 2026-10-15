@@ -117,7 +117,8 @@ function main() {
   orbit.update();
   const fly = new PointerLockControls(camera, document.body);
 
-  scene.add(new HemisphereLight(0xcfdcff, 0x7a5f45, 1.5));
+  const hemi = new HemisphereLight(0xcfdcff, 0x7a5f45, 1.5);
+  scene.add(hemi);
   const sun = new DirectionalLight(0xffcf9a, 2.8);
   sun.position.set(-span * 0.5, span * 0.42, -span * 0.3);
   sun.shadow.mapSize.set(4096, 4096);
@@ -165,6 +166,8 @@ function main() {
   const mcMap = { value: new DataArrayTexture(new Uint8Array([128, 128, 128, 255]), 1, 1, 1) };
   mcMap.value.needsUpdate = true;
   const mcMode = { value: 0 };
+  const night = { value: params.get('time') === 'night' ? 1 : 0 };
+  const glassLayer = FAMILIES.indexOf('glass');
   let mcLoaded: Promise<void> | null = null;
   function enableMcTextures(on: boolean) {
     if (!on) {
@@ -199,11 +202,13 @@ function main() {
     shader.uniforms.detailStrength = detail;
     shader.uniforms.mcMap = mcMap;
     shader.uniforms.mcMode = mcMode;
+    shader.uniforms.night = night;
+    shader.uniforms.glassLayer = { value: glassLayer };
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform float detailStrength;\nuniform float mcMode;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>
@@ -222,8 +227,16 @@ function main() {
             float dd = textureGrad(detailMap, vec3(fract(st), layer), gx, gy).r * (255.0 / 128.0);
             diffuseColor.rgb *= mix(1.0, dd, detailStrength);
           }
+          // Night: about 60% of windows are lit, chosen per window by a hash.
+          if (night > 0.5 && abs(layer - glassLayer) < 0.5 && vUp < 0.5) {
+            vec2 cell = floor(st + 0.001);
+            float h = fract(sin(dot(cell, vec2(12.9898, 78.233)) + pid) * 43758.5453);
+            if (h < 0.6) diffuseColor.rgb = vec3(1.0, 0.6, 0.24) * (0.8 + 0.6 * h) * 1.7;
+          }
         }`,
-      );
+      )
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+        if (night > 0.5 && abs(mod(vTex.z, 64.0) - glassLayer) < 0.5 && vUp < 0.5 && diffuseColor.r > 0.9) totalEmissiveRadiance = diffuseColor.rgb * 0.55;`);
   };
   const ox = -m.width / 2;
   const oz = -m.length / 2;
@@ -417,6 +430,7 @@ function main() {
     <div class="menu-h">Scene</div>
     <label><input type="checkbox" id="rv-textures" checked> Pixel textures</label>
     <label title="Loads the original block textures from jsDelivr at runtime"><input type="checkbox" id="rv-mc"> Minecraft textures</label>
+    <label><input type="checkbox" id="rv-night"> Night</label>
     <label><input type="checkbox" id="rv-labels" checked> District labels</label>
     <label><input type="checkbox" id="rv-flames" checked> Flames</label>
     <label><input type="checkbox" id="rv-shadows"> Shadows</label>`;
@@ -776,6 +790,21 @@ function main() {
     mcNote.hidden = false;
     void enableMcTextures(true);
   }
+  const nightBox = viewMenu.querySelector<HTMLInputElement>('#rv-night')!;
+  const dayLight = { hemi: hemi.intensity, sun: sun.intensity, sunColor: sun.color.getHex(), hemiSky: hemi.color.getHex() };
+  function setNight(on: boolean) {
+    night.value = on ? 1 : 0;
+    nightBox.checked = on;
+    hemi.intensity = on ? 0.5 : dayLight.hemi;
+    hemi.color.setHex(on ? 0x5d6f9e : dayLight.hemiSky);
+    sun.intensity = on ? 0.75 : dayLight.sun;
+    sun.color.setHex(on ? 0x9fb4ff : dayLight.sunColor);
+    renderer.toneMappingExposure = on ? 1.6 : 1.25;
+    document.body.classList.toggle('night', on);
+    sun.shadow.needsUpdate = true;
+  }
+  nightBox.addEventListener('change', () => setNight(nightBox.checked));
+  if (night.value) setNight(true);
   const labelsBox = viewMenu.querySelector<HTMLInputElement>('#rv-labels')!;
   labelsBox.addEventListener('change', () => (showLabels = labelsBox.checked));
   const flamesBox = viewMenu.querySelector<HTMLInputElement>('#rv-flames')!;
