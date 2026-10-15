@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repoville · Walk your codebase</title>
+<meta name="description" content="Repoville turns any Git repository into a voxel city you can walk through in your browser and export to Minecraft. Folders are districts, files are buildings, churn burns, TODOs crumble.">
+<meta property="og:title" content="Repoville · Walk your codebase">
+<meta property="og:description" content="Turn any Git repo into a walkable voxel city. Runs locally.">
+<meta property="og:image" content="https://maximilianfeix.github.io/repoville/media/social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#191b20;--deep:#23262E;--card:#20232a;--moss:#4E8C3A;--moss-hi:#6fb352;--red:#D9382B;--lava:#FF7A1A;--dia:#3FD0C9;--sand:#E8D9A8;--bone:#F6F1E4;--mute:rgba(246,241,228,.66);--line:rgba(246,241,228,.12);--mono:'JetBrains Mono',ui-monospace,monospace;--px:Silkscreen,var(--mono);--wrap:min(1160px,calc(100% - 40px))}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--bone);font:17px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--dia)}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--dia);outline-offset:3px}
+.wrap{width:var(--wrap);margin:0 auto}
+.nav{position:absolute;inset:0 0 auto;z-index:3}
+.nav .wrap{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--bone);font:400 18px var(--px)}
+.logo img{width:34px;height:34px}
+.nav nav{display:flex;gap:22px;font-size:15px}
+.nav nav a{color:var(--bone);text-decoration:none;opacity:.85}
+.nav nav a:hover{opacity:1;text-decoration:underline}
+.hero{position:relative;min-height:min(92vh,900px);display:flex;align-items:flex-end;overflow:hidden;background:#15171b}
+.hero picture,.hero>img{position:absolute;inset:0}
+.hero img.bg{width:100%;height:100%;object-fit:cover;object-position:60% 50%}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(21,23,27,.92) 0%,rgba(21,23,27,.7) 34%,rgba(21,23,27,0) 66%),linear-gradient(0deg,var(--bg) 0%,rgba(25,27,32,0) 28%)}
+.hero .wrap{position:relative;z-index:2;padding:0 0 80px}
+.eyebrow{font:400 13px var(--px);color:var(--sand);letter-spacing:.06em;margin:0 0 14px}
+h1{font:800 clamp(44px,7vw,88px)/.98 Inter,sans-serif;letter-spacing:-.035em;margin:0 0 20px;max-width:9ch}
+.lede{font-size:clamp(17px,1.6vw,20px);color:var(--mute);max-width:36ch;margin:0 0 30px}
+.lede b{color:var(--bone);font-weight:600}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:8px;font-weight:600;text-decoration:none;font-size:16px;border:1px solid transparent}
+.btn.primary{background:var(--moss);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 8px 24px rgba(78,140,58,.35)}
+.btn.primary:hover{background:#579c41}
+.btn.ghost{color:var(--bone);border-color:rgba(246,241,228,.3)}
+.btn.ghost:hover{border-color:var(--bone)}
+.note{margin-top:18px;font:13px var(--mono);color:var(--mute)}
+section{padding:96px 0}
+h2{font:800 clamp(30px,4vw,46px)/1.05 Inter,sans-serif;letter-spacing:-.03em;margin:0 0 14px}
+.sub{color:var(--mute);max-width:56ch;margin:0 0 40px}
+.kicker{font:400 12px var(--px);color:var(--moss-hi);letter-spacing:.08em;margin:0 0 12px}
+.demos{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.demo{position:relative;border-radius:10px;overflow:hidden;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--bone);grid-column:span 4;transition:transform .2s ease,border-color .2s}
+.demo:first-child{grid-column:span 8;grid-row:span 2}
+.demo:hover{transform:translateY(-3px);border-color:rgba(63,208,201,.5)}
+.demo img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.demo:first-child img{height:100%;aspect-ratio:auto}
+.demo .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;background:linear-gradient(0deg,rgba(18,20,24,.92),rgba(18,20,24,0))}
+.demo .cap b{font:600 15px var(--mono);display:block}
+.demo .cap span{font-size:13px;color:var(--mute)}
+.demo .walk{position:absolute;top:12px;right:12px;font:600 12px var(--mono);background:rgba(18,20,24,.8);border:1px solid var(--line);padding:4px 8px;border-radius:5px;color:var(--dia)}
+.map{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.map div{background:var(--bg);padding:26px 24px}
+.map dt{display:flex;align-items:center;gap:10px;font-weight:600;margin-bottom:6px}
+.map dd{margin:0;color:var(--mute);font-size:15px}
+.map code{font:13px var(--mono);color:var(--sand)}
+.sw{width:18px;height:18px;border-radius:3px;flex:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+.split img{border-radius:10px;border:1px solid var(--line)}
+.honest li{margin:0 0 10px;color:var(--mute)}
+.honest b{color:var(--bone)}
+.formats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.fmt{border:1px solid var(--line);border-radius:10px;padding:22px;background:var(--card)}
+.fmt h3{margin:0 0 4px;font:600 16px var(--mono);color:var(--sand)}
+.fmt p{margin:0 0 12px;color:var(--mute);font-size:15px}
+.status{font:600 11px var(--mono);padding:3px 8px;border-radius:4px;display:inline-block}
+.ok{color:var(--moss-hi);border:1px solid rgba(78,140,58,.6)}
+.wip{color:var(--sand);border:1px solid rgba(232,217,168,.4)}
+pre{margin:0;background:#121418;border:1px solid var(--line);border-radius:10px;padding:22px 24px;overflow:auto;font:14px/1.7 var(--mono);color:var(--bone)}
+pre .c{color:rgba(246,241,228,.45)}
+pre .p{color:var(--moss-hi);user-select:none}
+.privacy{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#16181c}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.three h3{margin:0 0 6px;font-size:18px}
+.three p{margin:0;color:var(--mute);font-size:15px}
+.cta{text-align:center}
+.cta h2{max-width:none}
+.cta .ctas{justify-content:center}
+footer{border-top:1px solid var(--line);padding:36px 0 48px;font-size:13px;color:var(--mute)}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer .legal{font:11px var(--mono);letter-spacing:.02em;max-width:60ch}
+@media (max-width:900px){.demo,.demo:first-child{grid-column:span 12;grid-row:auto}.demo:first-child img{aspect-ratio:16/10}.map{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}.formats{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr}.nav nav a:not(.gh){display:none}}
+@media (max-width:560px){section{padding:64px 0}.map,.formats{grid-template-columns:1fr}.hero{min-height:88vh}.hero::after{background:linear-gradient(0deg,var(--bg) 8%,rgba(21,23,27,.82) 48%,rgba(21,23,27,.25) 100%)}.hero img.bg{object-position:70% 30%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="brand/mark.svg" alt="" width="34" height="34">repoville</a>
+    <nav aria-label="Main"><a href="#demos">Demos</a><a href="#how">How it works</a><a href="#minecraft">Minecraft</a><a class="gh" href="https://github.com/maximilianfeix/repoville">GitHub</a></nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-labelledby="h1">
+  <img class="bg" src="media/hero-react.jpg" alt="The React repository rendered as a voxel city: tall towers downtown, a red Rust district, parks and roads.">
+  <div class="wrap">
+    <p class="eyebrow">Open source · runs locally</p>
+    <h1 id="h1">Walk your codebase.</h1>
+    <p class="lede">Repoville turns any Git repository into a city. <b>Folders become districts, files become buildings,</b> busy code burns, TODOs crumble and forgotten corners grow moss.</p>
+    <div class="ctas">
+      <a class="btn primary" href="r/facebook/react/">Explore React as a city →</a>
+      <a class="btn ghost" href="https://github.com/maximilianfeix/repoville">View on GitHub</a>
+    </div>
+    <p class="note">Browser 3D preview · .schem / .litematic for Minecraft Java</p>
+  </div>
+</section>
+
+<section id="demos" aria-labelledby="demos-h">
+  <div class="wrap">
+    <p class="kicker">Real repos, real renders</p>
+    <h2 id="demos-h">Pick a city and walk in.</h2>
+    <p class="sub">Every picture on this page is a screenshot of the actual viewer. Click one to open the self-contained city file; it works offline, too.</p>
+    <div class="demos">
+      <a class="demo" href="r/facebook/react/"><img src="media/react-ui.jpg" alt="React city with the viewer interface" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>facebook/react</b><span>JavaScript, 7,165 files, 3,294 buildings</span></span></a>
+      <a class="demo" href="r/torvalds/linux/"><img src="media/linux.jpg" alt="Linux kernel city" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>torvalds/linux</b><span>96k files folded into 4k buildings</span></span></a>
+      <a class="demo" href="r/BurntSushi/ripgrep/"><img src="media/ripgrep.jpg" alt="ripgrep city in the nether theme" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>BurntSushi/ripgrep</b><span>Rust, nether district</span></span></a>
+      <a class="demo" href="r/junegunn/fzf/"><img src="media/fzf.jpg" alt="fzf city in the frozen theme" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>junegunn/fzf</b><span>Go, frozen peaks</span></span></a>
+      <a class="demo" href="r/maximilianfeix/repoville/"><img src="media/repoville.jpg" alt="Repoville's own repository as a city" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>repoville</b><span>this project, built with itself</span></span></a>
+    </div>
+  </div>
+</section>
+
+<section id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <p class="kicker">The legend</p>
+    <h2 id="how-h">Every block means something.</h2>
+    <p class="sub">The city is generated from your files and your git history. Same commit in, same city out: layout and decoration are deterministic.</p>
+    <dl class="map">
+      <div><dt><span class="sw" style="background:#35303b"></span>Folders → districts</dt><dd>Nested folders become nested districts with roads, a plaza and a name sign. Big folders sit downtown.</dd></div>
+      <div><dt><span class="sw" style="background:#e0d6a8"></span>Files → buildings</dt><dd>Height is <code>4 + 4·√(lines/10)</code>. Small files are houses, big ones are towers; tests are lighthouses, docs are libraries.</dd></div>
+      <div><dt><span class="sw" style="background:#FF7A1A"></span>Churn → fire</dt><dd>The 10% most-changed files of the last year burn on the roof; the top 2% get soul fire.</dd></div>
+      <div><dt><span class="sw" style="background:#6e6e6e"></span>TODOs → ruins</dt><dd>The share of TODO/FIXME/HACK lines becomes the share of cracked and cobwebbed wall.</dd></div>
+      <div><dt><span class="sw" style="background:#596e2d"></span>Untouched → moss</dt><dd>Files without a commit for over a year grow moss and vines.</dd></div>
+      <div><dt><span class="sw" style="background:#7e3a56"></span>Language → theme</dt><dd>TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java badlands, C/C++ deep caves, Ruby cherry grove.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section aria-labelledby="facts-h">
+  <div class="wrap split">
+    <img src="media/react-churn.jpg" alt="The React city in churn view: columns coloured and sized by commits per file" loading="lazy">
+    <div>
+      <p class="kicker">Metrics, not judgement</p>
+      <h2 id="facts-h">A metaphor you can switch off.</h2>
+      <ul class="honest">
+        <li><b>Fire is activity, not bad code.</b> Busy files are often the most important ones.</li>
+        <li><b>Moss is age, not rot.</b> Stable code that nobody needs to touch is a good sign.</li>
+        <li><b>Exact numbers are one click away.</b> Every building shows lines, commits, last touch and TODO count, and the metric view swaps the city for plain columns.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="minecraft" aria-labelledby="mc-h">
+  <div class="wrap">
+    <p class="kicker">Take it into the game</p>
+    <h2 id="mc-h">Then build it for real.</h2>
+    <p class="sub">The same city exports to Minecraft Java Edition. Status reflects what is tested today.</p>
+    <div class="formats">
+      <div class="fmt"><h3>city.html</h3><p>Self-contained 3D viewer. One file, opens from disk or any static host.</p><span class="status ok">tested · Chromium</span></div>
+      <div class="fmt"><h3>.schem</h3><p>Sponge v3 for WorldEdit. Pasted and block-checked on Paper 1.21.11.</p><span class="status ok">tested · Paper + WorldEdit</span></div>
+      <div class="fmt"><h3>.litematic</h3><p>For Litematica. Round-trip checked with litemapy.</p><span class="status ok">tested · litemapy</span></div>
+      <div class="fmt"><h3>world / live</h3><p>Ready-to-open world and live building over RCON.</p><span class="status wip">in progress</span></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="cli-h">
+  <div class="wrap split">
+    <div>
+      <p class="kicker">One command</p>
+      <h2 id="cli-h">Point it at a repo.</h2>
+      <p class="sub">A local folder, <code>owner/repo</code> or any git URL. Remote repos are cloned without file contents first, then analysed on your machine. An npm release is coming; until then run it from source.</p>
+    </div>
+<pre><span class="c"># from source (Node 22+)</span>
+<span class="p">$ </span>git clone https://github.com/maximilianfeix/repoville
+<span class="p">$ </span>cd repoville &amp;&amp; npm ci &amp;&amp; npm run build
+<span class="p">$ </span>node dist/cli.js facebook/react --format html,schem
+<span class="c">  7165 files · 903,811 LOC · 3294 buildings
+  wrote html      repoville-out/facebook-react.html
+  wrote schem     repoville-out/facebook-react.schem</span></pre>
+  </div>
+</section>
+
+<section class="privacy" aria-labelledby="priv-h">
+  <div class="wrap">
+    <h2 id="priv-h" style="font-size:28px">Your code stays on your machine.</h2>
+    <div class="three">
+      <div><h3>Local analysis</h3><p>Counting lines and reading git history happens locally. Nothing is uploaded, and there is no telemetry.</p></div>
+      <div><h3>Paths and counts only</h3><p>The city file contains file paths, line counts and commit counts, never file contents.</p></div>
+      <div><h3>Nothing runs</h3><p>Repoville never executes code from the repos it renders, and ignores config files from cloned repos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" aria-labelledby="cta-h">
+  <div class="wrap">
+    <h2 id="cta-h">What does your repo look like?</h2>
+    <p class="sub" style="margin:0 auto 28px">Open a demo, then try it on your own code. If you enjoy it, a star helps other people find it.</p>
+    <div class="ctas"><a class="btn primary" href="r/facebook/react/">Explore a demo</a><a class="btn ghost" href="https://github.com/maximilianfeix/repoville">Star on GitHub</a></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><img src="brand/mark.svg" alt="" width="18" height="18" style="display:inline;vertical-align:-4px;margin-right:6px">Repoville · MIT licensed · <a href="https://github.com/maximilianfeix/repoville">GitHub</a></span>
+    <span class="legal">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</span>
+  </div>
+</footer>
+</body>
+</html>
