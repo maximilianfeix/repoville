@@ -1,6 +1,6 @@
 import { inflateSync } from 'fflate';
 import {
-  ACESFilmicToneMapping, AdditiveBlending, Box3, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
+  ACESFilmicToneMapping, AdditiveBlending, Box3, DataArrayTexture, LinearMipmapLinearFilter, NearestFilter, RGBAFormat, UnsignedByteType, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
   HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
@@ -9,6 +9,7 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { decodePayload, fillChunk, type BuildingRow, type Payload } from './format.js';
 import { greedyMesh } from './mesher.js';
+import { buildDetailLayers, familyOf, FAMILIES, TILE } from './textures.js';
 
 declare global {
   interface Window {
@@ -148,8 +149,39 @@ function main() {
   const progress = el('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Building the city' });
   ui.append(progress);
 
+  // ---------- Pixel detail textures (procedural, original) ----------
+  const detailTex = new DataArrayTexture(buildDetailLayers(), TILE, TILE, FAMILIES.length);
+  detailTex.format = RGBAFormat;
+  detailTex.type = UnsignedByteType;
+  detailTex.magFilter = NearestFilter;
+  detailTex.minFilter = LinearMipmapLinearFilter;
+  detailTex.generateMipmaps = true;
+  detailTex.needsUpdate = true;
+  const sideLayer = m.states.map((st) => FAMILIES.indexOf(familyOf(st)));
+  const topLayer = m.states.map((st, i) => (/_log|_stem|pillar/.test(st) ? FAMILIES.indexOf('logTop') : sideLayer[i]!));
+  const detail = { value: params.get('textures') === '0' ? 0 : 1 };
+
   // ---------- City meshes (progressive, nearest chunks first) ----------
   const material = new MeshLambertMaterial({ vertexColors: true });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.detailMap = { value: detailTex };
+    shader.uniforms.detailStrength = detail;
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec3 tex;\nvarying vec3 vTex;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform float detailStrength;\nvarying vec3 vTex;')
+      .replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        {
+          vec2 st = vTex.xy;
+          // Gradients from the continuous coordinate keep mip selection stable across tile seams.
+          float dd = textureGrad(detailMap, vec3(fract(st), vTex.z), dFdx(st), dFdy(st)).r * (255.0 / 128.0);
+          diffuseColor.rgb *= mix(1.0, dd, detailStrength);
+        }`,
+      );
+  };
   const ox = -m.width / 2;
   const oz = -m.length / 2;
   const queue: Array<[number, number]> = [];
@@ -211,13 +243,14 @@ function main() {
       const sz = Math.min(CHUNK, m.length - z0);
       const top = fillChunk(p, x0, z0, sx, sz, vox);
       // The dense array keeps the full-height stride; meshing only walks up to this chunk's top.
-      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo);
+      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo, { side: sideLayer, top: topLayer, origin: [x0, z0] });
       state.chunksDone++;
       progress.style.setProperty('--p', String(state.chunksDone / state.chunks));
       if (!out.quads) continue;
       const geo = new BufferGeometry();
       geo.setAttribute('position', new BufferAttribute(out.positions, 3));
       geo.setAttribute('normal', new BufferAttribute(out.normals, 3));
+      geo.setAttribute('tex', new BufferAttribute(out.tex, 3));
       geo.setAttribute('color', new BufferAttribute(out.colors, 3));
       geo.setIndex(new BufferAttribute(out.indices, 1));
       geo.computeBoundingSphere();
@@ -333,6 +366,7 @@ function main() {
     <button data-metric="age" aria-pressed="false">Age</button>
     <button data-metric="todos" aria-pressed="false">TODO density</button>
     <div class="menu-h">Scene</div>
+    <label><input type="checkbox" id="rv-textures" checked> Pixel textures</label>
     <label><input type="checkbox" id="rv-labels" checked> District labels</label>
     <label><input type="checkbox" id="rv-flames" checked> Flames</label>
     <label><input type="checkbox" id="rv-shadows"> Shadows</label>`;
@@ -670,6 +704,9 @@ function main() {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-metric]');
     if (b) setMetric(b.dataset.metric as Metric);
   });
+  const texBox = viewMenu.querySelector<HTMLInputElement>('#rv-textures')!;
+  texBox.checked = detail.value === 1;
+  texBox.addEventListener('change', () => (detail.value = texBox.checked ? 1 : 0));
   const labelsBox = viewMenu.querySelector<HTMLInputElement>('#rv-labels')!;
   labelsBox.addEventListener('change', () => (showLabels = labelsBox.checked));
   const flamesBox = viewMenu.querySelector<HTMLInputElement>('#rv-flames')!;

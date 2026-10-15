@@ -5,6 +5,8 @@
  */
 export interface MeshOut {
   positions: Float32Array;
+  /** Per vertex: s, t in block units (texture repeats every block) and the detail layer. */
+  tex: Float32Array;
   normals: Float32Array;
   colors: Float32Array;
   indices: Uint32Array;
@@ -32,6 +34,8 @@ export function greedyMesh(
   linear = false,
   /** Bake per-vertex ambient occlusion on upward faces (costs ~10% more quads). */
   ao = true,
+  /** Detail texture layer per palette id (side/top) and the chunk's integer origin. */
+  texture?: { side: ArrayLike<number>; top: ArrayLike<number>; origin: [number, number] },
 ): MeshOut {
   const lin = (c: number) => (linear ? Math.pow(c, 2.2) : c);
   const bx = sx + 2;
@@ -46,12 +50,14 @@ export function greedyMesh(
   let pos = new Float32Array(4096 * 12);
   let col = new Float32Array(4096 * 12);
   let nor = new Float32Array(4096 * 12);
+  let tex = new Float32Array(4096 * 12);
   let idx = new Uint32Array(4096 * 6);
   let quads = 0;
   const grow = () => {
     const p2 = new Float32Array(pos.length * 2); p2.set(pos); pos = p2;
     const c2 = new Float32Array(col.length * 2); c2.set(col); col = c2;
     const n2 = new Float32Array(nor.length * 2); n2.set(nor); nor = n2;
+    const t2 = new Float32Array(tex.length * 2); t2.set(tex); tex = t2;
     const i2 = new Uint32Array(idx.length * 2); i2.set(idx); idx = i2;
   };
 
@@ -148,6 +154,18 @@ export function greedyMesh(
             const r = lin(((rgb >> 16) & 255) / 255) * glow;
             const g = lin(((rgb >> 8) & 255) / 255) * glow;
             const bl = lin((rgb & 255) / 255) * glow;
+            if (texture) {
+              // s runs horizontally, t vertically on walls (so brick rows stay level).
+              const layer = d === 1 ? texture.top[id]! : texture.side[id]!;
+              let tp = quads * 12;
+              for (const c of corners) {
+                const wx = c[0]! + texture.origin[0];
+                const wz = c[2]! + texture.origin[1];
+                tex[tp++] = d === 0 ? wz : wx;
+                tex[tp++] = d === 1 ? wz : c[1]!;
+                tex[tp++] = layer;
+              }
+            }
             let np = quads * 12;
             for (let k = 0; k < 4; k++) {
               nor[np + d] = side === 0 ? 1 : -1;
@@ -178,5 +196,5 @@ export function greedyMesh(
       }
     }
   }
-  return { positions: pos.slice(0, quads * 12), normals: nor.slice(0, quads * 12), colors: col.slice(0, quads * 12), indices: idx.slice(0, quads * 6), quads };
+  return { positions: pos.slice(0, quads * 12), tex: tex.slice(0, quads * 12), normals: nor.slice(0, quads * 12), colors: col.slice(0, quads * 12), indices: idx.slice(0, quads * 6), quads };
 }
