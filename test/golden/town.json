@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "34d214f2e73ceaa1caef0e364c201813f1fc5f3270c4f1f39868ff050dce0aeb",
-  "litematicNbtSha256": "88bdb2bba596c2fc8cf8cc2a04ca3f23eb7e65b6d8c767c9894f4995c13c0230",
+  "schemNbtSha256": "1a80de964ac4c074651994426344b4bc9d86b33a8d4e17a054a032030a7eca62",
+  "litematicNbtSha256": "2c1a3b8b5c0f225ebce9c57992460495ca17cd58abc7962801e1e1d34b3709db",
   "summary": {
     "dimensions": [
       69,
@@ -93,7 +93,7 @@
       "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]"
     ],
     "blockCounts": {
-      "minecraft:air": 287455,
+      "minecraft:air": 287663,
       "minecraft:polished_blackstone": 2123,
       "minecraft:polished_deepslate": 476,
       "minecraft:tuff": 358,
@@ -153,7 +153,7 @@
       "minecraft:soul_fire": 4,
       "minecraft:cracked_stone_bricks": 3,
       "minecraft:jungle_planks": 82,
-      "minecraft:jungle_log[axis=y]": 104,
+      "minecraft:jungle_log[axis=y]": 70,
       "minecraft:lime_stained_glass": 16,
       "minecraft:birch_planks": 42,
       "minecraft:red_concrete": 24,
@@ -165,11 +165,11 @@
       "minecraft:red_nether_brick_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]": 2,
       "minecraft:red_nether_brick_slab[type=bottom,waterlogged=false]": 4,
       "minecraft:water[level=0]": 80,
-      "minecraft:birch_log[axis=y]": 21,
-      "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]": 78,
-      "minecraft:oak_log[axis=y]": 39,
-      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]": 130,
-      "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]": 117
+      "minecraft:birch_log[axis=y]": 8,
+      "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]": 26,
+      "minecraft:oak_log[axis=y]": 34,
+      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]": 117,
+      "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]": 26
     },
     "fire": [
       "src/hot.ts:2"

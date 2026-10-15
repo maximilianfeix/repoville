@@ -195,18 +195,23 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     const strips: Rect[] = [
       { x0: lot.x0, z0: lot.z0, x1: lot.x1, z1: fp.z0 },
       { x0: lot.x0, z0: fp.z1, x1: lot.x1, z1: lot.z1 },
-      { x0: lot.x0, z0: lot.z0, x1: fp.x0, z1: lot.z1 },
-      { x0: fp.x1, z0: lot.z0, x1: lot.x1, z1: lot.z1 },
+      // Side strips stop at the footprint so corners are not visited twice.
+      { x0: lot.x0, z0: fp.z0, x1: fp.x0, z1: fp.z1 },
+      { x0: fp.x1, z0: fp.z0, x1: lot.x1, z1: fp.z1 },
     ].filter((r) => r.x1 - r.x0 >= 3 && r.z1 - r.z0 >= 3);
     for (const r of strips) {
       const w = r.x1 - r.x0;
       const d = r.z1 - r.z0;
       if (w >= 7 && d >= 7 && grid.get(r.x0 + 3, 0, r.z0 + 3) === grassId && rng() < 0.5) {
         const pond = { x0: r.x0 + 2, z0: r.z0 + 2, x1: r.x1 - 2, z1: r.z1 - 2 };
+        let filled = 0;
         for (let z = pond.z0; z < pond.z1; z++) for (let x = pond.x0; x < pond.x1; x++) {
-          if (!occ(x, z) && grid.get(x, 1, z) === 0) grid.set(x, 0, z, water);
+          if (!occ(x, z) && grid.get(x, 1, z) === 0) {
+            grid.set(x, 0, z, water);
+            filled++;
+          }
         }
-        mark(pond);
+        if (filled) mark(pond);
       }
       for (let z = r.z0 + 1; z < r.z1 - 1; z += 3) for (let x = r.x0 + 1; x < r.x1 - 1; x += 3) {
         if (rng() > 0.7) continue;
