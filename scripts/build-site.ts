@@ -51,7 +51,7 @@ async function shot(slug: string, file: string, w: number, h: number, query = 'u
   await page.screenshot({ path: join(OUT, 'media', file), type: file.endsWith('.jpg') ? 'jpeg' : 'png', quality: file.endsWith('.jpg') ? 86 : undefined });
   await page.close();
 }
-await shot('facebook/react', 'hero-react.jpg', 1920, 1080);
+await shot('facebook/react', 'hero-react.jpg', 1920, 1080, 'ui=off&quality=high', 'f=packages/react-reconciler');
 await shot('facebook/react', 'react-ui.jpg', 1440, 900, 'quality=high');
 await shot('torvalds/linux', 'linux.jpg', 1280, 800);
 await shot('BurntSushi/ripgrep', 'ripgrep.jpg', 1280, 800);
