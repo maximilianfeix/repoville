@@ -84,7 +84,8 @@ program
     console.error(`repoville: building ${src.name}`);
     const res = await render(src, cfg, log);
     const s = res.city.stats;
-    console.error(`  ${s.files} files · ${s.loc.toLocaleString('en-US')} LOC · ${s.commits} commits · ${res.built.buildings.length} buildings on ${res.layout.width}×${res.layout.length} blocks`);
+    const n = (v: number) => v.toLocaleString('en-US');
+    console.error(`  ${n(s.files)} files · ${n(s.loc)} LOC · ${n(s.commits)} commits · ${n(res.built.buildings.length)} buildings on ${res.layout.width}×${res.layout.length} blocks`);
     for (const line of formatHighlights(res.highlights, cfg.since)) console.error(`  ${line}`);
     for (const out of res.outputs) console.error(`  wrote ${out.format.padEnd(9)} ${out.file}`);
     console.error(`  done in ${((performance.now() - t0) / 1000).toFixed(1)} s · analysis ran locally, nothing was uploaded`);

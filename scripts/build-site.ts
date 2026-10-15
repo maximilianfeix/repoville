@@ -14,6 +14,7 @@ export const DEMOS = [
   { slug: 'torvalds/linux', target: 'torvalds/linux', blurb: 'C · 96k files, folded into 4k buildings' },
   { slug: 'BurntSushi/ripgrep', target: 'BurntSushi/ripgrep', blurb: 'Rust · the nether district' },
   { slug: 'junegunn/fzf', target: 'junegunn/fzf', blurb: 'Go · frozen peaks' },
+  { slug: 'pallets/flask', target: 'pallets/flask', blurb: 'Python · jungle' },
   { slug: 'maximilianfeix/repoville', target: ROOT, blurb: 'TypeScript · this project' },
 ];
 
@@ -56,8 +57,10 @@ await shot('facebook/react', 'react-ui.jpg', 1440, 900, 'quality=high');
 await shot('torvalds/linux', 'linux.jpg', 1280, 800);
 await shot('BurntSushi/ripgrep', 'ripgrep.jpg', 1280, 800);
 await shot('junegunn/fzf', 'fzf.jpg', 1280, 800);
+await shot('pallets/flask', 'flask.jpg', 1280, 800);
+await shot('facebook/react', 'react-clean.jpg', 1440, 900, 'ui=off&quality=high', 'f=packages/react-dom');
 await shot('maximilianfeix/repoville', 'repoville.jpg', 1280, 800);
-await shot('facebook/react', 'react-churn.jpg', 1280, 800, 'ui=off&view=churn&quality=low');
+await shot('facebook/react', 'react-churn.jpg', 1280, 800, 'ui=off&view=churn&quality=low', 'f=packages');
 await shot('BurntSushi/ripgrep', 'ripgrep-closeup.jpg', 1440, 900, 'ui=off&quality=high', 'f=README.md');
 await shot('BurntSushi/ripgrep', 'ripgrep-mc.jpg', 1440, 900, 'ui=off&quality=high&mc=1', 'f=README.md');
 // Social preview 1280×640 composed from the real hero render.

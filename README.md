@@ -19,10 +19,12 @@
 </p>
 
 <p align="center">
-  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/hero-react.jpg" alt="The facebook/react repository rendered by Repoville: a downtown of tall towers, a red Rust district, parks, ponds and roads." width="100%"></a>
+  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/flyover.gif" alt="A real recording of the viewer: flying over the facebook/react city, into the burning ReactFiberWorkLoop.js tower (5,268 lines, soul fire, 46 TODOs) and to a mossy corner." width="100%"></a>
 </p>
 
-> Every image in this README is a screenshot of the real viewer. Click it to open the city (one self-contained HTML file).
+<p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">three commands</a> · <b>Show it off:</b> <code>repoville badge</code></p>
+
+> Every image here is a real recording or screenshot of the viewer. Click to open the city (one self-contained HTML file).
 
 ## What you get
 
@@ -86,7 +88,7 @@ That writes `repoville-out/facebook-react.html` and `repoville-out/facebook-reac
 
 ```
 repoville: building facebook/react
-  7165 files · 903,811 LOC · 678 commits · 3294 buildings on 1024×1024 blocks
+  7,165 files · 903,811 LOC · 678 commits · 3,294 buildings on 1024×1024 blocks
   hottest districts (commits in 1y):
     packages/react-devtools-shared/src: 125 commits, 3 roofs on fire
   most ruined buildings (TODO/FIXME/HACK/XXX):
