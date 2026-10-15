@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.gif binary
+*.schem binary
+*.litematic binary
+*.nbt binary

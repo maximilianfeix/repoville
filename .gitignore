@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+coverage/
+.cache/
+test/fixtures/repos/
+test/e2e/.paper/
+*.log
+.DS_Store
