@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repoville · City not built yet</title>
+<link rel="icon" href="/repoville/brand/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#191b20;--moss:#4E8C3A;--dia:#3FD0C9;--sand:#E8D9A8;--bone:#F6F1E4;--mute:rgba(246,241,228,.7);--line:rgba(246,241,228,.12)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--bone);font:17px/1.6 Inter,system-ui,sans-serif;padding:24px}
+main{max-width:640px;width:100%}
+.logo{display:flex;align-items:center;gap:10px;font:16px Silkscreen,monospace;color:var(--bone);text-decoration:none;margin-bottom:40px}
+.logo img{width:36px;height:36px}
+h1{font:800 clamp(30px,5vw,44px)/1.1 Inter,sans-serif;letter-spacing:-.03em;margin:0 0 12px}
+p{color:var(--mute);margin:0 0 20px}
+code,pre{font-family:'JetBrains Mono',monospace}
+pre{background:#121418;border:1px solid var(--line);border-radius:10px;padding:18px 20px;overflow:auto;font-size:14px;line-height:1.7;margin:0 0 24px}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+a.btn{display:inline-block;padding:12px 18px;border-radius:8px;font-weight:600;text-decoration:none}
+a.primary{background:var(--moss);color:#fff}
+a.ghost{border:1px solid rgba(246,241,228,.32);color:var(--bone)}
+.repo{color:var(--sand)}
+</style>
+</head>
+<body>
+<main>
+  <a class="logo" href="/repoville/"><img src="/repoville/brand/mark.svg" alt="">repoville</a>
+  <h1 id="title">This page is still under construction.</h1>
+  <p id="lede">Nothing here yet.</p>
+  <pre id="cmd" hidden></pre>
+  <div class="btns">
+    <a class="btn primary" id="req" href="https://github.com/maximilianfeix/repoville/issues/new?template=repo-request.yml" hidden>Request this city</a>
+    <a class="btn ghost" href="/repoville/r/facebook/react/">Walk the React demo</a>
+  </div>
+</main>
+<script>
+  // /repoville/r/<owner>/<repo>[/] → explain how to build that city.
+  const m = location.pathname.match(/\/r\/([\w.-]+)\/([\w.-]+)\/?$/);
+  if (m) {
+    const slug = `${m[1]}/${m[2]}`;
+    document.title = `${slug} · Repoville`;
+    const t = document.getElementById('title');
+    t.textContent = '';
+    t.append('The city of ', Object.assign(document.createElement('span'), { className: 'repo', textContent: slug }), ' is not in the gallery yet.');
+    document.getElementById('lede').textContent = 'Build it yourself in a minute — it runs on your machine and opens in your browser:';
+    const cmd = document.getElementById('cmd');
+    cmd.hidden = false;
+    cmd.textContent = `npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville ${slug} --open`;
+    const req = document.getElementById('req');
+    req.hidden = false;
+    req.href += `&title=${encodeURIComponent('Render ' + slug)}&repo=${encodeURIComponent(slug)}`;
+  }
+</script>
+</body>
+</html>
