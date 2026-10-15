@@ -78,6 +78,41 @@ program
   });
 
 program
+  .command('live')
+  .description('build the city on a running Paper/Spigot/vanilla server over RCON (password from MC_RCON_PW)')
+  .argument('[target]', 'folder, owner/repo or git URL', '.')
+  .requiredOption('--rcon <host:port>', 'RCON address, e.g. localhost:25575')
+  .requiredOption('--world-dir <path>', "the server's world folder (structure tiles are written there)")
+  .option('--at <x,y,z>', 'north-west ground corner of the city', '0,-60,0')
+  .option('--mc <version>', 'server Minecraft version', DEFAULT_MC)
+  .option('--since <duration>', 'churn window', DEFAULTS.since)
+  .option('--max-buildings <n>', 'building budget', String(DEFAULTS.maxBuildings))
+  .action(async (target: string, o: { rcon: string; worldDir: string; at: string; mc: string; since: string; maxBuildings: string }) => {
+    const password = process.env.MC_RCON_PW;
+    if (!password) throw new Error('Set MC_RCON_PW to the server\'s rcon.password (it is never read from arguments).');
+    const [host, portStr] = o.rcon.split(':');
+    const at = o.at.split(',').map(Number) as [number, number, number];
+    if (at.length !== 3 || at.some((n) => !Number.isInteger(n))) throw new Error('--at must be x,y,z integers');
+    const log = (m: string) => console.error(`  ${m}`);
+    const { analyze: analyzeRepo } = await import('./analyze.js');
+    const { applyLod } = await import('./model/lod.js');
+    const { layoutCity } = await import('./layout/treemap.js');
+    const { buildCity } = await import('./build/city.js');
+    const { buildLive } = await import('./live/paste.js');
+    const { dataVersionFor } = await import('./mc.js');
+    const sinceDays = parseDays(o.since);
+    const src = await resolveSource(target, { historyDays: Math.max(sinceDays, 3 * 365), log });
+    const city = applyLod(await analyzeRepo(src.dir, { sinceDays, name: src.name }), Number(o.maxBuildings));
+    const built = buildCity(city, layoutCity(city));
+    const runId = `c${city.head?.slice(0, 8) ?? 'local'}`;
+    console.error(`repoville: building ${src.name} live at ${at.join(' ')}`);
+    const res = await buildLive(built.grid, { host: host ?? 'localhost', port: Number(portStr ?? 25575), password, worldDir: resolve(o.worldDir), at, dataVersion: dataVersionFor(o.mc), runId, log });
+    console.error(`  placed ${res.tiles} tiles (${res.blocks.toLocaleString('en-US')} blocks)${res.failed.length ? `, ${res.failed.length} failed` : ''}`);
+    for (const f of res.failed.slice(0, 5)) console.error(`  ✗ ${f}`);
+    if (res.failed.length) process.exitCode = 1;
+  });
+
+program
   .command('badge')
   .description('print the README badge for a GitHub repo')
   .argument('[owner/repo]', 'GitHub repo; defaults to the origin remote of the current folder')

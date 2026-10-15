@@ -106,6 +106,7 @@ node dist/cli.js [build] <path|owner/repo|url>
   --seed <n>               decoration seed
   --ref <commit>           render a specific commit of a remote repo
 node dist/cli.js badge [owner/repo]   print the README badge
+MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
 ```
 
 A `repoville.config.json` in a local repo can set the same keys plus `palette` overrides. Config files inside cloned remote repos are ignored.
@@ -117,7 +118,7 @@ A `repoville.config.json` in a local repo can set the same keys plus `palette` o
 | `.schem` (Sponge v3) | Pasted with WorldEdit 7.3.19 on Paper 1.21.11 and block-checked over RCON (`test/e2e/worldedit-paste.ts`) |
 | `.litematic` (v6) | Round-trip checked with litemapy 0.11 in the test suite |
 | World `.zip` (superflat, Java 1.21.x) | Loaded as the server world on Paper 1.21.11 and block-checked (`test/e2e/world-load.ts`) |
-| Live building over RCON | In progress |
+| Live building over RCON | Built on Paper 1.21.11 with structure tiles + `/place template`, block-checked (`test/e2e/live.ts`) |
 
 Paste a schematic: copy it to `plugins/WorldEdit/schematics/`, then `//schem load <name>` and `//paste`. Or unzip `*-world.zip` into your `saves/` folder: a creative superflat world with the city at spawn (ground at y = −61, daylight fixed, no mobs). Buildings reach up to about 290 blocks.
 
@@ -141,7 +142,6 @@ Remote repos are cloned blobless and only as far back as the history window need
 
 ## Roadmap
 
-- Live building on a Paper server
 - npm release (`npx repoville`)
 - v2: coding agents walking the city as villagers while they work
 
