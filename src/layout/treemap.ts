@@ -187,12 +187,15 @@ function placeSuburb(files: FileNode[], r: Rect, roomyOnly: boolean): BuildingLa
  * the nearest edge of their district (the street), so spare space collects
  * behind them as one courtyard instead of a thin ring.
  */
-function towerFootprint(lot: Rect, side: number, district: Rect | null): Rect | null {
+function towerFootprint(lot: Rect, side: number, district: Rect | null, height = 0): Rect | null {
   const w = lot.x1 - lot.x0;
   const h = lot.z1 - lot.z0;
   if (w < 4 || h < 4) return null;
-  const fw = Math.min(side, w - 2);
-  const fh = Math.min(side, h - 2);
+  // Massing: height is the metric, so keep it, but stop small files from
+  // becoming posts. Widen up to height/1.8 when the lot has room.
+  const want = Math.max(side, Math.ceil(height / 1.8));
+  const fw = Math.min(want, w - 2);
+  const fh = Math.min(want, h - 2);
   let x0 = lot.x0 + Math.floor((w - fw) / 2);
   let z0 = lot.z0 + Math.floor((h - fh) / 2);
   if (district) {
@@ -234,7 +237,7 @@ export function layoutCity(city: CityTree): CityLayout {
         });
       } else if (d.kind === 'file') {
         leaves++;
-        const fp = towerFootprint(rect, d.side, node.parent ? snap(node.parent) : null);
+        const fp = towerFootprint(rect, d.side, node.parent ? snap(node.parent) : null, d.file.merged ? 0 : buildingHeight(d.file.loc));
         if (!fp) {
           failed.push(d);
           continue;
