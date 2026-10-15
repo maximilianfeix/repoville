@@ -54,6 +54,9 @@ export function validateBlockState(state: unknown, where: string): string {
   return state;
 }
 
+const BIOMES = new Set(['nether', 'plains', 'jungle', 'frozen', 'badlands', 'caves', 'cherry', 'end', 'quarry', 'library', 'stone']);
+const SLOTS = new Set(['wall', 'towerWall', 'trim', 'roof', 'roofBlock', 'glass', 'floor', 'ground', 'accent', 'mossyWall', 'treeLog', 'treeLeaves']);
+
 /** Keys a repo's own config file may set. `out` is CLI-only so a repo cannot pick where files are written. */
 const FILE_KEYS = new Set(['format', 'mc', 'maxBuildings', 'since', 'include', 'exclude', 'ignore', 'seed', 'textured', 'palette']);
 
@@ -73,8 +76,16 @@ export function readConfigFile(dir: string): Partial<RenderConfig> {
   if (raw.palette !== undefined) {
     if (typeof raw.palette !== 'object' || raw.palette === null) throw new Error(`${CONFIG_FILE}: "palette" must be an object`);
     for (const [biome, slots] of Object.entries(raw.palette as Record<string, unknown>)) {
+      if (!BIOMES.has(biome)) throw new Error(`${CONFIG_FILE}: unknown theme "${biome}". Use one of: ${[...BIOMES].join(', ')}`);
       if (typeof slots !== 'object' || slots === null) throw new Error(`${CONFIG_FILE}: palette.${biome} must be an object`);
-      for (const [slot, state] of Object.entries(slots as Record<string, unknown>)) validateBlockState(state, `${CONFIG_FILE} palette.${biome}.${slot}`);
+      for (const [slot, state] of Object.entries(slots as Record<string, unknown>)) {
+        const where = `${CONFIG_FILE} palette.${biome}.${slot}`;
+        if (!SLOTS.has(slot)) throw new Error(`${where}: unknown slot. Use one of: ${[...SLOTS].join(', ')}`);
+        // "roof" is a stair/slab material stem (spruce → minecraft:spruce_stairs), not a block state.
+        if (slot === 'roof') {
+          if (typeof state !== 'string' || !/^[a-z0-9_]+$/.test(state)) throw new Error(`${where}: use a material name like "spruce" or "stone_brick"`);
+        } else validateBlockState(state, where);
+      }
     }
   }
   const out: Partial<RenderConfig> = { ...(raw as Partial<RenderConfig>) };

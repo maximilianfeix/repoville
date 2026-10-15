@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises';
+import { lstat, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import ignore from 'ignore';
 import { glob } from 'tinyglobby';
@@ -101,9 +101,10 @@ export async function walk(root: string, opts: WalkOptions = {}): Promise<Scanne
       const full = join(root, path);
       let st;
       try {
-        st = await stat(full);
+        // lstat: symlinks are skipped, so a repo can never point the scan outside itself.
+        st = await lstat(full);
       } catch {
-        continue; // deleted in the working tree or a broken symlink
+        continue; // deleted in the working tree
       }
       if (!st.isFile() || st.size > maxBytes) continue;
       const counted = countSource(await readFile(full));

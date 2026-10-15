@@ -48,6 +48,8 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
   const city = applyLod(full, cfg.maxBuildings);
   const merged = full.stats.files - [...files(city.root)].length;
   if (merged > 0) log(`merged ${merged} files into folder towers to stay under ${cfg.maxBuildings} buildings`);
+  const remaining = full.stats.files - merged;
+  if (remaining > cfg.maxBuildings) log(`note: ${remaining} files sit directly in the root, more than --max-buildings ${cfg.maxBuildings}; rendering them all`);
   const layout = layoutCity(city);
   lap('layout');
   const built = buildCity(city, layout, { seed: cfg.seed, palettes: withOverrides(cfg.palette) });

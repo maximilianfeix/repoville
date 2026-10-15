@@ -24,6 +24,12 @@ describe('config file', () => {
     expect(() => readConfigFile(withConfig({ palette: { plains: { wall: 'minecraft:chest{Items:[]}' } } }))).toThrow(/plain block state/);
     expect(validateBlockState('minecraft:oak_slab[type=bottom,waterlogged=false]', 'x')).toBeTruthy();
   });
+  it('accepts roof material stems and rejects block states there', () => {
+    expect(readConfigFile(withConfig({ palette: { plains: { roof: 'spruce' } } })).palette).toBeTruthy();
+    expect(() => readConfigFile(withConfig({ palette: { plains: { roof: 'minecraft:spruce' } } }))).toThrow(/material name/);
+    expect(() => readConfigFile(withConfig({ palette: { atlantis: { wall: 'minecraft:stone' } } }))).toThrow(/unknown theme/);
+    expect(() => readConfigFile(withConfig({ palette: { plains: { door: 'minecraft:stone' } } }))).toThrow(/unknown slot/);
+  });
   it('validates formats', () => {
     expect(() => parseFormats('html,gif')).toThrow(/Unknown format/);
   });

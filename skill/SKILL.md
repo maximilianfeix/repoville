@@ -11,7 +11,7 @@ Turns a repo into a city: folders are districts, files are buildings (height fro
 
 1. Render the city and open it:
    ```sh
-   npx repoville . --open            # npm release pending; from a clone: node <repoville>/dist/cli.js . --open
+   npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville . --open
    ```
    It prints a summary (hottest districts, most ruined buildings, oldest mossy corner) and writes `repoville-out/<name>.html`.
 2. Tell the user, with the real numbers from that summary:

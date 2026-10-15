@@ -76,6 +76,19 @@ describe('walk', () => {
     expect(paths).not.toContain('src/util/old.py');
   });
 
+  it('skips symlinks so a repo cannot read files outside itself', async () => {
+    const { mkdtempSync, symlinkSync, writeFileSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const outside = mkdtempSync(join(tmpdir(), 'rv-outside-'));
+    writeFileSync(join(outside, 'secret.ts'), 'const secret = 1;\n'.repeat(500));
+    const repo = mkdtempSync(join(tmpdir(), 'rv-link-'));
+    writeFileSync(join(repo, 'a.ts'), 'const a = 1;\n');
+    symlinkSync(join(outside, 'secret.ts'), join(repo, 'link.ts'));
+    const files = await walk(repo);
+    expect(files.map((f) => f.path)).toEqual(['a.ts']);
+  });
+
   it('reports CRLF files with correct line counts', async () => {
     const files = await walk(fixture('town'));
     expect(files.find((f) => f.path === 'src/crlf.ts')).toMatchObject({ loc: 3, lines: 4 });

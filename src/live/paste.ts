@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { VoxelGrid } from '../build/voxel-grid.js';
@@ -13,7 +14,7 @@ export interface LiveOptions {
   /** World position of the city's north-west ground corner. */
   at: [number, number, number];
   dataVersion: number;
-  /** Unique per run so the server's template cache never serves stale tiles. */
+  /** Prefix for template names; the content hash is appended so the server's template cache never serves stale tiles. */
   runId: string;
   log?: (m: string) => void;
 }
@@ -30,37 +31,42 @@ const ns = 'repoville';
 export async function buildLive(grid: VoxelGrid, opts: LiveOptions): Promise<LiveResult> {
   const log = opts.log ?? (() => {});
   const tiles = structureTiles(grid, opts.dataVersion);
+  const digest = createHash('sha256');
+  for (const t of tiles) digest.update(t.data);
+  const runId = `${opts.runId}_${digest.digest('hex').slice(0, 10)}`;
   const dir = join(opts.worldDir, 'generated', ns, 'structures');
   mkdirSync(dir, { recursive: true });
-  for (const t of tiles) writeFileSync(join(dir, `${opts.runId}_${t.tx}_${t.ty}_${t.tz}.nbt`), t.data);
+  for (const t of tiles) writeFileSync(join(dir, `${runId}_${t.tx}_${t.ty}_${t.tz}.nbt`), t.data);
   log(`wrote ${tiles.length} structure tiles to ${dir}`);
 
   const rcon = new Rcon(opts.host, opts.port);
   await rcon.connect(opts.password);
   const failed: string[] = [];
   const [ax, ay, az] = opts.at;
+  const forced: string[] = [];
   try {
     // Force-load the area chunk block by chunk block (the server caps one call at 256 chunks).
     const c0x = Math.floor(ax / 16), c0z = Math.floor(az / 16);
     const c1x = Math.floor((ax + grid.width - 1) / 16), c1z = Math.floor((az + grid.length - 1) / 16);
-    const forced: string[] = [];
     for (let cz = c0z; cz <= c1z; cz += 16) for (let cx = c0x; cx <= c1x; cx += 16) {
       const ex = Math.min(c1x, cx + 15), ez = Math.min(c1z, cz + 15);
       const area = `${cx * 16} ${cz * 16} ${ex * 16 + 15} ${ez * 16 + 15}`;
-      await rcon.send(`forceload add ${area}`);
-      forced.push(area);
+      const r = await rcon.send(`forceload add ${area}`);
+      if (/marked|already/i.test(r)) forced.push(area);
+      else throw new Error(`forceload failed for ${area}: ${r.trim()}`);
     }
     let blocks = 0;
     for (const [i, t] of tiles.entries()) {
       const x = ax + t.tx * TILE, y = ay + t.ty * TILE, z = az + t.tz * TILE;
-      const reply = await rcon.send(`place template ${ns}:${opts.runId}_${t.tx}_${t.ty}_${t.tz} ${x} ${y} ${z}`);
+      const reply = await rcon.send(`place template ${ns}:${runId}_${t.tx}_${t.ty}_${t.tz} ${x} ${y} ${z}`);
       if (!/loaded template|placed/i.test(reply)) failed.push(`${t.tx},${t.ty},${t.tz}: ${reply.trim()}`);
       blocks += t.blocks;
       if ((i + 1) % 25 === 0) log(`placed ${i + 1}/${tiles.length} tiles`);
     }
-    for (const area of forced) await rcon.send(`forceload remove ${area}`);
     return { tiles: tiles.length, blocks, failed };
   } finally {
+    // Always release what we force-loaded, even after an error.
+    for (const area of forced) await rcon.send(`forceload remove ${area}`).catch(() => {});
     rcon.close();
   }
 }

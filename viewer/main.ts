@@ -287,6 +287,7 @@ function main() {
       }
     }
     cityMeshes = merged;
+    chunkOf.clear(); // drop references to the pre-merge geometry
     sun.shadow.needsUpdate = true;
   }
 
@@ -787,7 +788,7 @@ function main() {
     });
     mcNote.hidden = !mcBox.checked;
   });
-  if (params.get('mc') === '1') {
+  if (params.get('mc') === '1' || (m.textured && params.get('mc') !== '0')) {
     mcBox.checked = true;
     mcNote.hidden = false;
     void enableMcTextures(true);

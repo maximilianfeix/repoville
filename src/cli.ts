@@ -48,7 +48,7 @@ program
   .option('--include <glob>', 'only these paths (repeatable)', collect, [])
   .option('--exclude <glob>', 'skip these paths (repeatable)', collect, [])
   .option('--seed <n>', 'seed for decorations', '0')
-  .option('--textured', 'viewer fetches Minecraft textures at runtime (opt-in)')
+  .option('--textured', 'open the viewer with Minecraft textures (fetched by the browser at runtime)')
   .option('--open', 'open the 3D preview when done')
   .option('--gallery', 'also write gallery/<owner>-<repo>/ for a gallery PR')
   .addOption(new Option('--ref <commit>', 'render this commit of a remote repo'))
