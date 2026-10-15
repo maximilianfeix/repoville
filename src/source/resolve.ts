@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { hasGit, run } from '../util/exec.js';
@@ -46,6 +47,8 @@ export function parseTarget(target: string, cwd = process.cwd()): ParsedTarget {
 
 export interface ResolveOptions {
   ref?: string;
+  /** Only fetch history this many days back (plus a margin). Omit for full history. */
+  historyDays?: number;
   refresh?: boolean;
   log?: (msg: string) => void;
 }
@@ -69,7 +72,19 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
   if (!existsSync(join(dir, '.git'))) {
     mkdirSync(join(cacheRoot(), 'repos'), { recursive: true });
     log(`cloning ${parsed.url} (blobless) into ${dir}`);
-    await git(['clone', '--filter=blob:none', '--no-tags', '--single-branch', parsed.url!, dir], cacheRoot());
+    const base = ['clone', '--filter=blob:none', '--no-tags', '--single-branch'];
+    if (opts.historyDays && !opts.ref) {
+      const since = new Date(Date.now() - (opts.historyDays + 30) * 86400_000).toISOString().slice(0, 10);
+      try {
+        await git([...base, `--shallow-since=${since}`, parsed.url!, dir], cacheRoot());
+      } catch {
+        // Repos without commits after the cutoff reject --shallow-since; take everything.
+        await rm(dir, { recursive: true, force: true });
+        await git([...base, parsed.url!, dir], cacheRoot());
+      }
+    } else {
+      await git([...base, parsed.url!, dir], cacheRoot());
+    }
   } else if (opts.refresh) {
     log(`updating ${dir}`);
     await git(['fetch', '--filter=blob:none', 'origin'], dir);
@@ -77,7 +92,7 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
   }
   if (opts.ref) {
     const has = await run('git', ['cat-file', '-e', `${opts.ref}^{commit}`], dir);
-    if (has.code !== 0) await git(['fetch', '--filter=blob:none', 'origin', opts.ref], dir);
+    if (has.code !== 0) await git(['fetch', '--filter=blob:none', '--unshallow', 'origin', opts.ref], dir).catch(() => git(['fetch', '--filter=blob:none', 'origin', opts.ref!], dir));
     await git(['checkout', '-q', '--detach', opts.ref], dir);
   }
   const name = parsed.owner ? `${parsed.owner}/${parsed.repo}` : (parsed.repo ?? 'repo');
