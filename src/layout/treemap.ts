@@ -116,8 +116,45 @@ function runTreemap(root: LNode, side: number): HierarchyRectangularNode<LNode> 
     .paddingTop((n) => (n.depth === 0 ? roadWidth(0) : plazaFor(n.data)))(h);
 }
 
-interface Placement {
-  houses: BuildingLayout[] | null;
+type Laid = HierarchyRectangularNode<LNode>;
+
+function mirror(node: Laid, axis: 'x' | 'y', a: number, b: number): void {
+  node.each((n) => {
+    if (axis === 'x') [n.x0, n.x1] = [a + b - n.x1, a + b - n.x0];
+    else [n.y0, n.y1] = [a + b - n.y1, a + b - n.y0];
+  });
+}
+
+/**
+ * Squarify always packs the largest children into the x0/y0 corner. Mirror
+ * each district (top-down) so its heavy side faces its parent's centre: the
+ * big files of the whole repo then gather in one downtown. Only placement
+ * changes; every lot keeps its size, and the plaza strip stays where it is.
+ */
+function gatherDowntown(root: Laid): void {
+  root.eachBefore((node) => {
+    if (!node.parent || !node.children?.length) return;
+    const parent = node.parent;
+    const px = (parent.x0 + parent.x1) / 2;
+    const py = (parent.y0 + parent.y1) / 2;
+    const plaza = plazaFor(node.data);
+    const cx = (node.x0 + node.x1) / 2;
+    const cy = (node.y0 + plaza + node.y1) / 2;
+    let wx = 0, wy = 0, w = 0;
+    for (const c of node.children) {
+      const v = c.value ?? 0;
+      wx += ((c.x0 + c.x1) / 2) * v;
+      wy += ((c.y0 + c.y1) / 2) * v;
+      w += v;
+    }
+    if (w <= 0) return;
+    wx /= w;
+    wy /= w;
+    for (const c of node.children) {
+      if ((wx - cx) * (px - cx) < 0) mirror(c, 'x', node.x0, node.x1);
+      if ((wy - cy) * (py - cy) < 0) mirror(c, 'y', node.y0 + plaza, node.y1);
+    }
+  });
 }
 
 function placeSuburb(files: FileNode[], r: Rect, roomyOnly: boolean): BuildingLayout[] | null {
@@ -145,14 +182,23 @@ function placeSuburb(files: FileNode[], r: Rect, roomyOnly: boolean): BuildingLa
   return null;
 }
 
-function towerFootprint(lot: Rect, side: number): Rect | null {
+/**
+ * Footprint inside its lot, keeping a one-block alley. Buildings line up with
+ * the nearest edge of their district (the street), so spare space collects
+ * behind them as one courtyard instead of a thin ring.
+ */
+function towerFootprint(lot: Rect, side: number, district: Rect | null): Rect | null {
   const w = lot.x1 - lot.x0;
   const h = lot.z1 - lot.z0;
   if (w < 4 || h < 4) return null;
   const fw = Math.min(side, w - 2);
   const fh = Math.min(side, h - 2);
-  const x0 = lot.x0 + Math.floor((w - fw) / 2);
-  const z0 = lot.z0 + Math.floor((h - fh) / 2);
+  let x0 = lot.x0 + Math.floor((w - fw) / 2);
+  let z0 = lot.z0 + Math.floor((h - fh) / 2);
+  if (district) {
+    x0 = lot.x0 - district.x0 <= district.x1 - lot.x1 ? lot.x0 + 1 : lot.x1 - 1 - fw;
+    z0 = lot.z0 - district.z0 <= district.z1 - lot.z1 ? lot.z0 + 1 : lot.z1 - 1 - fh;
+  }
   return { x0, z0, x1: x0 + fw, z1: z0 + fh };
 }
 
@@ -167,6 +213,7 @@ export function layoutCity(city: CityTree): CityLayout {
   for (let attempt = 0; ; attempt++) {
     const last = attempt === MAX_ATTEMPTS;
     const laid = runTreemap(build(city.root, 0, demoted, boost), side);
+    gatherDowntown(laid);
     const districts: DistrictLayout[] = [];
     const buildings: BuildingLayout[] = [];
     const failed: Array<Extract<LNode, { kind: 'file' | 'suburb' }>> = [];
@@ -187,7 +234,7 @@ export function layoutCity(city: CityTree): CityLayout {
         });
       } else if (d.kind === 'file') {
         leaves++;
-        const fp = towerFootprint(rect, d.side);
+        const fp = towerFootprint(rect, d.side, node.parent ? snap(node.parent) : null);
         if (!fp) {
           failed.push(d);
           continue;

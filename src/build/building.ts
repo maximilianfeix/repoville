@@ -210,7 +210,11 @@ class Mason {
 const grid = (rows: (y: number) => boolean) => (along: number, len: number, y: number) =>
   along > 0 && along < len - 1 && along % 2 === 1 && rows(y);
 
-export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style: Style, rng: () => number): Shell {
+/**
+ * `roofSeed` is a hash of the building's folder: buildings in one district
+ * share their roof type (large shapes stay predictable, details vary).
+ */
+export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style: Style, rng: () => number, roofSeed = 0): Shell {
   const m = new Mason(g, pal, rng);
   const fp = b.footprint;
   const H = b.height;
@@ -237,7 +241,7 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
       const slender = H > 1.6 * Math.min(width(fp), depth(fp));
       const square = Math.abs(width(fp) - depth(fp)) <= 1;
       if (slender) m.flatRoof(fp, H + 1, pal.roofBlock, pal.trim);
-      else if (square && rng() < 0.6) m.hip(fp, H + 1, roofMat, 1);
+      else if (square && roofSeed % 5 < 3) m.hip(fp, H + 1, roofMat, 1);
       else m.gable(fp, H + 1, roofMat, pal.roofBlock, 1, pal.wall);
       if (rng() < 0.3 && width(fp) >= 4) m.fill({ x0: fp.x0 + 1, z0: fp.z0 + 1, x1: fp.x0 + 2, z1: fp.z0 + 2 }, H + 1, H + 3 + Math.floor(Math.min(width(fp), depth(fp)) / 2), BLOCKS.chimney);
       break;

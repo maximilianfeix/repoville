@@ -7,7 +7,7 @@ export const BLOCK_COLORS: Record<string, number> = {
   'minecraft:crimson_stem': 0x6a2c3e, 'minecraft:red_stained_glass': 0xa83a3a, 'minecraft:crimson_slab': 0x7e3a56,
   'minecraft:crimson_planks': 0x7e3a56, 'minecraft:crimson_nylium': 0x8a1f1f, 'minecraft:magma_block': 0xc0581c,
   'minecraft:birch_planks': 0xd7c98c, 'minecraft:oak_log': 0x6b5434, 'minecraft:glass': 0xc8e6ef, 'minecraft:oak_slab': 0xa88754,
-  'minecraft:oak_planks': 0xa88754, 'minecraft:grass_block': 0x7cb55a, 'minecraft:yellow_concrete': 0xf0af15,
+  'minecraft:oak_planks': 0xa88754, 'minecraft:grass_block': 0x6f9f4c, 'minecraft:yellow_concrete': 0xf0af15,
   'minecraft:mossy_cobblestone': 0x6e7a5e, 'minecraft:jungle_planks': 0xa0734d, 'minecraft:jungle_log': 0x584419,
   'minecraft:lime_stained_glass': 0x7fcc19, 'minecraft:jungle_slab': 0xa0734d, 'minecraft:lime_concrete': 0x5ea918,
   'minecraft:light_blue_concrete': 0x3aafd9, 'minecraft:packed_ice': 0x8db4f2, 'minecraft:light_blue_stained_glass': 0x8fc6e6,

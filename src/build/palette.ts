@@ -121,6 +121,8 @@ export function stairs(material: string, facing: Facing): string {
 
 export const BLOCKS = {
   roadTop: 'minecraft:polished_blackstone',
+  roadMid: 'minecraft:polished_deepslate',
+  roadLane: 'minecraft:tuff',
   roadDeep: 'minecraft:dirt_path',
   sidewalk: 'minecraft:smooth_stone',
   plaza: 'minecraft:polished_andesite',
