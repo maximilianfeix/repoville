@@ -164,7 +164,7 @@ export const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 
 const CSS = `
 :root{--bg:#1c1e24;--deep:#23262E;--panel:rgba(28,30,36,.9);--panel-solid:#23262E;--moss:#4E8C3A;--moss-hi:#6fb352;--red:#D9382B;--lava:#FF7A1A;--dia:#3FD0C9;--sand:#E8D9A8;--bone:#F6F1E4;--mute:rgba(246,241,228,.62);--line:rgba(246,241,228,.12);--line-hi:rgba(246,241,228,.24);--r:6px;--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;--ui:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--px:Silkscreen,var(--mono)}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--bone);font:13px/1.45 var(--ui);-webkit-font-smoothing:antialiased}
+html,body{margin:0;height:100%;position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);transition:background .6s;color:var(--bone);font:13px/1.45 var(--ui);-webkit-font-smoothing:antialiased}
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
 #ui{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 #ui>*{pointer-events:auto}
@@ -262,6 +262,7 @@ body.flying #ui>*:not(.foot){display:none!important}
 body.no-ui #ui{display:none}
 .fatal{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--bone)}
 [hidden]{display:none!important}
+body.night{background:radial-gradient(120% 90% at 50% 30%,#1b2238 0%,#11131b 60%,#0b0c10 100%)!important}
 @media (max-width:900px){.stats{display:none}.search{width:180px}}
 @media (max-width:720px){
  .brand{top:10px;left:10px}
