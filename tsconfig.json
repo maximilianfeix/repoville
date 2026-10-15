@@ -14,5 +14,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "viewer", "test", "scripts", "*.ts"]
+  "include": ["src", "viewer", "test", "scripts", "*.ts"],
+  "exclude": ["test/fixtures", "node_modules", "dist"]
 }
