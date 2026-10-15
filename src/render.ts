@@ -13,6 +13,7 @@ import { highlights, type Highlights } from './summary.js';
 import { parseDays } from './util/duration.js';
 import { writeLitematic } from './write/litematic.js';
 import { writeWorldZip } from './write/world.js';
+import { renderThumbnail } from './write/thumbnail.js';
 import { writeSchem } from './write/schem.js';
 import { writeHtml } from './write/html.js';
 import { badgeMarkdown, SITE } from './badge.js';
@@ -86,6 +87,19 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
       continue;
     }
     lap(format);
+  }
+
+  if (cfg.gallery) {
+    const dir = join(cfg.out, 'gallery', base);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'city.png'), renderThumbnail(built.grid));
+    const h = highlights(city, built.buildings, built.districts);
+    writeFileSync(join(dir, 'meta.json'), JSON.stringify({
+      repo: src.name, head: city.head, files: city.stats.files, loc: city.stats.loc, commits: city.stats.commits,
+      buildings: built.buildings.length, size: [layout.width, layout.length], since: cfg.since, highlights: h,
+    }, null, 2) + '\n');
+    outputs.push({ format: 'gallery', file: dir });
+    lap('gallery');
   }
 
   return { city, layout, built, highlights: highlights(city, built.buildings, built.districts), outputs, timings };
