@@ -45,7 +45,26 @@ export function buildingHeight(loc: number): number {
 
 /** Desired square footprint side for a file; below 2 the file lives in a suburb. */
 export function buildingSide(loc: number): number {
-  return Math.min(MAX_BUILDING_SIDE, Math.round(Math.sqrt(loc) / 2.5));
+  return Math.min(MAX_BUILDING_SIDE, Math.round(Math.sqrt(loc) / 2));
+}
+
+/**
+ * Folder towers made by LOD stand for many files. Applying the per-file
+ * formula to their summed LOC puts almost all of them at the 250 cap, so their
+ * volume tracks LOC instead: a wider footprint and height = LOC / (side² · 4).
+ */
+export function landmarkSide(loc: number): number {
+  return Math.max(6, Math.min(MAX_BUILDING_SIDE, Math.round(Math.sqrt(loc) / 10)));
+}
+export function landmarkHeight(loc: number, side: number): number {
+  return Math.max(8, Math.min(250, Math.round(loc / (side * side * 4))));
+}
+
+function sideFor(f: FileNode): number {
+  return f.merged ? landmarkSide(f.loc) : buildingSide(f.loc);
+}
+function heightFor(f: FileNode, side: number): number {
+  return f.merged ? landmarkHeight(f.loc, side) : buildingHeight(f.loc);
 }
 
 type LNode =
@@ -67,7 +86,7 @@ function build(dir: DirNode, depth: number, demoted: Set<string>, boost: Map<str
       children.push(build(c, depth + 1, demoted, boost));
       continue;
     }
-    const side = buildingSide(c.loc);
+    const side = sideFor(c);
     if (side < 2 || demoted.has(c.path)) small.push(c);
     else {
       const s = Math.max(3, side);
@@ -174,7 +193,7 @@ export function layoutCity(city: CityTree): CityLayout {
           continue;
         }
         if ((rect.x1 - rect.x0) * (rect.z1 - rect.z0) < ((d.side + 2) ** 2) * 0.8) squeezed++;
-        buildings.push({ kind: 'tower', file: d.file, lot: rect, footprint: fp, height: buildingHeight(d.file.loc) });
+        buildings.push({ kind: 'tower', file: d.file, lot: rect, footprint: fp, height: heightFor(d.file, d.side) });
       } else {
         const houses = placeSuburb(d.files, rect, side < MAX_SIDE && attempt < MAX_ATTEMPTS / 2);
         if (houses) buildings.push(...houses);

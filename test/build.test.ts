@@ -43,10 +43,12 @@ describe('buildCity on the town fixture', async () => {
     const idx = fact('src/index.ts');
     expect(idx.height).toBe(4 + Math.round(4 * Math.sqrt(121 / 10)));
     const g = built.grid;
-    // Walls stand on the footprint corners up to the height, the slab roof one above.
-    expect(g.state(idx.x0, idx.height, idx.z0)).toBe('minecraft:oak_log[axis=y]');
-    expect(g.state(idx.x0, idx.height + 1, idx.z0)).toBe('minecraft:oak_slab[type=bottom,waterlogged=false]');
-    expect(g.state(idx.x0, idx.height + 2, idx.z0)).toBe('minecraft:air');
+    // A mid-rise: trim corners up to the LOC height, a roof deck above, then a parapet.
+    expect(idx.style).toBe('midrise');
+    expect(g.state(idx.x0, idx.height, idx.z0)).toBe('minecraft:stripped_oak_log[axis=y]');
+    expect(g.state(idx.x0, idx.height + 1, idx.z0)).toBe('minecraft:oak_planks');
+    expect(g.state(idx.x0, idx.height + 2, idx.z0)).toBe('minecraft:stripped_oak_log[axis=y]');
+    expect(g.state(idx.x0, idx.height + 3, idx.z0)).toBe('minecraft:air');
   });
 
   it('sets the hottest file on fire and leaves cold files alone', () => {

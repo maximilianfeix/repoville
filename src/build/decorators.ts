@@ -43,6 +43,13 @@ export function ruinShare(file: FileNode): number {
   return Math.min(RUIN_CAP, file.todos / file.loc);
 }
 
+/** Highest solid y in a column at or below `fromY`, or -1. */
+function surface(grid: VoxelGrid, x: number, z: number, fromY: number): number {
+  for (let y = Math.min(fromY, grid.height - 1); y >= 0; y--) if (grid.get(x, y, z) !== 0) return y;
+  return -1;
+}
+
+/** Campfires (and soul fire for the hottest) on the roof surface, wherever the roof shape puts it. */
 export function addFire(grid: VoxelGrid, b: BuildingLayout, shell: Shell, level: 0 | 1 | 2, rng: () => number): void {
   if (level === 0) return;
   const { x0, z0, x1, z1 } = b.footprint;
@@ -52,7 +59,8 @@ export function addFire(grid: VoxelGrid, b: BuildingLayout, shell: Shell, level:
   for (let i = 0; i < count; i++) {
     const x = x0 + Math.floor(rng() * (x1 - x0));
     const z = z0 + Math.floor(rng() * (z1 - z0));
-    grid.set(x, shell.roofY, z, campfire);
+    const top = surface(grid, x, z, shell.topY);
+    if (top >= 0 && top + 1 < grid.height) grid.set(x, top + 1, z, campfire);
   }
   if (level === 2) {
     const cx = x0 + Math.floor((x1 - x0) / 2);
@@ -63,8 +71,10 @@ export function addFire(grid: VoxelGrid, b: BuildingLayout, shell: Shell, level:
       const x = cx + dx;
       const z = cz + dz;
       if (x < x0 || z < z0) continue;
-      grid.set(x, shell.roofY, z, sand);
-      grid.set(x, shell.roofY + 1, z, fire);
+      const top = surface(grid, x, z, shell.topY + 1);
+      if (top < 0 || top + 1 >= grid.height) continue;
+      grid.set(x, top, z, sand);
+      grid.set(x, top + 1, z, fire);
     }
   }
 }
@@ -78,12 +88,18 @@ export function addMoss(grid: VoxelGrid, shell: Shell, pal: Palette, rng: () => 
       n++;
     }
   }
-  // Vines on 30% of outward faces, hanging down from the top of the wall.
-  const tops = shell.walls.filter((c) => c.y === shell.height);
+  // Vines on 30% of outward faces, hanging down from the top wall block of each column.
+  const topOf = new Map<string, WallCell>();
+  for (const c of shell.walls) {
+    const k = `${c.x},${c.z},${c.face}`;
+    const prev = topOf.get(k);
+    if (!prev || c.y > prev.y) topOf.set(k, c);
+  }
+  const tops = [...topOf.values()];
   for (const c of tops) {
     if (rng() >= MOSS_SHARE) continue;
     const [vx, vz] = outside(c);
-    const len = 2 + Math.floor(rng() * Math.max(1, shell.height / 2));
+    const len = 2 + Math.floor(rng() * Math.max(1, c.y / 2));
     const state = grid.id(vine(attachSide(c.face)));
     for (let y = c.y; y > Math.max(0, c.y - len); y--) {
       if (grid.get(vx, y, vz) !== 0) break;
