@@ -1,7 +1,7 @@
 import { inflateSync } from 'fflate';
 import {
   ACESFilmicToneMapping, AdditiveBlending, Box3, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
-  HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFSoftShadowMap,
+  HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -70,7 +70,7 @@ function main() {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = SRGBColorSpace;
-  renderer.shadowMap.type = PCFSoftShadowMap;
+  renderer.shadowMap.type = PCFShadowMap;
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -123,6 +123,7 @@ function main() {
   sc.near = 1; sc.far = span * 3;
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.6;
+  sun.shadow.radius = 2;
   // The city never moves: render the shadow map only when meshes are added or quality changes.
   sun.shadow.autoUpdate = false;
   scene.add(sun, sun.target);
