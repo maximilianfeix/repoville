@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "f87bd9d3245b1c18d3c99319efbf15c136d3a8e9d0986e377d16266b85e7cec2",
-  "litematicNbtSha256": "44572f9b2b6b841bfa0f44619465ea885d4f91f37baee543231075d3af583c9b",
+  "schemNbtSha256": "e7674dbd9ab062c14fb5782add67054161b5fbb96cf767593d83f2288e0c57e7",
+  "litematicNbtSha256": "7b22952f6ce11d557f5300b84fe64399f02880d36a18fe3737485806767b2de4",
   "summary": {
     "dimensions": [
       63,
@@ -84,8 +84,8 @@
       "minecraft:chiseled_stone_bricks": 24,
       "minecraft:glass": 56,
       "minecraft:smooth_stone": 2,
-      "minecraft:white_concrete": 50,
-      "minecraft:red_concrete": 40,
+      "minecraft:white_concrete": 74,
+      "minecraft:red_concrete": 16,
       "minecraft:stone_brick_slab[type=bottom,waterlogged=false]": 9,
       "minecraft:mossy_stone_bricks": 7,
       "minecraft:vine[east=false,north=false,south=true,up=false,west=false]": 19,

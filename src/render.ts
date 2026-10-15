@@ -13,13 +13,15 @@ import { highlights, type Highlights } from './summary.js';
 import { parseDays } from './util/duration.js';
 import { writeLitematic } from './write/litematic.js';
 import { writeSchem } from './write/schem.js';
+import { writeHtml } from './write/html.js';
+import { badgeMarkdown, SITE } from './badge.js';
 
 export interface RenderResult {
   city: CityTree;
   layout: CityLayout;
   built: BuiltCity;
   highlights: Highlights;
-  outputs: Array<{ format: string; file: string }>;
+  outputs: Array<{ format: string; file: string; bytes?: number }>;
   timings: Record<string, number>;
 }
 
@@ -55,7 +57,14 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
   const meta = { name: src.name, author: 'repoville', date: city.headTime * 1000, dataVersion };
 
   for (const format of cfg.formats) {
-    if (format === 'schem') {
+    if (format === 'html') {
+      const file = join(cfg.out, `${base}.html`);
+      const bytes = writeHtml(file, {
+        city, built, highlights: highlights(city, built.buildings, built.districts), since: cfg.since,
+        generator: `repoville ${process.env.REPOVILLE_VERSION ?? 'dev'}`, site: SITE, badge: badgeMarkdown(src.owner, src.repo), textured: cfg.textured,
+      });
+      outputs.push({ format, file, bytes });
+    } else if (format === 'schem') {
       const file = join(cfg.out, `${base}.schem`);
       await writeSchem(file, built.grid, meta);
       outputs.push({ format, file });

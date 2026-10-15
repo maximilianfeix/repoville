@@ -39,7 +39,8 @@ export function buildShell(grid: VoxelGrid, b: BuildingLayout, pal: Palette, sty
 
   for (let y = 1; y <= H; y++) {
     const band = style !== 'house' && y % 4 === 0 && y < H;
-    const wallId = style === 'lighthouse' ? (Math.floor((y - 1) / 3) % 2 === 0 ? stripeA : stripeB) : wall;
+    // Lighthouses: white with a red band every 8 levels (tests are common; full stripes were too loud).
+    const wallId = style === 'lighthouse' ? (y % 8 === 6 || y % 8 === 7 ? stripeB : stripeA) : wall;
     for (let z = z0; z < z1; z++) {
       for (let x = x0; x < x1; x++) {
         const ex = x === x0 || x === x1 - 1;
