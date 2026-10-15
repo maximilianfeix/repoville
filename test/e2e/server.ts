@@ -12,14 +12,14 @@ export interface Session {
 }
 
 /** Starts Paper (or reuses one when E2E_RCON_PW is set) and hands an RCON session to `fn`. */
-export async function withServer<T>(opts: { plugins?: Array<{ url: string; name: string }>; before?: () => void }, fn: (s: Session) => Promise<T>): Promise<T> {
+export async function withServer<T>(opts: { plugins?: Array<{ url: string; name: string }>; before?: () => void; freshWorld?: boolean }, fn: (s: Session) => Promise<T>): Promise<T> {
   const reuse = process.env.E2E_RCON_PW;
   const password = reuse ?? 'e2e-' + Math.random().toString(36).slice(2);
   let server: { ready: Promise<void>; stop: () => Promise<void> } | null = null;
   if (!reuse) {
     const jar = await fetchPaper(MC);
     for (const p of opts.plugins ?? []) await fetchPlugin(p.url, p.name);
-    configure({ password });
+    configure({ password, freshWorld: opts.freshWorld ?? true });
     opts.before?.();
     server = start(jar);
     await server!.ready;
