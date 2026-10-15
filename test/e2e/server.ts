@@ -9,6 +9,7 @@ export const WORLDEDIT = { url: 'https://cdn.modrinth.com/data/1u6JkXh5/versions
 export interface Session {
   rcon: Rcon;
   run: (cmd: string) => Promise<string>;
+  password: string;
 }
 
 /** Starts Paper (or reuses one when E2E_RCON_PW is set) and hands an RCON session to `fn`. */
@@ -34,7 +35,7 @@ export async function withServer<T>(opts: { plugins?: Array<{ url: string; name:
     return out;
   };
   try {
-    return await fn({ rcon, run });
+    return await fn({ rcon, run, password });
   } finally {
     rcon.close();
     await server?.stop();
