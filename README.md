@@ -22,7 +22,7 @@
   <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/flyover.gif" alt="A real recording of the viewer: flying over the facebook/react city, into the burning ReactFiberWorkLoop.js tower (5,268 lines, soul fire, 46 TODOs) and to a mossy corner." width="100%"></a>
 </p>
 
-<p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">three commands</a> · <b>Show it off:</b> <code>repoville badge</code></p>
+<p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">one <code>npx</code> command</a> · <b>Show it off:</b> <code>repoville badge</code></p>
 
 > Every image here is a real recording or screenshot of the viewer. Click to open the city (one self-contained HTML file).
 
@@ -74,14 +74,18 @@ Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers 
 
 ## Quick start
 
-Repoville needs **Node.js 22+** and **git**. The npm package is not published yet, so run it from source for now:
+Repoville needs **Node.js 22+** and **git**. One command, no install (the npm package is not published yet, so `npx` runs the release tarball):
 
 ```sh
-git clone https://github.com/maximilianfeix/repoville
-cd repoville
-npm ci
-npm run build
-node dist/cli.js facebook/react            # or a local folder, or any git URL
+npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville facebook/react --open
+```
+
+Use `.` for the current folder, `owner/repo`, or any git URL. From source instead:
+
+```sh
+git clone https://github.com/maximilianfeix/repoville && cd repoville
+npm ci && npm run build
+node dist/cli.js facebook/react --open
 ```
 
 That writes `repoville-out/facebook-react.html` and `repoville-out/facebook-react.schem` and prints a short tour:

@@ -210,24 +210,22 @@ footer .legal{font:11px var(--mono);letter-spacing:.02em;max-width:60ch}
     <div>
       <p class="kicker">Run it on your repo</p>
       <h2 id="cli-h">One command, nothing uploaded.</h2>
-      <p class="sub">A local folder, <code>owner/repo</code> or any git URL. The npm package is coming; until then run it from source (Node 22+).</p>
+      <p class="sub">A local folder, <code>owner/repo</code> or any git URL. Needs Node 22+ and git; <code>npx</code> runs the latest release, no install.</p>
       <div class="trust">
         <div><i></i><p style="margin:0"><b>Local analysis</b><span>Lines and git history are read on your machine. No upload, no telemetry.</span></p></div>
         <div><i></i><p style="margin:0"><b>Paths and counts only</b><span>The city file holds file paths and numbers, never file contents.</span></p></div>
         <div><i></i><p style="margin:0"><b>Nothing runs</b><span>Repoville never executes code from the repos it renders.</span></p></div>
       </div>
     </div>
-<pre><span class="c"># from source</span>
-<span class="p">$ </span>git clone https://github.com/maximilianfeix/repoville
-<span class="p">$ </span>cd repoville &amp;&amp; npm ci &amp;&amp; npm run build
-<span class="p">$ </span>node dist/cli.js facebook/react --open
+<pre><span class="p">$ </span>npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz \
+    repoville facebook/react --open
 <span class="o">  7,165 files · 903,811 LOC · 3,294 buildings
   hottest districts (commits in 1y):
     packages/react-devtools-shared/src: 125 commits
   wrote html  repoville-out/facebook-react.html</span>
 
-<span class="c"># add the badge to your README</span>
-<span class="p">$ </span>node dist/cli.js badge</pre>
+<span class="c"># then add the badge to your README</span>
+<span class="p">$ </span>npx --package=… repoville badge</pre>
   </div>
 </section>
 
