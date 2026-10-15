@@ -38,3 +38,9 @@ Running log of choices made while building Repoville. Newest at the bottom of ea
 
 - **AO only on upward faces and only for cities ≤ 400,000 blocks² by default.** Full 0fps AO added 29 % quads on React; up-faces only +10 % quads but still −15 % fps in headless Chromium, and the gain is invisible from the overview camera. Small/mid repos (where people zoom in) get it; `?ao=1` forces it.
 - **Region merge (8×8 chunks) after load** made no measurable difference in headless Chromium (GPU-bound) but cuts ~1,000 draw calls for CPU-bound machines; kept.
+
+## 2026-10-16 — Textures
+
+- **Default: procedural 16×16 detail textures** (`viewer/textures.ts`), original artwork, one luminance map per material family multiplied with the palette colour. Repeats per block across greedy-merged quads via `fract()` + `textureGrad()` on a mipmapped `DataArrayTexture`, so distant faces average out instead of shimmering. Cost in headless Chromium: ~1 fps.
+- **Optional "Minecraft textures"** (View menu or `?mc=1`): the browser fetches the original textures from `misode/mcmeta` on jsDelivr at runtime; nothing from Mojang is bundled, in line with the usage guidelines and the brief ("fetch at runtime, opt-in"). An attribution note is shown while it is on. Grey textures (grass top, leaves, water, vines) get biome tints; transparent pixels are laid over a dark interior so glass reads as windows. `scripts/check-mc-names.ts` checks every palette state resolves.
+- Marketing images use the procedural look; Mojang textures appear only where clearly labelled.
