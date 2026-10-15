@@ -306,7 +306,7 @@ function main() {
   const boxFor = (b: BuildingRow, target: Box3) => target.set(new Vector3(b[1] + ox - 0.15, 0, b[2] + oz - 0.15), new Vector3(b[3] + ox + 0.15, b[5] + 2.3, b[4] + oz + 0.15));
 
   // ---------- HUD ----------
-  const brand = el('header', { class: 'brand' }, `${MARK}<div><div class="word">repoville</div><div class="repo" title="${esc(m.name)}">${esc(m.name)}${m.head ? `<span>@${m.head.slice(0, 7)}</span>` : ''}</div></div>`);
+  const brand = el('header', { class: 'brand' }, `${MARK}<div><div class="word">repoville</div><div class="repo" title="${esc(m.name)}">${esc(m.name)}${m.head ? `<span>@${esc(m.head.slice(0, 7))}</span>` : ''}</div></div>`);
   const stats = el('dl', { class: 'stats' }, [
     ['files', compact(m.stats.files)],
     ['lines', compact(m.stats.loc)],
