@@ -1,9 +1,9 @@
-import { writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { Command, Option } from 'commander';
 import { analyze } from './analyze.js';
 import { badgeMarkdown } from './badge.js';
-import { DEFAULTS, parseFormats, readConfigFile, type RenderConfig } from './config.js';
+import { CONFIG_FILE, DEFAULTS, parseFormats, readConfigFile, type RenderConfig } from './config.js';
 import { DEFAULT_MC } from './mc.js';
 import { render } from './render.js';
 import { resolveSource } from './source/resolve.js';
@@ -42,12 +42,14 @@ program
     const log = (m: string) => console.error(`  ${m}`);
     const sinceDays = parseDays(String(o.since));
     const src = await resolveSource(target, { ref: o.ref as string | undefined, refresh: Boolean(o.refresh), historyDays: Math.max(sinceDays, 3 * 365), log });
-    const fileCfg = readConfigFile(src.dir);
+    // A cloned repo is untrusted input: its config file is ignored entirely.
+    const fileCfg = src.remote ? {} : readConfigFile(src.dir);
+    if (src.remote && existsSync(join(src.dir, CONFIG_FILE))) log(`ignoring ${CONFIG_FILE} from the remote repo`);
     const explicit = (k: string) => program.commands[0]!.getOptionValueSource(k) === 'cli';
     const pick = <K extends keyof RenderConfig>(key: K, cli: RenderConfig[K], optName = key as string): RenderConfig[K] =>
       explicit(optName) ? cli : ((fileCfg[key] as RenderConfig[K] | undefined) ?? cli);
     const cfg: RenderConfig = {
-      out: resolve(pick('out', String(o.out))),
+      out: resolve(String(o.out)),
       formats: pick('formats', parseFormats(String(o.format)), 'format'),
       mc: pick('mc', String(o.mc)),
       maxBuildings: Number(pick('maxBuildings', Number(o.maxBuildings))),
@@ -57,8 +59,8 @@ program
       ignore: fileCfg.ignore ?? [],
       seed: Number(pick('seed', Number(o.seed))),
       textured: Boolean(o.textured ?? fileCfg.textured),
-      open: Boolean(o.open ?? fileCfg.open),
-      gallery: Boolean(o.gallery ?? fileCfg.gallery),
+      open: Boolean(o.open),
+      gallery: Boolean(o.gallery),
       palette: fileCfg.palette,
     };
     if (!Number.isInteger(cfg.maxBuildings) || cfg.maxBuildings < 1) throw new Error('--max-buildings must be a positive integer');
