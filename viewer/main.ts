@@ -361,6 +361,7 @@ function main() {
         <dt>Lighthouse</dt><dd>Tests (white lab blocks when large)</dd>
         <dt>Library</dt><dd>Docs and Markdown</dd>
         <dt>Workshop</dt><dd>Shell and config files</dd>
+        <dt>Gold crown</dt><dd>Largest file of its folder</dd>
         <dt>Landmark</dt><dd>A whole folder, merged to keep big repos fast</dd>
       </dl>
       <p class="fine">Themes follow the language: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove.</p>
@@ -477,8 +478,9 @@ function main() {
 
   const districtOf = (path: string) => (path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '');
   function facts(b: BuildingRow): string {
-    const [path, , , , , height, loc, churn, todos, last, fireLvl, mossy, lang, style, merged] = b;
+    const [path, , , , , height, loc, churn, todos, last, fireLvl, mossy, lang, style, merged, landmark] = b;
     const tags: string[] = [];
+    if (landmark) tags.push('<span class="tag gold">largest in its folder</span>');
     if (fireLvl === 2) tags.push('<span class="tag lava">soul fire · top 2% churn</span>');
     else if (fireLvl === 1) tags.push('<span class="tag lava">on fire · top 10% churn</span>');
     if (todos > 0) tags.push(`<span class="tag red">${todos} TODO${todos === 1 ? '' : 's'}</span>`);
@@ -554,12 +556,21 @@ function main() {
   function focusRect(x0: number, z0: number, x1: number, z1: number, height: number, done?: () => void) {
     const cx = (x0 + x1) / 2 + ox;
     const cz = (z0 + z1) / 2 + oz;
-    const size = Math.max(x1 - x0, z1 - z0, height * 0.8, 14);
+    // Fit the bounding sphere of the target (with some street around it) into the view.
+    const w = Math.max(x1 - x0, 6) + 10;
+    const d = Math.max(z1 - z0, 6) + 10;
+    const radius = 0.5 * Math.sqrt(w * w + d * d + height * height);
+    const vfov = (camera.fov * Math.PI) / 180;
+    const fit = Math.min(vfov, 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect));
+    const dist = Math.max(30, (radius / Math.sin(fit / 2)) * 1.25);
     const dir = camera.position.clone().sub(orbit.target).setY(0);
     if (dir.lengthSq() < 1) dir.set(0.7, 0, 0.7);
     dir.normalize();
-    const pos = new Vector3(cx, height * 0.6 + size * 0.9, cz).addScaledVector(dir, size * 1.7);
-    flyTo(pos, new Vector3(cx, height * 0.45, cz), 1300, done);
+    const elev = (35 * Math.PI) / 180;
+    const target = new Vector3(cx, height * 0.55, cz);
+    const pos = target.clone().addScaledVector(dir, dist * Math.cos(elev));
+    pos.y += dist * Math.sin(elev);
+    flyTo(pos, target, 1300, done);
   }
   const byPath = new Map(m.buildings.map((b, i) => [b[0], i]));
   const districtByPath = new Map(m.districts.map((d) => [d[0], d]));
