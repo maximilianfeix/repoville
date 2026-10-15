@@ -28,6 +28,8 @@ export interface BuildingFact {
   ruinShare: number;
   mossy: boolean;
   merged?: number;
+  /** Largest file of its folder: crowned. */
+  landmark?: boolean;
 }
 
 export interface DistrictFact {
@@ -141,6 +143,18 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     for (let px = d.plaza.x0 + 5; px < d.plaza.x1 - 1; px += 6) grid.set(px, 1, z, bush);
   }
 
+  // --- Landmarks: the largest file (by LOC) of each folder with at least three buildings.
+  const largest = new Map<string, { path: string; loc: number }>();
+  const perDir = new Map<string, number>();
+  for (const b of layout.buildings) {
+    if (b.kind === 'house' || b.file.merged) continue;
+    const dir = b.file.path.includes('/') ? b.file.path.slice(0, b.file.path.lastIndexOf('/')) : '';
+    perDir.set(dir, (perDir.get(dir) ?? 0) + 1);
+    const cur = largest.get(dir);
+    if (!cur || b.file.loc > cur.loc || (b.file.loc === cur.loc && b.file.path < cur.path)) largest.set(dir, { path: b.file.path, loc: b.file.loc });
+  }
+  const landmarks = new Set([...largest.entries()].filter(([dir]) => (perDir.get(dir) ?? 0) >= 3).map(([, v]) => v.path));
+
   // --- Buildings.
   const buildings: BuildingFact[] = [];
   for (const b of layout.buildings) {
@@ -150,7 +164,8 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     const roofSeed = fnv1a(f.path.split('/').slice(0, -1).join('/'));
     const style = chooseStyle({ kind: b.kind, height: b.height, isTest: f.isTest, isDoc: f.isDoc, lang: f.lang, merged: f.merged });
     const rng = rngFor(f.path, seed);
-    const shell = buildShell(grid, b, pal, style, rng, roofSeed);
+    const landmark = landmarks.has(f.path);
+    const shell = buildShell(grid, b, pal, style, rng, roofSeed, landmark);
     const fire = fireLevel(f.churn, thresholds);
     const mossy = isMossy(f, city.headTime);
     const share = ruinShare(f);
@@ -163,7 +178,7 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
       path: f.path, name: f.name, kind: b.kind, style, biome, lang: f.lang,
       x0: b.footprint.x0, z0: b.footprint.z0, x1: b.footprint.x1, z1: b.footprint.z1,
       height: b.height, topY: shell.topY + 1, loc: f.loc, churn: f.churn, todos: f.todos, lastTouched: f.lastTouched,
-      fire, ruinShare: share, mossy, ...(f.merged ? { merged: f.merged } : {}),
+      fire, ruinShare: share, mossy, ...(f.merged ? { merged: f.merged } : {}), ...(landmark ? { landmark: true } : {}),
     });
   }
 
