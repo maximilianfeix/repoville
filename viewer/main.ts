@@ -14,13 +14,13 @@ import { loadMcLayers } from './mctextures.js';
 
 declare global {
   interface Window {
-    __repoville?: { ready: boolean; chunks: number; chunksDone: number; quads: number; fps: number; buildings: number; quality: string };
+    __repoville?: { ready: boolean; chunks: number; chunksDone: number; quads: number; fps: number; buildings: number; quality: string; focus?: (path: string) => void; fit?: () => void };
   }
 }
 
 const CHUNK = 32;
 const DAY = 86400;
-const MARK = `<svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#14161b" d="M4 44 32 30 60 44V50L32 64 4 50Z"/><path fill="#E8D9A8" d="M4 44 32 30 60 44 32 58Z"/><path fill="#4E8C3A" d="M22 16 32 21V41L22 36Z"/><path fill="#355F28" d="M32 21 42 16V36L32 41Z"/><path fill="#F6F1E4" d="M22 16 32 11 42 16 32 21Z"/><path fill="#4E8C3A" d="M6 34 16 39V49L6 44Z"/><path fill="#355F28" d="M16 39 26 34V44L16 49Z"/><path fill="#F6F1E4" d="M6 34 16 29 26 34 16 39Z"/><path fill="#4E8C3A" d="M38 30 48 35V47L38 42Z"/><path fill="#355F28" d="M48 35 58 30V42L48 47Z"/><path fill="#F6F1E4" d="M38 30 48 25 58 30 48 35Z"/><path fill="none" stroke="#3FD0C9" stroke-width="3" stroke-linejoin="round" d="M21 50 32 55 47 48M32 55V45"/><path fill="#FF7A1A" d="M29 5H35V11H29Z"/></svg>`;
+const MARK = `<svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#16181D" d="M6.4 46.3L32 59.1L32 62.7L6.4 49.9Z"/><path fill="#23262E" d="M57.6 46.3L32 59.1L32 62.7L57.6 49.9Z"/><path fill="#2E323B" d="M32 33.5L57.6 46.3L32 59.1L6.4 46.3Z"/><path fill="none" stroke="#3FD0C9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12.48 47.1L32 56.86M22.72 52.22L38.4 53.34"/><path fill="#E8D9A8" d="M22.4 40.86L32 45.66L32 14.16L22.4 9.36Z"/><path fill="#A8996E" d="M41.6 40.86L32 45.66L32 14.16L41.6 9.36Z"/><path fill="#F6F1E4" d="M32 4.56L41.6 9.36L32 14.16L22.4 9.36Z"/><path fill="#3A3F4B" d="M24.8 38.46L26.72 39.42L26.72 37.32L24.8 36.36Z"/><path fill="#6E6650" d="M39.2 38.46L37.28 39.42L37.28 37.32L39.2 36.36Z"/><path fill="#3A3F4B" d="M27.68 39.9L29.6 40.86L29.6 38.76L27.68 37.8Z"/><path fill="#6E6650" d="M36.32 39.9L34.4 40.86L34.4 38.76L36.32 37.8Z"/><path fill="#3A3F4B" d="M24.8 33.66L26.72 34.62L26.72 32.52L24.8 31.56Z"/><path fill="#6E6650" d="M39.2 33.66L37.28 34.62L37.28 32.52L39.2 31.56Z"/><path fill="#3A3F4B" d="M27.68 35.1L29.6 36.06L29.6 33.96L27.68 33Z"/><path fill="#6E6650" d="M36.32 35.1L34.4 36.06L34.4 33.96L36.32 33Z"/><path fill="#3A3F4B" d="M24.8 28.86L26.72 29.82L26.72 27.72L24.8 26.76Z"/><path fill="#6E6650" d="M39.2 28.86L37.28 29.82L37.28 27.72L39.2 26.76Z"/><path fill="#3A3F4B" d="M27.68 30.3L29.6 31.26L29.6 29.16L27.68 28.2Z"/><path fill="#6E6650" d="M36.32 30.3L34.4 31.26L34.4 29.16L36.32 28.2Z"/><path fill="#3A3F4B" d="M24.8 24.06L26.72 25.02L26.72 22.92L24.8 21.96Z"/><path fill="#6E6650" d="M39.2 24.06L37.28 25.02L37.28 22.92L39.2 21.96Z"/><path fill="#3A3F4B" d="M27.68 25.5L29.6 26.46L29.6 24.36L27.68 23.4Z"/><path fill="#6E6650" d="M36.32 25.5L34.4 26.46L34.4 24.36L36.32 23.4Z"/><path fill="#3A3F4B" d="M24.8 19.26L26.72 20.22L26.72 18.12L24.8 17.16Z"/><path fill="#6E6650" d="M39.2 19.26L37.28 20.22L37.28 18.12L39.2 17.16Z"/><path fill="#3A3F4B" d="M27.68 20.7L29.6 21.66L29.6 19.56L27.68 18.6Z"/><path fill="#6E6650" d="M36.32 20.7L34.4 21.66L34.4 19.56L36.32 18.6Z"/><path fill="#3A3F4B" d="M24.8 14.46L26.72 15.42L26.72 13.32L24.8 12.36Z"/><path fill="#6E6650" d="M39.2 14.46L37.28 15.42L37.28 13.32L39.2 12.36Z"/><path fill="#3A3F4B" d="M27.68 15.9L29.6 16.86L29.6 14.76L27.68 13.8Z"/><path fill="#6E6650" d="M36.32 15.9L34.4 16.86L34.4 14.76L36.32 13.8Z"/><path fill="#FFB066" d="M32 3.66L36.8 6.06L32 8.46L27.2 6.06Z"/><path fill="#FF7A1A" d="M27.2 9.36L32 11.76L32 8.46L27.2 6.06Z"/><path fill="#D45F10" d="M36.8 9.36L32 11.76L32 8.46L36.8 6.06Z"/><path fill="#E8D9A8" d="M35.2 46.62L43.52 50.78L43.52 30.38L35.2 26.22Z"/><path fill="#A8996E" d="M51.84 46.62L43.52 50.78L43.52 30.38L51.84 26.22Z"/><path fill="#F6F1E4" d="M43.52 22.06L51.84 26.22L43.52 30.38L35.2 26.22Z"/><path fill="#3A3F4B" d="M37.28 44.06L38.94 44.89L38.94 42.79L37.28 41.96Z"/><path fill="#6E6650" d="M49.76 44.06L48.1 44.89L48.1 42.79L49.76 41.96Z"/><path fill="#3A3F4B" d="M39.78 45.31L41.44 46.14L41.44 44.04L39.78 43.21Z"/><path fill="#6E6650" d="M47.26 45.31L45.6 46.14L45.6 44.04L47.26 43.21Z"/><path fill="#3A3F4B" d="M37.28 39.26L38.94 40.09L38.94 37.99L37.28 37.16Z"/><path fill="#6E6650" d="M49.76 39.26L48.1 40.09L48.1 37.99L49.76 37.16Z"/><path fill="#3A3F4B" d="M39.78 40.51L41.44 41.34L41.44 39.24L39.78 38.41Z"/><path fill="#6E6650" d="M47.26 40.51L45.6 41.34L45.6 39.24L47.26 38.41Z"/><path fill="#3A3F4B" d="M37.28 34.46L38.94 35.29L38.94 33.19L37.28 32.36Z"/><path fill="#6E6650" d="M49.76 34.46L48.1 35.29L48.1 33.19L49.76 32.36Z"/><path fill="#3A3F4B" d="M39.78 35.71L41.44 36.54L41.44 34.44L39.78 33.61Z"/><path fill="#6E6650" d="M47.26 35.71L45.6 36.54L45.6 34.44L47.26 33.61Z"/><path fill="#E8D9A8" d="M16 46.62L24.32 50.78L24.32 38.78L16 34.62Z"/><path fill="#A8996E" d="M31.36 47.26L24.32 50.78L24.32 38.78L31.36 35.26Z"/><path fill="#F6F1E4" d="M23.04 31.1L31.36 35.26L24.32 38.78L16 34.62Z"/><path fill="#3A3F4B" d="M18.08 44.06L19.74 44.89L19.74 42.79L18.08 41.96Z"/><path fill="#6E6650" d="M29.6 44.54L28.19 45.24L28.19 43.14L29.6 42.44Z"/><path fill="#3A3F4B" d="M20.58 45.31L22.24 46.14L22.24 44.04L20.58 43.21Z"/><path fill="#6E6650" d="M27.49 45.6L26.08 46.3L26.08 44.2L27.49 43.5Z"/><path fill="#3A3F4B" d="M18.08 39.26L19.74 40.09L19.74 37.99L18.08 37.16Z"/><path fill="#6E6650" d="M29.6 39.74L28.19 40.44L28.19 38.34L29.6 37.64Z"/><path fill="#3A3F4B" d="M20.58 40.51L22.24 41.34L22.24 39.24L20.58 38.41Z"/><path fill="#6E6650" d="M27.49 40.8L26.08 41.5L26.08 39.4L27.49 38.7Z"/></svg>`;
 
 const ICON = {
   search: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3.1 8.9l3 3 1.4-1.4-3-3A5 5 0 0 0 7 2Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>',
@@ -356,7 +356,13 @@ function main() {
   scene.add(metricMesh);
   const tmpM = new Matrix4();
   const tmpC = new Color();
-  const RAMP = [new Color(0x3a4252), new Color(0x4e8c3a), new Color(0xe8d9a8), new Color(0xff7a1a), new Color(0xd9382b)];
+  // One ramp per metric, in the colour the brand reserves for it.
+  const RAMPS: Record<'churn' | 'age' | 'todos', Color[]> = {
+    churn: [new Color(0x3a4252), new Color(0x8a5a2b), new Color(0xe8a04a), new Color(0xff7a1a)],
+    todos: [new Color(0x3a4252), new Color(0x7a3a36), new Color(0xd9382b), new Color(0xff8a7f)],
+    age: [new Color(0x3fd0c9), new Color(0x4e8c3a), new Color(0x7a8a4a), new Color(0x596e2d)],
+  };
+  let RAMP = RAMPS.churn;
   const ramp = (t: number) => {
     const x = Math.max(0, Math.min(1, t)) * (RAMP.length - 1);
     const i = Math.min(RAMP.length - 2, Math.floor(x));
@@ -392,7 +398,7 @@ function main() {
 
   const dock = el('nav', { class: 'dock', 'aria-label': 'City controls' });
   dock.innerHTML = `
-    <div class="search">${ICON.search}<input id="rv-search" type="search" placeholder="Find a file or folder" autocomplete="off" spellcheck="false" aria-label="Find a file or folder" aria-controls="rv-matches"><kbd>/</kbd></div>
+    <div class="search">${ICON.search}<input id="rv-search" type="search" placeholder="Search files" autocomplete="off" spellcheck="false" aria-label="Find a file or folder" aria-controls="rv-matches"><kbd>/</kbd></div>
     <button class="tool" id="rv-tour" title="Tour the highlights (T)" aria-pressed="false">${ICON.tour}<span>Tour</span></button>
     <button class="tool" id="rv-home" title="Fit the city (R)">${ICON.reset}<span>Fit</span></button>
     <button class="tool" id="rv-fly" title="Walk / fly (F)" aria-pressed="false">${ICON.fly}<span>Fly</span></button>
@@ -456,7 +462,7 @@ function main() {
   const card = el('div', { class: 'card', role: 'dialog', 'aria-label': 'Building details' });
   card.hidden = true;
   const tip = el('div', { class: 'tip', role: 'tooltip' });
-  const foot = el('footer', { class: 'foot' }, `<a href="${esc(m.site)}" target="_blank" rel="noopener">repoville</a> · walk your codebase · Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.`);
+  const foot = el('footer', { class: 'foot' }, `Made with <a href="${esc(m.site)}" target="_blank" rel="noopener">repoville</a>. Not an official Minecraft product; not approved by or associated with Mojang or Microsoft.`);
   const labelLayer = el('div', { class: 'labels', 'aria-hidden': 'true' });
   ui.prepend(labelLayer);
   ui.append(brand, stats, metricLegend, card, tip, viewMenu, matches, dock, drawer, foot);
@@ -471,6 +477,8 @@ function main() {
       cityMeshes.forEach((c) => (c.visible = true));
       return;
     }
+    RAMP = RAMPS[next];
+    metricLegend.querySelector<HTMLElement>('.ramp')!.style.background = `linear-gradient(90deg,${RAMP.map((c) => '#' + c.getHexString()).join(',')})`;
     const values = m.buildings.map((b) => (next === 'churn' ? b[7] : next === 'todos' ? (b[6] ? b[8] / b[6] : 0) : b[9] < 0 ? 3 * 365 : (m.headTime - b[9]) / DAY));
     const sorted = values.filter((v) => v > 0).sort((a, b) => a - b);
     const cap = sorted[Math.floor(sorted.length * 0.98)] || 1;
@@ -924,6 +932,10 @@ function main() {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  // Automation hooks (used for screenshots and recordings).
+  window.__repoville!.focus = (path: string) => focusPath(path);
+  window.__repoville!.fit = fitCity;
 
   // Deep links: #f=<path>, #tour, ?view=churn|age|todos, ?ui=off
   const hash = decodeURIComponent(location.hash.slice(1));
