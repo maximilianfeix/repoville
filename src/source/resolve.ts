@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync, statSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { hasGit, run } from '../util/exec.js';
 
@@ -14,7 +15,8 @@ export interface ResolvedSource {
 }
 
 const SHORTHAND = /^([A-Za-z0-9][\w.-]*)\/([\w.-]+?)(?:\.git)?$/;
-const GITHUB_URL = /github\.com[/:]([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/;
+const SCP = /^([\w.-]+)@([\w.-]+):([\w./-]+?)(?:\.git)?\/?$/;
+const GITHUB_HOSTS = new Set(['github.com', 'www.github.com']);
 
 export function cacheRoot(): string {
   if (process.env.REPOVILLE_CACHE) return process.env.REPOVILLE_CACHE;
@@ -29,19 +31,37 @@ export interface ParsedTarget {
   url?: string;
   owner?: string;
   repo?: string;
+  /** Canonical identity (host/path) used for the cache key. */
+  id?: string;
+}
+
+function remoteFrom(host: string, path: string, url: string): ParsedTarget {
+  const clean = path.replace(/^\/+|\/+$/g, '').replace(/\.git$/, '');
+  const parts = clean.split('/').filter(Boolean);
+  if (!parts.length || parts.some((p) => p === '..' || p === '.')) throw new Error(`Not a repository URL: ${url}`);
+  const h = host.toLowerCase();
+  if (GITHUB_HOSTS.has(h) && parts.length === 2) {
+    return { kind: 'remote', url: `https://github.com/${parts[0]}/${parts[1]}.git`, owner: parts[0], repo: parts[1], id: `github.com/${parts[0]}/${parts[1]}`.toLowerCase() };
+  }
+  return { kind: 'remote', url, repo: parts[parts.length - 1], id: `${h}/${clean}`.toLowerCase() };
 }
 
 export function parseTarget(target: string, cwd = process.cwd()): ParsedTarget {
   const local = resolve(cwd, target);
   if (existsSync(local) && statSync(local).isDirectory()) return { kind: 'local', path: local };
-  const gh = GITHUB_URL.exec(target);
-  if (gh) return { kind: 'remote', url: `https://github.com/${gh[1]}/${gh[2]}.git`, owner: gh[1], repo: gh[2] };
-  if (/^(https?|ssh|git):\/\//.test(target) || /^[\w.-]+@[\w.-]+:/.test(target)) {
-    const name = target.replace(/\/$/, '').replace(/\.git$/, '').split(/[/:]/).pop() ?? 'repo';
-    return { kind: 'remote', url: target, repo: name };
+  if (/^(https?|ssh|git):\/\//.test(target)) {
+    let u: URL;
+    try {
+      u = new URL(target);
+    } catch {
+      throw new Error(`Not a valid git URL: ${target}`);
+    }
+    return remoteFrom(u.hostname, u.pathname, target);
   }
+  const scp = SCP.exec(target);
+  if (scp) return remoteFrom(scp[2]!, scp[3]!, target);
   const short = SHORTHAND.exec(target);
-  if (short) return { kind: 'remote', url: `https://github.com/${short[1]}/${short[2]}.git`, owner: short[1], repo: short[2] };
+  if (short) return remoteFrom('github.com', `${short[1]}/${short[2]}`, target);
   throw new Error(`Not a folder, owner/repo or git URL: ${target}`);
 }
 
@@ -66,9 +86,20 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
   }
   if (!(await hasGit(process.cwd()))) throw new Error('Cloning a remote repo needs git on PATH. Clone it yourself and pass the folder instead.');
 
-  const slug = [parsed.owner, parsed.repo].filter(Boolean).join('__').replace(/[^\w.-]/g, '_');
-  const dir = join(cacheRoot(), 'repos', slug);
+  // Cache key: readable prefix + hash of the canonical identity, so different
+  // hosts or owners never share a checkout. A --ref gets its own checkout.
+  const identity = parsed.id ?? parsed.url!;
+  const readable = (parsed.owner ? `${parsed.owner}__${parsed.repo}` : `${parsed.repo}`).replace(/[^\w.-]/g, '_');
+  const hash = createHash('sha256').update(identity).digest('hex').slice(0, 10);
+  const refSuffix = opts.ref ? `@${opts.ref.replace(/[^\w.-]/g, '_').slice(0, 40)}` : '';
+  const dir = join(cacheRoot(), 'repos', `${readable}-${hash}${refSuffix}`);
   const log = opts.log ?? (() => {});
+  // One-time migration from the old cache naming (<owner>__<repo>) when the origin matches.
+  const legacy = join(cacheRoot(), 'repos', readable);
+  if (!opts.ref && !existsSync(join(dir, '.git')) && existsSync(join(legacy, '.git'))) {
+    const origin = (await run('git', ['remote', 'get-url', 'origin'], legacy)).stdout.trim();
+    if (origin === parsed.url) renameSync(legacy, dir);
+  }
   if (!existsSync(join(dir, '.git'))) {
     mkdirSync(join(cacheRoot(), 'repos'), { recursive: true });
     log(`cloning ${parsed.url} (blobless) into ${dir}`);
@@ -85,7 +116,12 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
     } else {
       await git([...base, parsed.url!, dir], cacheRoot());
     }
-  } else if (opts.refresh) {
+  } else {
+    // Never reuse a checkout of a different remote.
+    const origin = (await run('git', ['remote', 'get-url', 'origin'], dir)).stdout.trim();
+    if (origin !== parsed.url) throw new Error(`Cache ${dir} belongs to ${origin}, not ${parsed.url}. Delete it and retry.`);
+  }
+  if (existsSync(join(dir, '.git')) && opts.refresh) {
     log(`updating ${dir}`);
     await git(['fetch', '--filter=blob:none', 'origin'], dir);
     await git(['reset', '--hard', '-q', 'FETCH_HEAD'], dir);

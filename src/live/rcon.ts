@@ -3,6 +3,9 @@ import { Socket } from 'node:net';
 const AUTH = 3;
 const COMMAND = 2;
 const MAX_FRAGMENT = 4096;
+/** Largest packet we accept (Minecraft sends ≤ 4096-byte bodies). */
+const MAX_PACKET = 16 * 1024;
+const MAX_REPLY = 4 * 1024 * 1024;
 
 /** Minimal Source RCON client (as used by Minecraft servers). */
 interface Pending {
@@ -19,7 +22,7 @@ export class Rcon {
   private buffer = Buffer.alloc(0);
   private readonly pending = new Map<number, Pending>();
 
-  constructor(private readonly host: string, private readonly port: number) {}
+  constructor(private readonly host: string, private readonly port: number, private readonly timeoutMs = 30_000) {}
 
   async connect(password: string, timeoutMs = 5000): Promise<void> {
     this.socket = await new Promise<Socket>((resolve, reject) => {
@@ -56,7 +59,19 @@ export class Rcon {
 
   private request(kind: Pending['kind'], type: number, body: string): Promise<string> {
     const id = this.nextId++;
-    const p = new Promise<string>((resolve, reject) => this.pending.set(id, { kind, parts: [], resolve, reject }));
+    const p = new Promise<string>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        if (!this.pending.has(id)) return;
+        this.pending.delete(id);
+        reject(new Error(`RCON ${kind} timed out after ${this.timeoutMs} ms`));
+      }, this.timeoutMs);
+      this.pending.set(id, {
+        kind,
+        parts: [],
+        resolve: (v) => (clearTimeout(timer), resolve(v)),
+        reject: (e) => (clearTimeout(timer), reject(e)),
+      });
+    });
     const payload = Buffer.from(body, 'utf8');
     const packet = Buffer.alloc(14 + payload.length);
     packet.writeInt32LE(10 + payload.length, 0);
@@ -76,6 +91,12 @@ export class Rcon {
     this.buffer = Buffer.concat([this.buffer, d]);
     while (this.buffer.length >= 4) {
       const len = this.buffer.readInt32LE(0);
+      if (len < 10 || len > MAX_PACKET) {
+        this.failAll(new Error(`RCON protocol error: packet length ${len}`));
+        this.socket?.destroy();
+        this.buffer = Buffer.alloc(0);
+        return;
+      }
       if (this.buffer.length < 4 + len) return;
       const id = this.buffer.readInt32LE(4);
       const body = this.buffer.toString('utf8', 12, 4 + len - 2);
@@ -90,6 +111,11 @@ export class Rcon {
         // Minecraft splits replies into 4096-byte fragments; a shorter one is the last.
         // (Marker packets with an unknown type make the server drop the connection.)
         p.parts.push(body);
+        if (p.parts.reduce((n, x) => n + x.length, 0) > MAX_REPLY) {
+          this.pending.delete(id);
+          p.reject(new Error('RCON reply too large'));
+          continue;
+        }
         if (len - 10 < MAX_FRAGMENT) {
           this.pending.delete(id);
           p.resolve(p.parts.join(''));

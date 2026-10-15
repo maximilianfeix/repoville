@@ -21,7 +21,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ### P0 — city looks art-directed
 - [ ] Apply research findings (composition: downtown clustering / parks / plaza greens / value hierarchy) — research notes in `docs/engineering/visual-research.md`.
-- [x] Static shadow map. [x] Baked per-vertex AO (perf-research #4, size-gated), packed attributes (#2), region merge (#5).
+- [x] Static shadow map, baked AO (size-gated), region merge. [ ] Packed attributes, worker meshing, shader windows.
 - [ ] Mobile portrait hero framing (landing hero crops the city on 390 px); hero camera presets that frame the city well at 16:9, 2:1 and mobile portrait.
 - [ ] Visual audit doc `docs/engineering/visual-audit.md` with before/after.
 

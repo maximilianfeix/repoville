@@ -28,7 +28,7 @@
 
 ## What you get
 
-- **A 3D city in one HTML file.** No Minecraft needed: orbit, fly, search, click a building for its facts, switch to a plain metric view. Pixel textures, soft shadows, ambient occlusion. Works offline and on GitHub Pages.
+- **A 3D city in one HTML file.** No Minecraft needed: orbit, fly, search, click a building for its facts, switch to a plain metric view. Pixel textures, soft shadows, ambient occlusion. Works offline and on GitHub Pages (only the web fonts need a connection).
 - **Minecraft exports.** Sponge `.schem` v3 for WorldEdit and `.litematic` for Litematica, targeting Java Edition 1.21.11 by default.
 - **Local and private.** Analysis runs on your machine. Nothing is uploaded, there is no telemetry, and the city file holds paths and counts, never file contents.
 
@@ -37,7 +37,7 @@
 | Repo | City |
 |---|---|
 | Folder | District with roads, a plaza and a name sign. Big folders end up downtown. |
-| File | Building. Height = `min(250, 4 + round(4·√(lines/10)))`. Small files are houses, big files are towers. |
+| File | Building. Height = `min(250, 4 + round(4·√(lines/10)))` from non-blank lines. Small files are houses, big files are towers. |
 | Tests | Lighthouses (white lab blocks when large) |
 | Docs / Markdown | Libraries with columns and bookshelves |
 | Shell / config | Workshops with sawtooth roofs |
@@ -119,7 +119,7 @@ node dist/cli.js badge [owner/repo]   print the README badge
 MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
 ```
 
-A `repoville.config.json` in a local repo can set the same keys plus `palette` overrides. Config files inside cloned remote repos are ignored.
+A `repoville.config.json` in a local repo can set `format`, `mc`, `maxBuildings`, `since`, `include`, `exclude`, `ignore`, `seed`, `textured` and `palette` overrides (output folder, `--open` and `--gallery` stay command-line only). Config files inside cloned remote repos are ignored.
 
 ## Minecraft
 
@@ -148,7 +148,7 @@ Remote repos are cloned blobless and only as far back as the history window need
 **Do I need Minecraft?** No. The HTML viewer is the main output.<br>
 **Does it upload my code?** No. Everything runs locally; the HTML file contains file paths and counts only.<br>
 **Private repos?** Point it at your local checkout.<br>
-**Is it the same every time?** Yes. Same commit and options give the same city (seeded randomness, times relative to the HEAD commit).
+**Is it the same every time?** Yes, for the same files, git history and options: randomness is seeded and ages are measured from the HEAD commit, not today. Uncommitted or untracked files are included, so a dirty working tree renders differently from a clean checkout.
 
 ## Roadmap
 
