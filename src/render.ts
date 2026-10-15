@@ -8,7 +8,7 @@ import { layoutCity, type CityLayout } from './layout/treemap.js';
 import { dataVersionFor } from './mc.js';
 import { applyLod } from './model/lod.js';
 import { files, type CityTree } from './model/city.js';
-import type { ResolvedSource } from './source/resolve.js';
+import { webBaseFor, type ResolvedSource } from './source/resolve.js';
 import { highlights, type Highlights } from './summary.js';
 import { parseDays } from './util/duration.js';
 import { writeLitematic } from './write/litematic.js';
@@ -66,6 +66,7 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
       const bytes = writeHtml(file, {
         city, built, highlights: highlights(city, built.buildings, built.districts), since: cfg.since,
         generator: `repoville ${process.env.REPOVILLE_VERSION ?? 'dev'}`, site: SITE, badge: badgeMarkdown(src.owner, src.repo), textured: cfg.textured,
+        source: webBaseFor(src.url),
       });
       outputs.push({ format, file, bytes });
     } else if (format === 'schem') {

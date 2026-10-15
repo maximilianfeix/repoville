@@ -12,6 +12,35 @@ export interface ResolvedSource {
   owner?: string;
   repo?: string;
   remote: boolean;
+  /** Git remote URL when known (cloned URL, or `origin` of a local repo). */
+  url?: string;
+}
+
+/**
+ * Browser URL of a repository on GitHub or GitLab (https), or null for other
+ * hosts. Used for "open in source" links; never contains credentials.
+ */
+export function webBaseFor(remote: string | undefined): { base: string; host: 'github' | 'gitlab' } | null {
+  if (!remote) return null;
+  let host = '';
+  let path = '';
+  const scp = /^[\w.-]+@([\w.-]+):(.+)$/.exec(remote);
+  if (scp) [host, path] = [scp[1]!, scp[2]!];
+  else {
+    try {
+      const u = new URL(remote);
+      host = u.hostname;
+      path = u.pathname;
+    } catch {
+      return null;
+    }
+  }
+  path = path.replace(/^\/+|\/+$/g, '').replace(/\.git$/, '');
+  if (!/^[\w.-]+(\/[\w.-]+)+$/.test(path)) return null;
+  host = host.toLowerCase();
+  if (host === 'github.com' || host === 'www.github.com') return { base: `https://github.com/${path}`, host: 'github' };
+  if (host === 'gitlab.com') return { base: `https://gitlab.com/${path}`, host: 'gitlab' };
+  return null;
 }
 
 const SHORTHAND = /^([A-Za-z0-9][\w.-]*)\/([\w.-]+?)(?:\.git)?$/;
@@ -82,7 +111,9 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
   const parsed = parseTarget(target);
   if (parsed.kind === 'local') {
     const name = parsed.path!.replaceAll('\\', '/').split('/').filter(Boolean).pop() ?? 'repo';
-    return { dir: parsed.path!, name, remote: false };
+    const origin = await run('git', ['remote', 'get-url', 'origin'], parsed.path!).catch(() => null);
+    const url = origin && origin.code === 0 ? origin.stdout.trim() : undefined;
+    return { dir: parsed.path!, name, remote: false, ...(url ? { url } : {}) };
   }
   if (!(await hasGit(process.cwd()))) throw new Error('Cloning a remote repo needs git on PATH. Clone it yourself and pass the folder instead.');
 
@@ -132,5 +163,5 @@ export async function resolveSource(target: string, opts: ResolveOptions = {}): 
     await git(['checkout', '-q', '--detach', opts.ref], dir);
   }
   const name = parsed.owner ? `${parsed.owner}/${parsed.repo}` : (parsed.repo ?? 'repo');
-  return { dir, name, owner: parsed.owner, repo: parsed.repo, remote: true };
+  return { dir, name, owner: parsed.owner, repo: parsed.repo, remote: true, url: parsed.url };
 }
