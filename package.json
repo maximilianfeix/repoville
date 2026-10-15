@@ -1,6 +1,6 @@
 {
   "name": "repoville",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Walk your codebase. Turn any Git repo into a walkable Minecraft city \u2014 folders are districts, files are buildings, churn burns, TODOs are ruins.",
   "type": "module",
   "bin": {
