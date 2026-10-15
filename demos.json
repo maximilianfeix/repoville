@@ -20,8 +20,13 @@
     "stats": "junegunn/fzf as a walkable city: 161 files, 53,292 lines of code."
   },
   {
+    "slug": "pallets/flask",
+    "blurb": "Python · jungle",
+    "stats": "pallets/flask as a walkable city: 230 files, 26,369 lines of code."
+  },
+  {
     "slug": "maximilianfeix/repoville",
     "blurb": "TypeScript · this project",
-    "stats": "repoville as a walkable city: 92 files, 6,896 lines of code."
+    "stats": "repoville as a walkable city: 114 files, 7,900 lines of code."
   }
 ]
