@@ -1,0 +1,11 @@
+# Changelog
+
+## 0.1.0 — 2026-10-16
+
+First public release.
+
+- **City generator:** folders → districts (squarified treemap, downtown mirroring, canals between top-level districts, street hierarchy, plazas with name signs), files → buildings in nine families (house, townhouse, mid-rise, tower, library, lighthouse, test lab, workshop, landmark) with height `4 + 4·√(LOC/10)`. Churn → fire / soul fire, TODO density → ruins, untouched > 1 year → moss and vines, largest file per folder → gold crown. Language themes, neighbourhood facade variants, trees, pocket parks and ponds. Deterministic.
+- **Viewer (`city.html`):** single self-contained file; greedy-meshed voxels with procedural pixel textures, optional runtime Minecraft textures, lights, static soft shadows, baked AO for small/mid cities, district labels, search, building card, metric view (churn / age / TODO), tour, fly mode, keyboard shortcuts.
+- **Minecraft:** Sponge `.schem` v3 (WorldEdit-tested), `.litematic` v6 (litemapy round-trip), ready-to-open world zip and live building over RCON (both tested on Paper 1.21.11).
+- **CLI:** `repoville [build]`, `live`, `tour`, `badge`; `--gallery` isometric PNG; `repoville.config.json` (ignored for remote repos).
+- **Big repos:** LOD folds folders into landmark towers above 4,000 buildings; Linux renders in ~25 s warm.
