@@ -111,6 +111,44 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
   }
   for (let i = 0; i < toSidewalk.length; i += 2) grid.set(toSidewalk[i]!, 0, toSidewalk[i + 1]!, sidewalk);
 
+  // --- Canals: the middle of the avenues between top-level districts becomes
+  // water (Lynch's "edges"), with plank bridges at a fixed rhythm.
+  const canalWater = grid.id(BLOCKS.water);
+  const bridge = grid.id('minecraft:spruce_planks');
+  const quay = grid.id('minecraft:stone_bricks');
+  const canal: number[] = [];
+  for (let z = 1; z < layout.length - 1; z++) {
+    for (let x = 1; x < layout.width - 1; x++) {
+      if (grid.get(x, 0, z) !== roadTop) continue;
+      let inner = true;
+      for (let dz = -1; dz <= 1 && inner; dz++) for (let dx = -1; dx <= 1; dx++) {
+        const n = grid.get(x + dx, 0, z + dz);
+        if (n !== roadTop && n !== canalWater) {
+          inner = false;
+          break;
+        }
+      }
+      if (inner) canal.push(x, z);
+    }
+  }
+  const canalSet = new Set<number>();
+  for (let i = 0; i < canal.length; i += 2) canalSet.add(canal[i + 1]! * layout.width + canal[i]!);
+  const isCanal = (x: number, z: number) => canalSet.has(z * layout.width + x);
+  for (let i = 0; i < canal.length; i += 2) {
+    const x = canal[i]!, z = canal[i + 1]!;
+    // Flow direction: along x if the canal continues left/right.
+    const alongX = isCanal(x - 1, z) || isCanal(x + 1, z);
+    const alongZ = isCanal(x, z - 1) || isCanal(x, z + 1);
+    const bridgeHere = alongX && !alongZ ? x % 24 < 3 : alongZ && !alongX ? z % 24 < 3 : false;
+    grid.set(x, 0, z, bridgeHere ? bridge : canalWater);
+  }
+  // Quay edges: road cells right next to water become stone.
+  for (let i = 0; i < canal.length; i += 2) {
+    const x = canal[i]!, z = canal[i + 1]!;
+    if (grid.get(x, 0, z) !== canalWater) continue;
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) if (grid.get(x + dx, 0, z + dz) === roadTop) grid.set(x + dx, 0, z + dz, quay);
+  }
+
   // --- Street lamps on sidewalks, on a fixed lattice so spacing stays even.
   const fence = grid.id(BLOCKS.fence);
   const lantern = grid.id(BLOCKS.lantern);
