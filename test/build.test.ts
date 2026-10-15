@@ -76,6 +76,11 @@ describe('buildCity on the town fixture', async () => {
     expect(fact('src/ruins.ts').ruinShare).toBeCloseTo(4 / 34);
   });
 
+  it('crowns the largest file of folders with at least three buildings', () => {
+    expect(fact('src/index.ts').landmark).toBe(true);
+    expect(fact('src/hot.ts').landmark).toBeUndefined();
+  });
+
   it('is deterministic for a given seed', () => {
     const again = buildCity(city, layoutCity(city), { seed: 1 });
     expect(again.grid.palette).toEqual(built.grid.palette);

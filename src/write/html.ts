@@ -109,7 +109,7 @@ export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
     kinds: g.palette.map(kindOf),
     states: g.palette,
     buildings: built.buildings.map((b) => [
-      b.path, b.x0, b.z0, b.x1, b.z1, b.height, b.loc, b.churn, b.todos, b.lastTouched ?? -1, b.fire, b.mossy ? 1 : 0, b.lang, b.style, b.merged ?? 0,
+      b.path, b.x0, b.z0, b.x1, b.z1, b.height, b.loc, b.churn, b.todos, b.lastTouched ?? -1, b.fire, b.mossy ? 1 : 0, b.lang, b.style, b.merged ?? 0, b.landmark ? 1 : 0,
     ]),
     districts: built.districts.map((d) => [d.path, d.depth, d.x0, d.z0, d.x1, d.z1]),
     textured: input.textured,
@@ -243,7 +243,7 @@ body.ready .progress{opacity:0}
 .facts dd{margin:0;font:600 13px var(--mono)}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .tag{font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid}
-.tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}
+.tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}.tag.gold{color:#f6d03d;border-color:rgba(246,208,61,.5)}
 .card-a{margin-top:10px}
 .tip{position:absolute;left:0;top:0;display:none;padding:5px 8px;background:var(--panel-solid);border:1px solid var(--line-hi);border-radius:5px;font-size:12px;white-space:nowrap}
 .tip b{font:600 12px var(--mono);margin-right:8px}

@@ -3,7 +3,7 @@ export const MAGIC = 0x31435652; // "RVC1" little-endian
 
 export type BuildingRow = [
   path: string, x0: number, z0: number, x1: number, z1: number, height: number,
-  loc: number, churn: number, todos: number, lastTouched: number, fire: number, mossy: number, lang: string, style: string, merged: number,
+  loc: number, churn: number, todos: number, lastTouched: number, fire: number, mossy: number, lang: string, style: string, merged: number, landmark: number,
 ];
 export type DistrictRow = [path: string, depth: number, x0: number, z0: number, x1: number, z1: number];
 

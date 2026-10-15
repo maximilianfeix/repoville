@@ -11,7 +11,7 @@ Diagnosis: every building had the same proportions (height/side ≈ 2.5), squari
 | 3 | Align footprints to the street edge, pool spare space into pocket parks | Stålberg / Townscaper (enclosed gardens) | done |
 | 4 | Water/canals at top-level boundaries with bridges | Lynch, *The Image of the City* (edges) | open |
 | 5 | Visible street hierarchy by depth (avenue, street, lane) | EvoStreets (Steinbrückner & Lewerentz) | done |
-| 6 | Data-driven landmark crowns (largest file per district, entry points) | Bremen VR software-city orientation study | open |
+| 6 | Data-driven landmark crowns (largest file per district, entry points) | Bremen VR software-city orientation study | done (largest file) |
 | 7 | Value structure: dark ground, mid walls, light roofs; olive grass | Townscaper palette restraint | partly |
 | 8 | Roof grammar by district hash, not coin flips | Stålberg ("large shapes predictable, small vary") | done |
 | 9 | Real per-vertex AO (0fps) | 0fps.net | open |

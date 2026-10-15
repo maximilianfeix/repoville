@@ -214,7 +214,7 @@ const grid = (rows: (y: number) => boolean) => (along: number, len: number, y: n
  * `roofSeed` is a hash of the building's folder: buildings in one district
  * share their roof type (large shapes stay predictable, details vary).
  */
-export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style: Style, rng: () => number, roofSeed = 0): Shell {
+export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style: Style, rng: () => number, roofSeed = 0, crown = false): Shell {
   const m = new Mason(g, pal, rng);
   const fp = b.footprint;
   const H = b.height;
@@ -375,8 +375,30 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
       break;
     }
   }
+  // Landmark crown: stepped tiers in the trim material, capped with gold.
+  // Marks the largest file of its folder; sits above the LOC height.
+  if (crown && (style === 'midrise' || style === 'tower' || style === 'testlab') && width(fp) >= 5 && depth(fp) >= 5) {
+    let tier = inset(fp, 1);
+    let y = H + 2;
+    // Clear roof furniture inside the crown footprint.
+    for (let yy = y; yy <= m.top; yy++) for (let z = tier.z0; z < tier.z1; z++) for (let x = tier.x0; x < tier.x1; x++) g.set(x, yy, z, 0);
+    // At most three tiers, so the crown never reads as extra height.
+    for (let t = 0; t < 3 && width(tier) >= 3 && depth(tier) >= 3; t++) {
+      m.shell(tier, y, y + 2, pal.trim, { trim: pal.trim, window: (a, len, yy) => yy === y + 1 && a > 0 && a < len - 1 && a % 2 === 1 });
+      m.fill(tier, y + 2, y + 3, pal.trim);
+      tier = inset(tier, 1);
+      y += 3;
+    }
+    const cx = fp.x0 + Math.floor(width(fp) / 2);
+    const cz = fp.z0 + Math.floor(depth(fp) / 2);
+    m.put(cx, y, cz, 'minecraft:gold_block');
+    for (let k = 1; k <= 3; k++) m.put(cx, y + k, cz, BLOCKS.ironBars);
+    m.put(cx, y + 4, cz, BLOCKS.antenna);
+  }
+
   // Later steps (doors, columns, roofs) may have replaced some wall cells.
   const plain = new Set([g.id(pal.wall), g.id(pal.towerWall), g.id(BLOCKS.lighthouseA), g.id('minecraft:white_concrete')]);
+  plain.delete(g.id(pal.trim));
   const walls = m.walls.filter((c) => plain.has(g.get(c.x, c.y, c.z)));
   return { walls, height: H, topY: m.top };
 }
