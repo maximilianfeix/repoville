@@ -1,0 +1,12 @@
+name: Gallery submission
+description: Share a city you rendered (screenshot or link)
+labels: [gallery]
+body:
+  - type: input
+    id: repo
+    attributes: { label: Repository, placeholder: owner/repo }
+    validations: { required: true }
+  - type: textarea
+    id: shot
+    attributes: { label: Screenshot or city.html link, description: Drag an image here. }
+    validations: { required: true }

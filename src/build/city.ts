@@ -71,11 +71,15 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
   };
 
   // --- Ground: districts paint their road surface, children paint over it.
+  // Street hierarchy: avenue (depth 0), street (1), lane (2), path (3+).
   const roadTop = grid.id(BLOCKS.roadTop);
+  const roadMid = grid.id(BLOCKS.roadMid);
+  const roadLane = grid.id(BLOCKS.roadLane);
   const roadDeep = grid.id(BLOCKS.roadDeep);
+  const roadFor = (depth: number) => [roadTop, roadMid, roadLane][depth] ?? roadDeep;
   const plaza = grid.id(BLOCKS.plaza);
   const districts = [...layout.districts].sort((a, b) => a.depth - b.depth || (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
-  for (const d of districts) grid.fill(d.rect.x0, 0, d.rect.z0, d.rect.x1, 1, d.rect.z1, d.depth === 0 ? roadTop : roadDeep);
+  for (const d of districts) grid.fill(d.rect.x0, 0, d.rect.z0, d.rect.x1, 1, d.rect.z1, roadFor(d.depth));
   for (const d of districts) if (d.plaza) grid.fill(d.plaza.x0, 0, d.plaza.z0, d.plaza.x1, 1, d.plaza.z1, plaza);
 
   const paletteOf = (f: { isDoc: boolean; lang: Parameters<typeof biomeFor>[0] }) => palettes[f.isDoc ? 'library' : biomeFor(f.lang)];
@@ -87,7 +91,7 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
 
   // --- Sidewalks: road cells touching anything that is not road.
   const sidewalk = grid.id(BLOCKS.sidewalk);
-  const isRoad = (id: number) => id === roadTop || id === roadDeep;
+  const isRoad = (id: number) => id === roadTop || id === roadMid || id === roadLane || id === roadDeep;
   const toSidewalk: number[] = [];
   for (let z = 0; z < layout.length; z++) {
     for (let x = 0; x < layout.width; x++) {
@@ -143,9 +147,10 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     const f = b.file;
     const biome: Biome = f.isDoc ? 'library' : biomeFor(f.lang);
     const pal = neighbourhoodPalette(palettes[biome], biome, f.path, palettes === PALETTES);
+    const roofSeed = fnv1a(f.path.split('/').slice(0, -1).join('/'));
     const style = chooseStyle({ kind: b.kind, height: b.height, isTest: f.isTest, isDoc: f.isDoc, lang: f.lang, merged: f.merged });
     const rng = rngFor(f.path, seed);
-    const shell = buildShell(grid, b, pal, style, rng);
+    const shell = buildShell(grid, b, pal, style, rng, roofSeed);
     const fire = fireLevel(f.churn, thresholds);
     const mossy = isMossy(f, city.headTime);
     const share = ruinShare(f);
@@ -162,18 +167,38 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     });
   }
 
-  // --- Trees and flowers in the free parts of lots (after buildings, so roofs win).
+  // --- Pocket parks: the space behind street-aligned buildings gets trees,
+  // and a pond when there is room. Placement is seeded per lot.
+  const water = grid.id(BLOCKS.water);
+  const grassId = grid.id(BLOCKS.grass);
   for (const b of layout.buildings) {
     if (b.kind === 'house') continue;
     const pal = paletteOf(b.file);
-    const rng = mulberry32(fnv1a(`tree:${b.file.path}`) ^ seed);
-    const { lot } = b;
-    const corners: Array<[number, number]> = [[lot.x0 + 1, lot.z0 + 1], [lot.x1 - 2, lot.z0 + 1], [lot.x0 + 1, lot.z1 - 2], [lot.x1 - 2, lot.z1 - 2]];
-    for (const [tx, tz] of corners) {
-      if (rng() > 0.55) continue;
-      if (!canPlant(grid, occ, tx, tz)) continue;
-      plantTree(grid, pal, tx, tz, 3 + Math.floor(rng() * 3));
-      occupied[tz * layout.width + tx] = 1;
+    const rng = mulberry32(fnv1a(`park:${b.file.path}`) ^ seed);
+    const { lot, footprint: fp } = b;
+    // Largest free strip of the lot on each side of the footprint.
+    const strips: Rect[] = [
+      { x0: lot.x0, z0: lot.z0, x1: lot.x1, z1: fp.z0 },
+      { x0: lot.x0, z0: fp.z1, x1: lot.x1, z1: lot.z1 },
+      { x0: lot.x0, z0: lot.z0, x1: fp.x0, z1: lot.z1 },
+      { x0: fp.x1, z0: lot.z0, x1: lot.x1, z1: lot.z1 },
+    ].filter((r) => r.x1 - r.x0 >= 3 && r.z1 - r.z0 >= 3);
+    for (const r of strips) {
+      const w = r.x1 - r.x0;
+      const d = r.z1 - r.z0;
+      if (w >= 7 && d >= 7 && grid.get(r.x0 + 3, 0, r.z0 + 3) === grassId && rng() < 0.5) {
+        const pond = { x0: r.x0 + 2, z0: r.z0 + 2, x1: r.x1 - 2, z1: r.z1 - 2 };
+        for (let z = pond.z0; z < pond.z1; z++) for (let x = pond.x0; x < pond.x1; x++) {
+          if (!occ(x, z) && grid.get(x, 1, z) === 0) grid.set(x, 0, z, water);
+        }
+        mark(pond);
+      }
+      for (let z = r.z0 + 1; z < r.z1 - 1; z += 3) for (let x = r.x0 + 1; x < r.x1 - 1; x += 3) {
+        if (rng() > 0.7) continue;
+        if (grid.get(x, 0, z) !== grassId || !canPlant(grid, occ, x, z)) continue;
+        plantTree(grid, pal, x, z, 3 + Math.floor(rng() * 3));
+        occupied[z * layout.width + x] = 1;
+      }
     }
   }
   // A few bushes next to building entrances (sparse on purpose: clutter hides the city).

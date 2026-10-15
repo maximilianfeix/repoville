@@ -1,0 +1,8 @@
+name: Feature idea
+description: Suggest a new building, mapping, export or viewer feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes: { label: The idea, description: Which repo fact should become which city feature? }
+    validations: { required: true }

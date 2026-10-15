@@ -1,7 +1,7 @@
 import { inflateSync } from 'fflate';
 import {
-  AdditiveBlending, Box3, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
-  HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFSoftShadowMap,
+  ACESFilmicToneMapping, AdditiveBlending, Box3, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
+  HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -70,14 +70,16 @@ function main() {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = SRGBColorSpace;
-  renderer.shadowMap.type = PCFSoftShadowMap;
+  renderer.shadowMap.type = PCFShadowMap;
+  renderer.toneMapping = ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const scene = new Scene();
   const span = Math.max(m.width, m.length);
   scene.fog = new Fog(0x262931, span * 1.6, span * 4);
 
-  const camera = new PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.5, span * 6);
+  const camera = new PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.5, span * 6);
   const homeDir = new Vector3(0.74, 0.6, 0.82).normalize();
   const fitDistance = () => {
     const vfov = (camera.fov * Math.PI) / 180;
@@ -85,7 +87,21 @@ function main() {
     const r = span * 0.6;
     return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * 0.8;
   };
-  camera.position.copy(homeDir.clone().multiplyScalar(fitDistance()));
+  // Aim at the LOC-weighted downtown rather than the map centre.
+  const downtown = new Vector3();
+  {
+    let wsum = 0;
+    for (const b of m.buildings) {
+      const w = b[6];
+      downtown.x += ((b[1] + b[3]) / 2 - m.width / 2) * w;
+      downtown.z += ((b[2] + b[4]) / 2 - m.length / 2) * w;
+      wsum += w;
+    }
+    if (wsum > 0) downtown.multiplyScalar(1 / wsum);
+    downtown.clampLength(0, span * 0.18);
+  }
+  const homePos = () => homeDir.clone().multiplyScalar(fitDistance()).add(downtown);
+  camera.position.copy(homePos());
 
   const orbit = new OrbitControls(camera, canvas);
   orbit.enableDamping = true;
@@ -94,18 +110,22 @@ function main() {
   orbit.minDistance = 6;
   orbit.maxDistance = span * 3;
   orbit.screenSpacePanning = false;
+  orbit.target.copy(downtown);
   orbit.update();
   const fly = new PointerLockControls(camera, document.body);
 
-  scene.add(new HemisphereLight(0xdfeaff, 0x6b5a48, 1.9));
-  const sun = new DirectionalLight(0xffe0b0, 2.6);
-  sun.position.set(-span * 0.45, span * 0.55, -span * 0.25);
+  scene.add(new HemisphereLight(0xcfdcff, 0x7a5f45, 1.5));
+  const sun = new DirectionalLight(0xffcf9a, 2.8);
+  sun.position.set(-span * 0.5, span * 0.42, -span * 0.3);
   sun.shadow.mapSize.set(4096, 4096);
   const sc = sun.shadow.camera;
   sc.left = -span * 0.75; sc.right = span * 0.75; sc.top = span * 0.75; sc.bottom = -span * 0.75;
   sc.near = 1; sc.far = span * 3;
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.6;
+  sun.shadow.radius = 2;
+  // The city never moves: render the shadow map only when meshes are added or quality changes.
+  sun.shadow.autoUpdate = false;
   scene.add(sun, sun.target);
 
   // Diorama base: the city floats on a slab of earth and stone.
@@ -167,7 +187,9 @@ function main() {
       scene.add(mesh);
       cityMeshes.push(mesh);
       state.quads += out.quads;
+      if (cityMeshes.length % 48 === 0) sun.shadow.needsUpdate = true;
     }
+    if (!queue.length) sun.shadow.needsUpdate = true;
     if (!queue.length && !state.ready) {
       state.ready = true;
       document.body.classList.add('ready');
@@ -607,6 +629,7 @@ function main() {
     state.quality = q + (auto ? ' (auto)' : '');
     sun.castShadow = q === 'high';
     renderer.shadowMap.enabled = q === 'high';
+    sun.shadow.needsUpdate = true;
     material.needsUpdate = true;
     renderer.setPixelRatio(q === 'high' ? Math.min(window.devicePixelRatio, 2) : Math.min(window.devicePixelRatio, 1.25));
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -615,7 +638,7 @@ function main() {
   setQuality(quality);
 
   function fitCity() {
-    flyTo(homeDir.clone().multiplyScalar(fitDistance()), new Vector3(0, 0, 0));
+    flyTo(homePos(), downtown.clone());
     closeCard();
     history.replaceState(null, '', location.pathname + location.search);
   }
