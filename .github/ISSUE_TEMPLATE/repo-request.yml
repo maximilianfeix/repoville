@@ -1,0 +1,11 @@
+name: Render a repo
+description: Ask for a public repo to be rendered for the gallery
+labels: [repo-request]
+body:
+  - type: input
+    id: repo
+    attributes: { label: Repository, placeholder: owner/repo }
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes: { label: What should we look for in the city? }
