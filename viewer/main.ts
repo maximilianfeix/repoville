@@ -29,6 +29,7 @@ const ICON = {
   fly: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 6 6 1 8l5 2 2 5 2-5 5-2-5-2z"/></svg>',
   layers: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 1 7 4-7 4-7-4zm-5.3 6.2L8 10.3l5.3-3.1L15 8l-7 4-7-4zm0 3L8 13.3l5.3-3.1L15 11l-7 4-7-4z"/></svg>',
   guide: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h12v2H2zm0 5h12v2H2zm0 5h8v2H2z"/></svg>',
+  camera: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2 4.5 4H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2.5l-1-2zM8 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>',
   close: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.4 2 4.6 4.6L12.6 2 14 3.4 9.4 8l4.6 4.6-1.4 1.4L8 9.4 3.4 14 2 12.6 6.6 8 2 3.4z"/></svg>',
 };
 
@@ -416,7 +417,8 @@ function main() {
     <button class="tool" id="rv-home" title="Fit the city (R)">${ICON.reset}<span>Fit</span></button>
     <button class="tool" id="rv-fly" title="Walk / fly (F)" aria-pressed="false">${ICON.fly}<span>Fly</span></button>
     <button class="tool" id="rv-view" title="Metric view (V)" aria-expanded="false" aria-controls="rv-viewmenu">${ICON.layers}<span>View</span></button>
-    <button class="tool" id="rv-guide" title="Guide (G)" aria-expanded="false" aria-controls="rv-drawer">${ICON.guide}<span>Guide</span></button>`;
+    <button class="tool" id="rv-guide" title="Guide (G)" aria-expanded="false" aria-controls="rv-drawer">${ICON.guide}<span>Guide</span></button>
+    <button class="tool" id="rv-shot" title="Save a screenshot (P)">${ICON.camera}<span>Photo</span></button>`;
   const matches = el('ul', { class: 'matches', id: 'rv-matches', role: 'listbox' });
   matches.hidden = true;
   const viewMenu = el('div', { class: 'menu', id: 'rv-viewmenu' });
@@ -466,7 +468,7 @@ function main() {
     </section>
     <section>
       <h3>Keys</h3>
-      <dl class="keys"><dt><kbd>/</kbd></dt><dd>search</dd><dt><kbd>T</kbd></dt><dd>tour</dd><dt><kbd>R</kbd></dt><dd>fit city</dd><dt><kbd>F</kbd></dt><dd>fly: WASD, Space, Shift, Esc</dd><dt><kbd>V</kbd></dt><dd>metric view</dd><dt><kbd>G</kbd></dt><dd>guide</dd></dl>
+      <dl class="keys"><dt><kbd>/</kbd></dt><dd>search</dd><dt><kbd>T</kbd></dt><dd>tour</dd><dt><kbd>R</kbd></dt><dd>fit city</dd><dt><kbd>F</kbd></dt><dd>fly: WASD, Space, Shift, Esc</dd><dt><kbd>V</kbd></dt><dd>metric view</dd><dt><kbd>G</kbd></dt><dd>guide</dd><dt><kbd>P</kbd></dt><dd>save a screenshot</dd></dl>
     </section>
     <section class="share">
       <button class="wide" id="rv-badge">Copy README badge</button>
@@ -895,6 +897,7 @@ function main() {
     else if (k === 'f') fly.lock();
     else if (k === 'g') setDrawer(Boolean(drawer.hidden));
     else if (k === 'v') setMenu(Boolean(viewMenu.hidden));
+    else if (k === 'p') void saveScreenshot();
     else if (e.key === 'Escape') {
       setDrawer(false);
       setMenu(false);
@@ -902,6 +905,43 @@ function main() {
     }
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
+
+  // ---------- Screenshot ----------
+  async function saveScreenshot() {
+    renderer.render(scene, camera);
+    const w = canvas.width;
+    const h = canvas.height;
+    const strip = Math.round(h * 0.075);
+    const out = document.createElement('canvas');
+    out.width = w;
+    out.height = h + strip;
+    const ctx = out.getContext('2d')!;
+    ctx.fillStyle = '#1c1e24';
+    ctx.fillRect(0, 0, w, h + strip);
+    ctx.drawImage(canvas, 0, 0);
+    const pad = Math.round(strip * 0.32);
+    const fs = Math.round(strip * 0.34);
+    ctx.fillStyle = '#F6F1E4';
+    ctx.font = `600 ${fs}px "JetBrains Mono", monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(m.name, pad, h + strip / 2);
+    const nameW = ctx.measureText(m.name).width;
+    ctx.fillStyle = 'rgba(246,241,228,.66)';
+    ctx.font = `400 ${Math.round(fs * 0.8)}px Inter, sans-serif`;
+    ctx.fillText(`${compact(m.stats.files)} files · ${compact(m.stats.loc)} lines · ${compact(m.stats.buildings)} buildings`, pad * 2 + nameW, h + strip / 2);
+    ctx.fillStyle = '#E8D9A8';
+    ctx.font = `400 ${fs}px Silkscreen, monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText('repoville', w - pad, h + strip / 2);
+    const blob = await new Promise<Blob | null>((r) => out.toBlob(r, 'image/png'));
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${m.name.replace(/[^\w.-]+/g, '-')}-repoville.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  dock.querySelector('#rv-shot')!.addEventListener('click', () => void saveScreenshot());
 
   // ---------- Loop ----------
   addEventListener('resize', () => {
