@@ -1,0 +1,27 @@
+[
+  {
+    "slug": "facebook/react",
+    "blurb": "JavaScript · 7k files",
+    "stats": "facebook/react as a walkable city: 7,165 files, 903,811 lines of code."
+  },
+  {
+    "slug": "torvalds/linux",
+    "blurb": "C · 96k files, folded into 4k buildings",
+    "stats": "torvalds/linux as a walkable city: 95,948 files, 33,795,018 lines of code."
+  },
+  {
+    "slug": "BurntSushi/ripgrep",
+    "blurb": "Rust · the nether district",
+    "stats": "BurntSushi/ripgrep as a walkable city: 227 files, 68,267 lines of code."
+  },
+  {
+    "slug": "junegunn/fzf",
+    "blurb": "Go · frozen peaks",
+    "stats": "junegunn/fzf as a walkable city: 161 files, 53,292 lines of code."
+  },
+  {
+    "slug": "maximilianfeix/repoville",
+    "blurb": "TypeScript · this project",
+    "stats": "repoville as a walkable city: 79 files, 6,064 lines of code."
+  }
+]
