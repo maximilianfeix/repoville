@@ -9,7 +9,7 @@ Diagnosis: every building had the same proportions (height/side ≈ 2.5), squari
 | 1 | Size classes with their own massing (height stays the metric) | Wettel & Lanza, CodeCity (VISSOFT 2007) | partly (families) |
 | 2 | Mirror child rects so heavy corners face the parent centre → one downtown | Parish & Müller 2001 (CityEngine density gradient) | done |
 | 3 | Align footprints to the street edge, pool spare space into pocket parks | Stålberg / Townscaper (enclosed gardens) | done |
-| 4 | Water/canals at top-level boundaries with bridges | Lynch, *The Image of the City* (edges) | open |
+| 4 | Water/canals at top-level boundaries with bridges | Lynch, *The Image of the City* (edges) | done |
 | 5 | Visible street hierarchy by depth (avenue, street, lane) | EvoStreets (Steinbrückner & Lewerentz) | done |
 | 6 | Data-driven landmark crowns (largest file per district, entry points) | Bremen VR software-city orientation study | done (largest file) |
 | 7 | Value structure: dark ground, mid walls, light roofs; olive grass | Townscaper palette restraint | partly |
