@@ -1,0 +1,49 @@
+name: Repoville city
+description: Render this repository as a walkable voxel city (self-contained HTML + gallery image), ready for GitHub Pages.
+author: maximilianfeix
+branding:
+  icon: map
+  color: green
+inputs:
+  path:
+    description: Folder to render (relative to the workspace).
+    default: .
+  out:
+    description: Output folder; contains index.html, city.png and meta.json.
+    default: repoville-city
+  since:
+    description: Churn window, e.g. 30d, 6m, 1y.
+    default: 1y
+  max-buildings:
+    description: Merge folders into landmark towers above this many buildings.
+    default: '4000'
+  formats:
+    description: Extra formats besides html (comma list of schem,litematic,world).
+    default: ''
+  version:
+    description: Repoville release tag to run (e.g. v0.2.0) or "latest".
+    default: latest
+outputs:
+  dir:
+    description: Output folder with index.html.
+    value: ${{ steps.render.outputs.dir }}
+  badge:
+    description: README badge Markdown pointing at this repo's Pages site.
+    value: ${{ steps.render.outputs.badge }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - id: render
+      shell: bash
+      env:
+        RV_PATH: ${{ inputs.path }}
+        RV_OUT: ${{ inputs.out }}
+        RV_SINCE: ${{ inputs.since }}
+        RV_MAX: ${{ inputs.max-buildings }}
+        RV_FORMATS: ${{ inputs.formats }}
+        RV_VERSION: ${{ inputs.version }}
+        RV_REPO: ${{ github.repository }}
+      run: bash "${{ github.action_path }}/action/render.sh"
