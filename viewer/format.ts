@@ -32,6 +32,8 @@ export interface ViewerMeta {
   buildings: BuildingRow[];
   districts: DistrictRow[];
   textured: boolean;
+  /** Web view of the repo (GitHub/GitLab) for source links, or null. */
+  source?: { base: string; host: 'github' | 'gitlab' } | null;
 }
 
 export interface Payload {

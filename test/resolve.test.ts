@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseTarget } from '../src/source/resolve.js';
+import { parseTarget, webBaseFor } from '../src/source/resolve.js';
 
 describe('parseTarget', () => {
   it('prefers an existing local folder', () => {
@@ -33,5 +33,18 @@ describe('parseTarget', () => {
   });
   it('rejects nonsense', () => {
     expect(() => parseTarget('not a repo at all!')).toThrow();
+  });
+});
+
+describe('webBaseFor', () => {
+  it('builds browser links for GitHub and GitLab only', () => {
+    expect(webBaseFor('https://github.com/facebook/react.git')).toEqual({ base: 'https://github.com/facebook/react', host: 'github' });
+    expect(webBaseFor('git@github.com:a/b.git')).toEqual({ base: 'https://github.com/a/b', host: 'github' });
+    expect(webBaseFor('https://gitlab.com/group/sub/proj.git')).toEqual({ base: 'https://gitlab.com/group/sub/proj', host: 'gitlab' });
+    expect(webBaseFor('https://example.org/a/b.git')).toBeNull();
+    expect(webBaseFor(undefined)).toBeNull();
+  });
+  it('never carries credentials into the link', () => {
+    expect(webBaseFor('https://user:token@github.com/a/b.git')?.base).toBe('https://github.com/a/b');
   });
 });

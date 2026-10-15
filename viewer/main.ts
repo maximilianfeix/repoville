@@ -173,6 +173,7 @@ function main() {
   function enableMcTextures(on: boolean) {
     if (!on) {
       mcMode.value = 0;
+      syncUrl();
       return Promise.resolve();
     }
     if (!mcLoaded) {
@@ -193,6 +194,7 @@ function main() {
     }
     return mcLoaded.then(() => {
       mcMode.value = 1;
+      syncUrl();
     });
   }
 
@@ -484,8 +486,21 @@ function main() {
   ui.prepend(labelLayer);
   ui.append(brand, stats, metricLegend, card, tip, viewMenu, matches, dock, drawer, foot);
 
+  /** Keep the URL in sync with the view so shared links reopen it as seen. */
+  function syncUrl() {
+    const q = new URLSearchParams(location.search);
+    const set = (k: string, v: string | null) => (v === null ? q.delete(k) : q.set(k, v));
+    set('view', metric === 'none' ? null : metric);
+    set('time', night.value ? 'night' : null);
+    set('mc', mcMode.value ? '1' : null);
+    set('textures', detail.value ? null : '0');
+    const qs = q.toString();
+    history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
+  }
+
   function setMetric(next: Metric) {
     metric = next;
+    queueMicrotask(syncUrl);
     for (const b of viewMenu.querySelectorAll<HTMLButtonElement>('[data-metric]')) b.setAttribute('aria-pressed', String(b.dataset.metric === next));
     metricLegend.innerHTML = `${METRIC_TEXT[next]}<span class="ramp" aria-hidden="true"></span>`;
     metricLegend.hidden = next === 'none';
@@ -499,6 +514,9 @@ function main() {
     const values = m.buildings.map((b) => (next === 'churn' ? b[7] : next === 'todos' ? (b[6] ? b[8] / b[6] : 0) : b[9] < 0 ? 3 * 365 : (m.headTime - b[9]) / DAY));
     const sorted = values.filter((v) => v > 0).sort((a, b) => a - b);
     const cap = sorted[Math.floor(sorted.length * 0.98)] || 1;
+    const unit = next === 'churn' ? 'commits' : next === 'age' ? 'days' : 'markers / line';
+    const f = (v: number) => (next === 'todos' ? v.toFixed(3) : fmt(Math.round(v)));
+    metricLegend.insertAdjacentHTML('beforeend', `<span class="ticks"><span>0</span><span>${f(cap / 2)}</span><span>${f(cap)}+ ${unit}</span></span>`);
     m.buildings.forEach((b, i) => {
       const v = values[i]!;
       const hgt = next === 'age' ? b[5] + 1 : 1 + Math.min(1, v / cap) * 60;
@@ -626,6 +644,16 @@ function main() {
     outline.visible = false;
   });
 
+  /** Link to the file (or merged folder) at the rendered commit on GitHub/GitLab. */
+  function sourceLink(b: BuildingRow): string {
+    const src = m.source;
+    if (!src || !m.head) return '';
+    const kind = b[14] ? 'tree' : 'blob';
+    const path = b[0].split('/').map(encodeURIComponent).join('/');
+    const href = src.host === 'gitlab' ? `${src.base}/-/${kind}/${m.head}/${path}` : `${src.base}/${kind}/${m.head}/${path}`;
+    return ` <a class="small" href="${esc(href)}" target="_blank" rel="noopener">Open source ↗</a>`;
+  }
+
   function closeCard() {
     card.hidden = true;
     selOutline.visible = false;
@@ -636,7 +664,7 @@ function main() {
     selOutline.visible = true;
     const d = districtOf(b[0]);
     card.innerHTML = `<div class="card-h"><button class="path district" data-path="${esc(d)}">${esc(d || m.name)}/</button><button class="icon" id="rv-card-close" aria-label="Close details">${ICON.close}</button></div>${facts(b)}
-      <div class="card-a"><button class="small" id="rv-link">Copy link to this building</button></div>`;
+      <div class="card-a"><button class="small" id="rv-link">Copy link</button>${sourceLink(b)}</div>`;
     card.hidden = false;
     card.querySelector('#rv-card-close')!.addEventListener('click', closeCard);
     card.querySelector('#rv-link')!.addEventListener('click', async (e) => {
@@ -647,7 +675,7 @@ function main() {
       } catch {
         btn.textContent = 'Copy failed';
       }
-      setTimeout(() => (btn.textContent = 'Copy link to this building'), 1400);
+      setTimeout(() => (btn.textContent = 'Copy link'), 1400);
     });
   }
 
@@ -775,7 +803,10 @@ function main() {
   });
   const texBox = viewMenu.querySelector<HTMLInputElement>('#rv-textures')!;
   texBox.checked = detail.value === 1;
-  texBox.addEventListener('change', () => (detail.value = texBox.checked ? 1 : 0));
+  texBox.addEventListener('change', () => {
+    detail.value = texBox.checked ? 1 : 0;
+    syncUrl();
+  });
   const mcBox = viewMenu.querySelector<HTMLInputElement>('#rv-mc')!;
   const mcNote = el('div', { class: 'mc-note' }, 'Minecraft textures © Mojang, loaded by your browser from <a href="https://github.com/misode/mcmeta" target="_blank" rel="noopener">misode/mcmeta</a>. Not bundled with Repoville.');
   mcNote.hidden = true;
@@ -806,7 +837,10 @@ function main() {
     document.body.classList.toggle('night', on);
     sun.shadow.needsUpdate = true;
   }
-  nightBox.addEventListener('change', () => setNight(nightBox.checked));
+  nightBox.addEventListener('change', () => {
+    setNight(nightBox.checked);
+    syncUrl();
+  });
   if (night.value) setNight(true);
   const labelsBox = viewMenu.querySelector<HTMLInputElement>('#rv-labels')!;
   labelsBox.addEventListener('change', () => (showLabels = labelsBox.checked));

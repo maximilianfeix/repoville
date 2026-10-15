@@ -80,6 +80,7 @@ export interface HtmlInput {
   site: string;
   badge: string;
   textured: boolean;
+  source?: { base: string; host: 'github' | 'gitlab' } | null;
 }
 
 export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
@@ -113,6 +114,7 @@ export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
     ]),
     districts: built.districts.map((d) => [d.path, d.depth, d.x0, d.z0, d.x1, d.z1]),
     textured: input.textured,
+    source: input.source ?? null,
   };
 }
 
@@ -213,6 +215,7 @@ body.ready .progress{opacity:0}
 .menu input{accent-color:var(--moss)}
 .metric-legend{position:absolute;left:50%;top:76px;transform:translateX(-50%);padding:8px 12px;max-width:min(560px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line);border-radius:var(--r);font-size:12px;color:var(--mute);text-align:center}
 .metric-legend b{color:var(--bone);margin-right:6px}
+.metric-legend .ticks{display:flex;justify-content:space-between;margin-top:3px;font:500 10.5px var(--mono);color:#A9ACB2}
 .metric-legend .ramp{display:block;height:6px;margin-top:6px;border-radius:3px;background:linear-gradient(90deg,#3a4252,#4E8C3A,#E8D9A8,#FF7A1A,#D9382B)}
 .drawer{position:absolute;right:16px;top:76px;bottom:90px;width:340px;overflow:auto;background:var(--panel-solid);border:1px solid var(--line);border-radius:8px;padding:0 16px 16px}
 .drawer-h{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 0 8px;background:var(--panel-solid);font:400 13px var(--px);color:var(--sand)}
@@ -244,7 +247,8 @@ body.ready .progress{opacity:0}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .tag{font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid}
 .tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}.tag.gold{color:#f6d03d;border-color:rgba(246,208,61,.5)}
-.card-a{margin-top:10px}
+.card-a{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.card-a a.small{text-decoration:none;color:var(--dia)}
 .tip{position:absolute;left:0;top:0;display:none;padding:5px 8px;background:var(--panel-solid);border:1px solid var(--line-hi);border-radius:5px;font-size:12px;white-space:nowrap}
 .tip b{font:600 12px var(--mono);margin-right:8px}
 .tip span{color:var(--mute)}
