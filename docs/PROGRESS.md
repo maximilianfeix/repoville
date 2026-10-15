@@ -4,11 +4,11 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ## Needs Maxi
 - `gh auth refresh -h github.com -u maximilianfeix -s workflow` — without it no `.github/workflows/*` can be pushed (CI, Pages workflow).
-- Allow merging: the auto-mode classifier blocks `gh pr merge` ("Merge Without Review"). Add a permission rule, e.g. `Bash(gh pr merge:*)`, or merge PRs by hand. Open: #1 → #2 (stacked).
 - Upload `assets/brand/social-preview.png` as the repo's social preview (Settings → General; no API for it).
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 00:00: merged #1–#20 (user granted merging). Since tick 2: independent code review (approve; fixes #11), procedural pixel textures + optional runtime Minecraft textures (#12), world zip verified on Paper (#13), live mode over RCON verified on Paper (#16), gallery PNG / --open / tour / agent skill (#17), community files + CI draft + launch drafts (#18), canals (#19), design pass after an independent design critique: new stepped-tower logo, site rewrite with hero video + texture slider + swatches, viewer label/contrast/ramp fixes, README flyover GIF (#20). Site redeployed.
 - 2026-10-15 23:30 (tick 2): PR #10 landmark crowns (largest file of each folder with ≥ 3 buildings; ≤ 3 tiers + spire so it never reads as height), card tag "largest in its folder", focus framing from the building's bounding sphere (tall towers were cropped before).
 - 2026-10-15 22:45 (tick 1): PR #9 baked AO (0fps, AO-aware greedy merge, diagonal flip) on upward faces, auto-on for cities ≤ 400k blocks² (`?ao=1/0` override); region merge after load. Measured (headless, load avg 5.5): React AO on 36–37 fps vs 42–43 off without shadows → AO auto-off for big cities; ripgrep with AO 60 fps. Region merge: no measurable change in headless (GPU-bound), kept for real CPUs. Nether ground → blackstone.
 - 2026-10-15 22:00: GitHub Pages live at https://maximilianfeix.github.io/repoville/ (gh-pages branch via `scripts/build-site.ts` + `scripts/deploy-pages.sh`), demos React / Linux / ripgrep / fzf / repoville, real social preview. README rewritten with real renders and measured numbers. Brand system `docs/brand/DESIGN.md`, `VOICE.md`, assets in `assets/brand/`. Labels, issue templates, issues #3–#8.
@@ -27,7 +27,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 ### P0 — brand
 - [x] `assets/brand/`: mark, mono, favicon, wordmarks, social preview. [ ] PNG avatar 512.
 - [x] `docs/brand/DESIGN.md` and `docs/brand/VOICE.md`.
-- [ ] Use the new mark in the viewer favicon (HUD already uses it).
+- [x] New stepped-tower mark in viewer HUD and favicon (#20).
 - [x] Landmark crowns (visual-research #6). [ ] water edges (#4), suburb rows (#12), class massing (#1).
 
 ### P0 — landing page + README
@@ -35,15 +35,23 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [x] Demo cities on Pages: React, this repo, one Rust + one Go repo (themes), at `/r/<owner>/<repo>/`.
 - [x] README: centered logo, tagline, real screenshot + GIF, quick start (only verified commands), mapping table, formats, privacy, limits, FAQ, contributing, disclaimer.
 
+### P0 — next
+- [ ] Codex inventory (scheduled 00:23) → issues + backlog.
+- [ ] Churn-view image on the site: frame tighter (currently a small plane in a dark box).
+- [ ] Shader-based facade windows to cut quads (perf-research #3); packed attributes (#2).
+- [ ] Suburb rows (visual-research #12), class massing (#1).
+- [ ] npm pack dry run + cold `npx` test from a tarball.
+- [ ] Re-run all Paper e2e (WorldEdit, world, live) after the geometry changes; CI once workflow scope exists.
+
 ### P1 — product completeness
-- [ ] World zip export (superflat level.dat + Anvil regions) verified on Paper.
-- [ ] Live mode over RCON (`repoville live`) using structure .nbt tiles + /place template, e2e on Paper.
+- [x] World zip export verified on Paper (#13).
+- [x] Live mode over RCON, e2e on Paper (#16).
 - [ ] Re-run WorldEdit e2e with the new geometry; check signs, stairs facing, leaves persistence.
-- [ ] `repoville tour`, `--open`, `--gallery` (city.png + meta.json), `badge` polish.
-- [ ] `skill/SKILL.md` (Claude Code / Codex skill).
+- [x] `repoville tour`, `--open`, `--gallery` (#17).
+- [x] `skill/SKILL.md` (#17).
 - [ ] CI: test matrix (ubuntu/macos/windows), litemapy job, viewer check, Paper e2e job (needs workflow scope).
-- [x] Issue templates, labels, good-first-issues (#3–#7). [ ] CONTRIBUTING, SECURITY, CODE_OF_CONDUCT.
-- [ ] Launch drafts in `launch/` (Show HN, X thread, Reddit, Shorts script) — drafts only.
+- [x] Issue templates, labels, good-first-issues (#3–#7). [x] CONTRIBUTING, SECURITY, CODE_OF_CONDUCT (#18).
+- [x] Launch drafts in `launch/` (#18).
 
 ### P2 — engineering
 - [ ] Security pass (prompt §10): URL validation, symlinks, cache isolation, bounded output, timeouts.
