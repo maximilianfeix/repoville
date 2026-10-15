@@ -47,7 +47,7 @@ async function shot(slug: string, file: string, w: number, h: number, query = 'u
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   await page.goto(pathToFileURL(join(OUT, 'r', slug, 'index.html')).href + `?${query}` + (hash ? `#${hash}` : ''));
   await page.waitForFunction('window.__repoville && window.__repoville.ready', null, { timeout: 180_000 });
-  await page.waitForTimeout(hash ? 2600 : 1200);
+  await page.waitForTimeout(query.includes('mc=1') ? 7000 : hash ? 2600 : 1200);
   await page.screenshot({ path: join(OUT, 'media', file), type: file.endsWith('.jpg') ? 'jpeg' : 'png', quality: file.endsWith('.jpg') ? 86 : undefined });
   await page.close();
 }
@@ -58,6 +58,8 @@ await shot('BurntSushi/ripgrep', 'ripgrep.jpg', 1280, 800);
 await shot('junegunn/fzf', 'fzf.jpg', 1280, 800);
 await shot('maximilianfeix/repoville', 'repoville.jpg', 1280, 800);
 await shot('facebook/react', 'react-churn.jpg', 1280, 800, 'ui=off&view=churn&quality=low');
+await shot('BurntSushi/ripgrep', 'ripgrep-closeup.jpg', 1440, 900, 'ui=off&quality=high', 'f=README.md');
+await shot('BurntSushi/ripgrep', 'ripgrep-mc.jpg', 1440, 900, 'ui=off&quality=high&mc=1', 'f=README.md');
 // Social preview 1280×640 composed from the real hero render.
 {
   const hero = readFileSync(join(OUT, 'media', 'hero-react.jpg')).toString('base64');

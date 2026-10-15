@@ -85,7 +85,7 @@ repoville: building facebook/react
 ```
 node dist/cli.js [build] <path|owner/repo|url>
   -o, --out <dir>          output folder (default repoville-out)
-  --format <list>          html,schem,litematic,json (default html,schem)
+  --format <list>          html,schem,litematic,world,json (default html,schem)
   --mc <version>           target Minecraft Java version (default 1.21.11)
   --max-buildings <n>      merge folders into landmark towers above this (default 4000)
   --since <duration>       churn window: 30d, 6m, 1y (default 1y)
@@ -103,9 +103,10 @@ A `repoville.config.json` in a local repo can set the same keys plus `palette` o
 |---|---|
 | `.schem` (Sponge v3) | Pasted with WorldEdit 7.3.19 on Paper 1.21.11 and block-checked over RCON (`test/e2e/worldedit-paste.ts`) |
 | `.litematic` (v6) | Round-trip checked with litemapy 0.11 in the test suite |
-| World `.zip`, live building over RCON | In progress |
+| World `.zip` (superflat, Java 1.21.x) | Loaded as the server world on Paper 1.21.11 and block-checked (`test/e2e/world-load.ts`) |
+| Live building over RCON | In progress |
 
-Paste a schematic: copy it to `plugins/WorldEdit/schematics/`, then `//schem load <name>` and `//paste`. Cities start at the ground layer; buildings reach up to about 290 blocks.
+Paste a schematic: copy it to `plugins/WorldEdit/schematics/`, then `//schem load <name>` and `//paste`. Or unzip `*-world.zip` into your `saves/` folder: a creative superflat world with the city at spawn (ground at y = −61, daylight fixed, no mobs). Buildings reach up to about 290 blocks.
 
 ## How big can a repo be?
 
@@ -127,7 +128,7 @@ Remote repos are cloned blobless and only as far back as the history window need
 
 ## Roadmap
 
-- World zip and live building on a Paper server
+- Live building on a Paper server
 - npm release (`npx repoville`)
 - v2: coding agents walking the city as villagers while they work
 

@@ -12,6 +12,7 @@ import type { ResolvedSource } from './source/resolve.js';
 import { highlights, type Highlights } from './summary.js';
 import { parseDays } from './util/duration.js';
 import { writeLitematic } from './write/litematic.js';
+import { writeWorldZip } from './write/world.js';
 import { writeSchem } from './write/schem.js';
 import { writeHtml } from './write/html.js';
 import { badgeMarkdown, SITE } from './badge.js';
@@ -71,6 +72,10 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
     } else if (format === 'litematic') {
       const file = join(cfg.out, `${base}.litematic`);
       await writeLitematic(file, built.grid, meta);
+      outputs.push({ format, file });
+    } else if (format === 'world') {
+      const file = join(cfg.out, `${base}-world.zip`);
+      writeWorldZip(file, built.grid, { name: `Repoville ${src.name}`, dataVersion, mcVersion: cfg.mc, date: city.headTime * 1000 });
       outputs.push({ format, file });
     } else if (format === 'json') {
       const file = join(cfg.out, `${base}.city.json`);
