@@ -37,7 +37,9 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [x] README: centered logo, tagline, real screenshot + GIF, quick start (only verified commands), mapping table, formats, privacy, limits, FAQ, contributing, disclaimer.
 
 ### P0 — next
-- [ ] Codex inventory (scheduled 00:23) → issues + backlog.
+- [ ] Hardening from the Codex inventory (docs/engineering/codex-inventory.md §2): symlinks, URL/cache identity, ref cache, RCON deadlines, template names, force-load cleanup, LOD budget, roof validation, chunk retention + doc accuracy fixes.
+- [ ] GitHub Action that publishes a repo's city (#28) — biggest adoption lever after npx.
+- [ ] Open building in source (#29), search in merged towers (#30), metric legend numbers (#31), share view state (#32), a11y (#33).
 - [ ] Churn-view image on the site: frame tighter (currently a small plane in a dark box).
 - [ ] Shader-based facade windows to cut quads (perf-research #3); packed attributes (#2).
 - [x] Class massing (#1). [ ] Suburb rows (#12).
