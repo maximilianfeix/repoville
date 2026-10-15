@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-10-16
+
+- **Night mode** in the viewer (View → Night or `?time=night`): moonlight and windows lit one by one.
+- **Massing:** small files become compact houses with roofs instead of thin posts (footprint widens up to height / 1.8; height is still the LOC metric).
+- Badge links for repos that are not in the gallery yet open a page with the one-line `npx` command and a prefilled render request.
+- Quick start uses `npx` straight from the GitHub release.
+
 ## 0.1.0 — 2026-10-16
 
 First public release.
