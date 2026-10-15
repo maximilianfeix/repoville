@@ -8,6 +8,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 00:20 (tick 3): class massing (#25): footprints widen up to height/1.8 when the lot has room, so small files are houses with roofs instead of posts; height unchanged. Night mode (#24), v0.1.0 released with npx-from-release (#22/#23).
 - 2026-10-16 00:00: merged #1–#20 (user granted merging). Since tick 2: independent code review (approve; fixes #11), procedural pixel textures + optional runtime Minecraft textures (#12), world zip verified on Paper (#13), live mode over RCON verified on Paper (#16), gallery PNG / --open / tour / agent skill (#17), community files + CI draft + launch drafts (#18), canals (#19), design pass after an independent design critique: new stepped-tower logo, site rewrite with hero video + texture slider + swatches, viewer label/contrast/ramp fixes, README flyover GIF (#20). Site redeployed.
 - 2026-10-15 23:30 (tick 2): PR #10 landmark crowns (largest file of each folder with ≥ 3 buildings; ≤ 3 tiers + spire so it never reads as height), card tag "largest in its folder", focus framing from the building's bounding sphere (tall towers were cropped before).
 - 2026-10-15 22:45 (tick 1): PR #9 baked AO (0fps, AO-aware greedy merge, diagonal flip) on upward faces, auto-on for cities ≤ 400k blocks² (`?ao=1/0` override); region merge after load. Measured (headless, load avg 5.5): React AO on 36–37 fps vs 42–43 off without shadows → AO auto-off for big cities; ripgrep with AO 60 fps. Region merge: no measurable change in headless (GPU-bound), kept for real CPUs. Nether ground → blackstone.
@@ -39,7 +40,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [ ] Codex inventory (scheduled 00:23) → issues + backlog.
 - [ ] Churn-view image on the site: frame tighter (currently a small plane in a dark box).
 - [ ] Shader-based facade windows to cut quads (perf-research #3); packed attributes (#2).
-- [ ] Suburb rows (visual-research #12), class massing (#1).
+- [x] Class massing (#1). [ ] Suburb rows (#12).
 - [ ] npm pack dry run + cold `npx` test from a tarball.
 - [ ] Re-run all Paper e2e (WorldEdit, world, live) after the geometry changes; CI once workflow scope exists.
 

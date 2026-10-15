@@ -6,7 +6,7 @@ Diagnosis: every building had the same proportions (height/side ≈ 2.5), squari
 
 | # | Change | Source | Status |
 |---|---|---|---|
-| 1 | Size classes with their own massing (height stays the metric) | Wettel & Lanza, CodeCity (VISSOFT 2007) | partly (families) |
+| 1 | Size classes with their own massing (height stays the metric) | Wettel & Lanza, CodeCity (VISSOFT 2007) | done |
 | 2 | Mirror child rects so heavy corners face the parent centre → one downtown | Parish & Müller 2001 (CityEngine density gradient) | done |
 | 3 | Align footprints to the street edge, pool spare space into pocket parks | Stålberg / Townscaper (enclosed gardens) | done |
 | 4 | Water/canals at top-level boundaries with bridges | Lynch, *The Image of the City* (edges) | done |
