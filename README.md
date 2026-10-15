@@ -121,6 +121,38 @@ MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /
 
 A `repoville.config.json` in a local repo can set `format`, `mc`, `maxBuildings`, `since`, `include`, `exclude`, `ignore`, `seed`, `textured` and `palette` overrides (output folder, `--open` and `--gallery` stay command-line only). Config files inside cloned remote repos are ignored.
 
+## Publish your repo's city (GitHub Action)
+
+Add this workflow and your repo gets its own city at `https://<owner>.github.io/<repo>/`, rebuilt on every push. The action renders with the latest Repoville release; enable Pages with source "GitHub Actions" first.
+
+```yaml
+# .github/workflows/repoville.yml
+name: repoville
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  city:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # churn and age need history
+      - uses: maximilianfeix/repoville@v0
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: repoville-city }
+      - id: deploy
+        uses: actions/deploy-pages@v4
+```
+
+The job summary prints a badge that links to your city. Inputs: `path`, `since`, `max-buildings`, `formats` (add `schem,litematic,world` to publish Minecraft files next to the viewer) and `version`. The render script (`action/render.sh`) is tested locally; the action has not run on GitHub-hosted runners yet.
+
 ## Minecraft
 
 | Output | Status |
