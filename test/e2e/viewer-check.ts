@@ -34,6 +34,7 @@ const t0 = Date.now();
 await page.goto(pathToFileURL(html).href + query + (hash ? `#${hash}` : ''));
 await page.waitForFunction('window.__repoville && window.__repoville.ready === true', null, { timeout: 120_000 });
 const readyMs = Date.now() - t0;
+if (settleMs) await page.waitForTimeout(settleMs);
 // Measure frame rate over 3 seconds while the camera orbits.
 // Passed as a string: tsx would otherwise inject helpers that do not exist in the page.
 const fps = (await page.evaluate(`new Promise((resolve) => {
@@ -46,7 +47,6 @@ const fps = (await page.evaluate(`new Promise((resolve) => {
   };
   requestAnimationFrame(tick);
 })`)) as number;
-if (settleMs) await page.waitForTimeout(settleMs);
 const stats = (await page.evaluate('window.__repoville')) as { quads: number; buildings: number } | undefined;
 const png = await page.screenshot();
 if (shot) writeFileSync(shot, png);
