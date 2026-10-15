@@ -1,0 +1,55 @@
+# Move to .github/workflows/ci.yml once the pushing token has the `workflow` scope.
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - run: npx vitest run
+      - name: CLI smoke test (cold cache)
+        run: node dist/cli.js . -o out --format html,schem,litematic,world
+  litemapy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install litemapy==0.11.0b0
+      - run: npm ci && LITEMAPY_PYTHON=$(which python) npx vitest run test/litematic.test.ts
+  viewer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && npm run build && npx playwright install --with-deps chromium
+      - run: node dist/cli.js . -o out --format html
+      - run: npx tsx test/e2e/viewer-check.ts out/*.html out/shot.png
+  paper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - run: npm ci
+      - run: npx tsx test/e2e/worldedit-paste.ts
+      - run: npx tsx test/e2e/world-load.ts
+      - run: npx tsx test/e2e/live.ts
