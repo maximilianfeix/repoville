@@ -22,7 +22,7 @@ function tree(root: DirNode): CityTree {
 const arbTree = fc
   .array(fc.tuple(fc.array(fc.constantFrom('a', 'b', 'c', 'd'), { minLength: 0, maxLength: 3 }), fc.integer({ min: 0, max: 20000 })), { minLength: 1, maxLength: 120 })
   .map((entries) => {
-    const root: DirNode = { kind: 'dir', name: 'r', path: '', children: [] };
+    const root: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: [] };
     entries.forEach(([segs, loc], i) => {
       let dir = root;
       let path = '';
@@ -30,7 +30,7 @@ const arbTree = fc
         path = path ? `${path}/${s}` : s;
         let next = dir.children.find((c): c is DirNode => c.kind === 'dir' && c.name === s);
         if (!next) {
-          next = { kind: 'dir', name: s, path, children: [] };
+          next = { kind: 'dir', churn: 0, directChurn: 0, name: s, path, children: [] };
           dir.children.push(next);
         }
         dir = next;
@@ -125,7 +125,7 @@ describe('layoutCity', () => {
 
   it('puts tiny files into a suburb of 3x3 houses', () => {
     const root: DirNode = {
-      kind: 'dir', name: 'r', path: '', children: [
+      kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: [
         file('big.ts', 5000),
         ...Array.from({ length: 9 }, (_, i) => file(`t${i}.ts`, 3)),
       ],
@@ -140,7 +140,7 @@ describe('layoutCity', () => {
   });
 
   it('stays within a 1024x1024 footprint', () => {
-    const root: DirNode = { kind: 'dir', name: 'r', path: '', children: Array.from({ length: 3000 }, (_, i) => file(`f${String(i).padStart(4, '0')}.c`, 30000)) };
+    const root: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: Array.from({ length: 3000 }, (_, i) => file(`f${String(i).padStart(4, '0')}.c`, 30000)) };
     const l = layoutCity(tree(root));
     expect(l.width).toBeLessThanOrEqual(1024);
     expect(l.length).toBeLessThanOrEqual(1024);
@@ -150,25 +150,26 @@ describe('layoutCity', () => {
 describe('applyLod', () => {
   it('merges deepest folders into towers until the building budget fits', () => {
     const mk = (dir: string, n: number): DirNode => ({
-      kind: 'dir', name: dir.split('/').pop()!, path: dir,
+      kind: 'dir', churn: 0, directChurn: 0, name: dir.split('/').pop()!, path: dir,
       children: Array.from({ length: n }, (_, i) => file(`${dir}/f${i}.c`, 10, { churn: 1, todos: 1, lastTouched: i })),
     });
     const a = mk('a', 3);
     const deep = mk('a/deep', 50);
+    deep.churn = 7;
     a.children.push(deep);
-    const root: DirNode = { kind: 'dir', name: 'r', path: '', children: [a, mk('b', 5)] };
+    const root: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: [a, mk('b', 5)] };
     const city = tree(root);
     const out = applyLod(city, 20);
     const all = [...files(out.root)];
     expect(all.length).toBeLessThanOrEqual(20);
     const tower = all.find((f) => f.path === 'a/deep')!;
-    expect(tower).toMatchObject({ merged: 50, loc: 500, churn: 50, todos: 50, lastTouched: 49 });
+    expect(tower).toMatchObject({ merged: 50, loc: 500, churn: 7, todos: 50, lastTouched: 49 });
     // The input is not mutated.
     expect([...files(city.root)].length).toBe(58);
   });
 
   it('is a no-op under budget', () => {
-    const root: DirNode = { kind: 'dir', name: 'r', path: '', children: [file('x.ts', 1)] };
+    const root: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: [file('x.ts', 1)] };
     expect(applyLod(tree(root), 10).root).toEqual(root);
   });
 });

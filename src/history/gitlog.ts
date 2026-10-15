@@ -14,6 +14,11 @@ export interface History {
   /** HEAD commit time; the reference "now" so output does not depend on the wall clock. */
   headTime: number;
   files: Map<string, FileHistory>;
+  /** Distinct commits inside the churn window touching anything below a folder ('' = root). */
+  dirChurn: Map<string, number>;
+  /** Distinct commits inside the churn window touching a file directly inside a folder. */
+  dirDirectChurn: Map<string, number>;
+  /** Commits inside the churn window. */
   commits: number;
 }
 
@@ -71,7 +76,7 @@ export function parseLogChunks(onCommit: (c: ParsedCommit) => void) {
 const DAY = 86400;
 
 export async function readHistory(root: string, opts: HistoryOptions): Promise<History> {
-  const empty: History = { available: false, head: null, headTime: 0, files: new Map(), commits: 0 };
+  const empty: History = { available: false, head: null, headTime: 0, files: new Map(), dirChurn: new Map(), dirDirectChurn: new Map(), commits: 0 };
   if (!(await hasGit(root))) return empty;
   const head = await run('git', ['log', '-1', '--format=%H %ct'], root);
   if (head.code !== 0 || !head.stdout.trim()) return empty;
@@ -82,9 +87,26 @@ export async function readHistory(root: string, opts: HistoryOptions): Promise<H
   const historyFrom = headTime - ageDays * DAY;
 
   const files = new Map<string, FileHistory>();
+  const dirChurn = new Map<string, number>();
+  const dirDirectChurn = new Map<string, number>();
   let commits = 0;
   const parser = parseLogChunks((c) => {
-    commits++;
+    const inWindow = c.time >= churnFrom;
+    if (inWindow) {
+      commits++;
+      const direct = new Set<string>();
+      const all = new Set<string>(['']);
+      for (const f of c.files) {
+        let slash = f.lastIndexOf('/');
+        direct.add(slash === -1 ? '' : f.slice(0, slash));
+        while (slash !== -1) {
+          all.add(f.slice(0, slash));
+          slash = f.lastIndexOf('/', slash - 1);
+        }
+      }
+      for (const d of direct) dirDirectChurn.set(d, (dirDirectChurn.get(d) ?? 0) + 1);
+      for (const d of all) dirChurn.set(d, (dirChurn.get(d) ?? 0) + 1);
+    }
     for (const f of c.files) {
       let h = files.get(f);
       if (!h) {
@@ -93,7 +115,7 @@ export async function readHistory(root: string, opts: HistoryOptions): Promise<H
       } else if (c.time > h.lastTouched) {
         h.lastTouched = c.time;
       }
-      if (c.time >= churnFrom) h.churn++;
+      if (inWindow) h.churn++;
     }
   });
 
@@ -112,5 +134,5 @@ export async function readHistory(root: string, opts: HistoryOptions): Promise<H
     });
   });
 
-  return { available: true, head: sha ?? null, headTime, files, commits };
+  return { available: true, head: sha ?? null, headTime, files, dirChurn, dirDirectChurn, commits };
 }

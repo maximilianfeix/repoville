@@ -14,7 +14,7 @@ export interface FileNode {
   lastTouched: number | null;
   isTest: boolean;
   isDoc: boolean;
-  /** Set when LOD merged a whole folder into this one building. */
+  /** Set when LOD merged a whole folder into this one building; churn is then distinct commits for the folder. */
   merged?: number;
 }
 
@@ -22,6 +22,10 @@ export interface DirNode {
   kind: 'dir';
   name: string;
   path: string;
+  /** Distinct commits in the churn window touching anything below this folder. */
+  churn: number;
+  /** Distinct commits in the churn window touching a file directly in this folder. */
+  directChurn: number;
   children: Node[];
 }
 
@@ -41,6 +45,7 @@ export interface CityTree {
     dirs: number;
     loc: number;
     todos: number;
+    /** Commits inside the churn window. */
     commits: number;
     languages: Array<{ lang: Lang; loc: number }>;
   };

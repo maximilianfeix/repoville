@@ -12,12 +12,11 @@ function count(node: Node): number {
 function mergeDir(dir: DirNode): FileNode {
   const all = [...files(dir)];
   const langLoc = new Map<Lang, number>();
-  let loc = 0, todos = 0, churn = 0;
+  let loc = 0, todos = 0;
   let last: number | null = null;
   for (const f of all) {
     loc += f.loc;
     todos += f.todos;
-    churn += f.churn;
     if (f.lastTouched !== null && (last === null || f.lastTouched > last)) last = f.lastTouched;
     langLoc.set(f.lang, (langLoc.get(f.lang) ?? 0) + f.loc);
   }
@@ -29,7 +28,7 @@ function mergeDir(dir: DirNode): FileNode {
     lang,
     loc,
     todos,
-    churn,
+    churn: Math.max(dir.churn, all.length ? Math.max(...all.map((f) => f.churn)) : 0),
     lastTouched: last,
     isTest: all.length > 0 && all.every((f) => f.isTest),
     isDoc: all.length > 0 && all.every((f) => f.isDoc),

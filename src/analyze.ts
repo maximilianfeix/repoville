@@ -22,14 +22,15 @@ export async function analyze(root: string, opts: AnalyzeOptions): Promise<CityT
     ? history.headTime
     : scanned.reduce((m, f) => Math.max(m, f.mtime), 0);
 
-  const rootNode: DirNode = { kind: 'dir', name: opts.name ?? basename(abs), path: '', children: [] };
+  const churnOf = (path: string) => ({ churn: history.dirChurn.get(path) ?? 0, directChurn: history.dirDirectChurn.get(path) ?? 0 });
+  const rootNode: DirNode = { kind: 'dir', name: opts.name ?? basename(abs), path: '', ...churnOf(''), children: [] };
   const dirIndex = new Map<string, DirNode>([['', rootNode]]);
   const dirFor = (path: string): DirNode => {
     const existing = dirIndex.get(path);
     if (existing) return existing;
     const slash = path.lastIndexOf('/');
     const parent = dirFor(slash === -1 ? '' : path.slice(0, slash));
-    const node: DirNode = { kind: 'dir', name: path.slice(slash + 1), path, children: [] };
+    const node: DirNode = { kind: 'dir', name: path.slice(slash + 1), path, ...churnOf(path), children: [] };
     parent.children.push(node);
     dirIndex.set(path, node);
     return node;
@@ -49,7 +50,8 @@ export async function analyze(root: string, opts: AnalyzeOptions): Promise<CityT
       loc: f.loc,
       todos: f.todos,
       churn: h?.churn ?? 0,
-      lastTouched: history.available ? (h?.lastTouched ?? null) : f.mtime,
+      // Untracked files are brand new; tracked files missing from the log are older than the window.
+      lastTouched: !history.available ? f.mtime : !f.tracked ? headTime : (h?.lastTouched ?? null),
       isTest: f.isTest,
       isDoc: f.isDoc,
     };

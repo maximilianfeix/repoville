@@ -15,6 +15,8 @@ export interface ScannedFile {
   isTest: boolean;
   isDoc: boolean;
   mtime: number;
+  /** False for files git does not track yet (untracked but not ignored). */
+  tracked: boolean;
 }
 
 export interface WalkOptions {
@@ -31,13 +33,21 @@ export function byCodeUnit(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-async function listWithGit(root: string): Promise<string[] | null> {
+async function listWithGit(root: string): Promise<{ paths: string[]; untracked: Set<string> } | null> {
   if (!(await hasGit(root))) return null;
   const inside = await run('git', ['rev-parse', '--is-inside-work-tree'], root);
   if (inside.code !== 0 || inside.stdout.trim() !== 'true') return null;
-  const res = await run('git', ['-c', 'core.quotepath=off', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], root);
+  const res = await run('git', ['-c', 'core.quotepath=off', 'ls-files', '-z', '-t', '--cached', '--others', '--exclude-standard'], root);
   if (res.code !== 0) return null;
-  return res.stdout.split('\0').filter(Boolean);
+  const paths: string[] = [];
+  const untracked = new Set<string>();
+  for (const entry of res.stdout.split('\0')) {
+    if (entry.length < 3) continue;
+    const path = entry.slice(2);
+    paths.push(path);
+    if (entry[0] === '?') untracked.add(path);
+  }
+  return { paths, untracked };
 }
 
 async function listWithGlob(root: string): Promise<string[]> {
@@ -57,7 +67,9 @@ function skipped(path: string): boolean {
 }
 
 export async function walk(root: string, opts: WalkOptions = {}): Promise<ScannedFile[]> {
-  const listed = (await listWithGit(root)) ?? (await listWithGlob(root));
+  const fromGit = await listWithGit(root);
+  const listed = fromGit?.paths ?? (await listWithGlob(root));
+  const untracked = fromGit?.untracked ?? new Set<string>();
   let paths = listed.map((p) => p.replaceAll('\\', '/')).filter((p) => !skipped(p));
 
   if (opts.include?.length || opts.exclude?.length || opts.ignore?.length) {
@@ -105,6 +117,7 @@ export async function walk(root: string, opts: WalkOptions = {}): Promise<Scanne
         isTest: cls.isTest,
         isDoc: cls.isDoc,
         mtime: Math.floor(st.mtimeMs / 1000),
+        tracked: !untracked.has(path),
       };
     }
   }
