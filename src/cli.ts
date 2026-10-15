@@ -1,4 +1,6 @@
+import { spawn } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { join, resolve } from 'node:path';
 import { Command, Option } from 'commander';
 import { analyze } from './analyze.js';
@@ -11,6 +13,20 @@ import { formatHighlights } from './summary.js';
 import { parseDays } from './util/duration.js';
 
 const VERSION = process.env.REPOVILLE_VERSION ?? '0.0.0-dev';
+
+/** Opens a local file in the default browser without a shell. */
+function openInBrowser(file: string, hash = ''): void {
+  const url = pathToFileURL(resolve(file)).href + (hash ? `#${hash}` : '');
+  const [cmd, args] =
+    process.platform === 'darwin' ? ['open', [url]] : process.platform === 'win32' ? ['rundll32', ['url.dll,FileProtocolHandler', url]] : ['xdg-open', [url]];
+  try {
+    const child = spawn(cmd, args as string[], { stdio: 'ignore', detached: true, shell: false });
+    child.on('error', () => console.error(`  open ${url} in your browser`));
+    child.unref();
+  } catch {
+    console.error(`  open ${url} in your browser`);
+  }
+}
 
 const program = new Command();
 program
@@ -72,9 +88,20 @@ program
     for (const line of formatHighlights(res.highlights, cfg.since)) console.error(`  ${line}`);
     for (const out of res.outputs) console.error(`  wrote ${out.format.padEnd(9)} ${out.file}`);
     console.error(`  done in ${((performance.now() - t0) / 1000).toFixed(1)} s · analysis ran locally, nothing was uploaded`);
+    const html = res.outputs.find((x) => x.format === 'html');
+    if (cfg.open && html) openInBrowser(html.file);
     console.error('');
     console.error('Add this badge to your README:');
     console.log(badgeMarkdown(src.owner, src.repo));
+  });
+
+program
+  .command('tour')
+  .description('open a rendered city.html and fly through its highlights')
+  .argument('<file>', 'a city .html written by repoville')
+  .action((file: string) => {
+    if (!existsSync(file)) throw new Error(`No such file: ${file}`);
+    openInBrowser(file, 'tour');
   });
 
 program
