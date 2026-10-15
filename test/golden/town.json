@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "f4d0ebe32a415767f1594b3295bf5aeca138dbd83e3edf6a56faadf52976151d",
-  "litematicNbtSha256": "a6613c07d81be56eb7da4bf89656df06aee690f2e0f13dece1f830247792af45",
+  "schemNbtSha256": "34d214f2e73ceaa1caef0e364c201813f1fc5f3270c4f1f39868ff050dce0aeb",
+  "litematicNbtSha256": "88bdb2bba596c2fc8cf8cc2a04ca3f23eb7e65b6d8c767c9894f4995c13c0230",
   "summary": {
     "dimensions": [
       69,
@@ -16,7 +16,7 @@
       "minecraft:dirt_path",
       "minecraft:polished_andesite",
       "minecraft:grass_block[snowy=false]",
-      "minecraft:crimson_nylium",
+      "minecraft:blackstone",
       "minecraft:snow_block",
       "minecraft:coarse_dirt",
       "minecraft:smooth_stone",
@@ -99,7 +99,7 @@
       "minecraft:tuff": 358,
       "minecraft:polished_andesite": 117,
       "minecraft:grass_block[snowy=false]": 727,
-      "minecraft:crimson_nylium": 147,
+      "minecraft:blackstone": 147,
       "minecraft:snow_block": 91,
       "minecraft:coarse_dirt": 120,
       "minecraft:smooth_stone": 576,

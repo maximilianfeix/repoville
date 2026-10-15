@@ -29,7 +29,7 @@ export const BLOCK_COLORS: Record<string, number> = {
   'minecraft:lantern': 0xffb54a, 'minecraft:oak_sign': 0xb08f5a, 'minecraft:campfire': 0xff7a1a, 'minecraft:soul_sand': 0x51402f,
   'minecraft:soul_fire': 0x3fd0c9, 'minecraft:cracked_stone_bricks': 0x6e6e6e, 'minecraft:cobweb': 0xe4e4e4,
   'minecraft:white_concrete': 0xcfd5d6, 'minecraft:red_concrete': 0x8e2121, 'minecraft:sea_lantern': 0xd5e6dd,
-  'minecraft:iron_bars': 0x8a8a8a, 'minecraft:smooth_quartz': 0xece6df, 'minecraft:stripped_birch_log': 0xc5b077, 'minecraft:packed_mud': 0x8e6b50, 'minecraft:smooth_red_sandstone': 0xb5621f, 'minecraft:polished_tuff': 0x616862, 'minecraft:calcite': 0xdfe0dc, 'minecraft:light_gray_concrete': 0x7d7d73, 'minecraft:redstone_lamp': 0xd9382b,
+  'minecraft:iron_bars': 0x8a8a8a, 'minecraft:blackstone': 0x2a2329, 'minecraft:smooth_quartz': 0xece6df, 'minecraft:stripped_birch_log': 0xc5b077, 'minecraft:packed_mud': 0x8e6b50, 'minecraft:smooth_red_sandstone': 0xb5621f, 'minecraft:polished_tuff': 0x616862, 'minecraft:calcite': 0xdfe0dc, 'minecraft:light_gray_concrete': 0x7d7d73, 'minecraft:redstone_lamp': 0xd9382b,
   // Overhaul additions (approximate average texture colours).
   'minecraft:smooth_sandstone': 0xe0d6a8, 'minecraft:stripped_oak_log': 0xb29157, 'minecraft:spruce_stairs': 0x725431,   'minecraft:nether_bricks': 0x2c1519, 'minecraft:red_nether_brick_stairs': 0x45070a,
   'minecraft:red_nether_bricks': 0x45070a, 'minecraft:red_nether_brick_slab': 0x45070a, 'minecraft:nether_wart_block': 0x732a20,
