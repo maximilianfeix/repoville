@@ -3,12 +3,15 @@
 Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ## Needs Maxi
+- Post launch/x-post.md on X (image docs/media/hero-react.jpg), or allow browser posting for this session.
+- Upload site-dist/media/social.png (new paper design) as the repo social preview.
 - X launch: which account should post the thread (`launch/x-thread.md`)? Chrome is logged into @44errrr; nothing was posted.
 - `gh auth refresh -h github.com -u maximilianfeix -s workflow` — without it no `.github/workflows/*` can be pushed (CI, Pages workflow).
 - Upload `assets/brand/social-preview.png` as the repo's social preview (Settings → General; no API for it).
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 18:00: redesign after "sieht hässlich aus": Codex wrote docs/brand/MASTER-PROMPT.md from spillage/hexvero/proxy-scraper; calmer render (#107), paper/ink HUD (#108), site + README + brand (#109), v0.14.0 released (#110), site deployed, repo description updated. X post prepared (launch/x-post.md, #111) but posting from the browser was blocked by the auto-mode classifier; no stray likes/posts on @44errrr (checked).
 - 2026-10-16 15:15: mini-map with camera marker and click-to-fly (#105, closes #3). Not released yet. Only v2 issue #8 remains open.
 - 2026-10-16 14:30: docs/BUILDINGS.md with real renders of all nine families (#100, closes #6); home view now backs off until tall building tops are in frame (small repos with one tall file were cut off). Search Home/End/Escape (#102, closes #7). Released v0.13.0 (#103), site redeployed. Open good-first-issues left: #3 mini-map, #8 agents-as-villagers (v2).
 - 2026-10-16 14:00: issue #4 done (#96): Swift/Lua copper town, C#/PHP reef; gravel roof decks replaced by tuff (they fell in game); WorldEdit e2e takes a repo path. Paper: themed repo 118/118, town 158/158 ×3. Released v0.12.0 (#98), site redeployed (theme text).
