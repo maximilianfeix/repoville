@@ -189,6 +189,8 @@ function main() {
   const mcMode = { value: 0 };
   const night = { value: params.get('time') === 'night' ? 1 : 0 };
   const glassLayer = FAMILIES.indexOf('glass');
+  const waterLayer = FAMILIES.indexOf('water');
+  const uTime = { value: 0 };
   let mcLoaded: Promise<void> | null = null;
   function enableMcTextures(on: boolean) {
     if (!on) {
@@ -230,11 +232,13 @@ function main() {
     shader.uniforms.mcMode = mcMode;
     shader.uniforms.night = night;
     shader.uniforms.glassLayer = { value: glassLayer };
+    shader.uniforms.waterLayer = { value: waterLayer };
+    shader.uniforms.uTime = uTime;
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform highp sampler2DArray pixMap;\nuniform highp sampler2D pixLut;\nuniform float pixMode;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform highp sampler2DArray pixMap;\nuniform highp sampler2D pixLut;\nuniform float pixMode;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nuniform float waterLayer;\nuniform float uTime;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>
@@ -263,6 +267,14 @@ function main() {
             vec2 cell = floor(st + 0.001);
             float h = fract(sin(dot(cell, vec2(12.9898, 78.233)) + pid) * 43758.5453);
             if (h < 0.6) diffuseColor.rgb = vec3(1.0, 0.6, 0.24) * (0.8 + 0.6 * h) * 1.7;
+          }
+          // Water surface: two slow crossing ripples and a soft glint where they meet.
+          if (abs(layer - waterLayer) < 0.5 && vUp > 0.5) {
+            vec2 q = (floor(st * 16.0) + 0.5) / 16.0; // snap to the texel grid so ripples stay pixel art
+            float w1 = sin(q.x * 0.37 + q.y * 0.21 + uTime * 0.9);
+            float w2 = sin(q.y * 0.53 - q.x * 0.29 - uTime * 0.6 + w1 * 1.8);
+            float glint = (1.0 - smoothstep(0.0, 0.14, abs(w2))) * (0.55 + 0.45 * w1);
+            diffuseColor.rgb = diffuseColor.rgb * (0.95 + 0.05 * w1) + mix(vec3(0.55, 0.82, 0.95), vec3(1.0, 0.75, 0.45), night) * glint * 0.2;
           }
         }`,
       )
@@ -1190,6 +1202,7 @@ function main() {
       }
       pos.needsUpdate = true;
     }
+    if (!reduceMotion) uTime.value = now / 1000;
     renderer.render(scene, camera);
     placeLabels();
     frames++;
