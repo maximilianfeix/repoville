@@ -17,6 +17,6 @@ Diagnosis: every building had the same proportions (height/side ≈ 2.5), squari
 | 9 | Real per-vertex AO (0fps) | 0fps.net | open |
 | 10 | Golden-hour light: low warm sun, cool fill, matched fog | — | done |
 | 11 | Hero camera aimed at the LOC-weighted downtown, longer lens; screenshot mode | arXiv 2208.05370 (occlusion) | done |
-| 12 | Suburbs as rows along lanes with gardens | — | open |
+| 12 | Suburbs as rows along lanes with gardens | — | done (terraces for folders of small towers) |
 
 Prior art notes: CodeCity validated in a controlled experiment (ICSE 2011) but was criticised for layout instability between versions; CodeCharta lets users assign area/height/colour metrics; Gource's value is motion, not stills.
