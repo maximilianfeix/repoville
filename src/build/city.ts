@@ -1,7 +1,7 @@
 import type { CityLayout, Rect } from '../layout/treemap.js';
 import { files, type CityTree } from '../model/city.js';
 import { buildShell, chooseStyle, type Style } from './building.js';
-import { addFire, addMoss, addRuins, churnThresholds, fireLevel, isMossy, ruinShare, type ChurnThresholds } from './decorators.js';
+import { addCrosswalks, addFire, addMoss, addRuins, churnThresholds, fireLevel, isMossy, ruinShare, type ChurnThresholds } from './decorators.js';
 import { BLOCKS, biomeFor, PALETTES, VARIANTS, type Biome, type Palette } from './palette.js';
 import { fnv1a, mulberry32, rngFor } from './rng.js';
 import { VoxelGrid } from './voxel-grid.js';
@@ -149,6 +149,17 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) if (grid.get(x + dx, 0, z + dz) === roadTop) grid.set(x + dx, 0, z + dz, quay);
   }
 
+  // --- Zebra crossings where streets and lanes open into a junction.
+  addCrosswalks(
+    grid,
+    (x, z) => isRoad(grid.get(x, 0, z)),
+    (x, z) => {
+      const id = grid.get(x, 0, z);
+      return id === roadMid || id === roadLane;
+    },
+    grid.id(BLOCKS.crosswalk),
+  );
+
   // --- Street lamps on sidewalks, on a fixed lattice so spacing stays even.
   const fence = grid.id(BLOCKS.fence);
   const lantern = grid.id(BLOCKS.lantern);
@@ -162,9 +173,22 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
     }
   }
 
-  // --- Plazas: name sign, lamp and planters.
+  // --- Sidewalk wear: a sparse, seeded scatter of worn and patched slabs.
+  const worn = grid.id(BLOCKS.sidewalkWorn);
+  const patch = grid.id(BLOCKS.sidewalkPatch);
+  const wear = mulberry32(fnv1a('sidewalk') ^ seed);
+  for (let i = 0; i < toSidewalk.length; i += 2) {
+    const r = wear();
+    const x = toSidewalk[i]!, z = toSidewalk[i + 1]!;
+    if (r >= 0.08 || grid.get(x, 0, z) !== sidewalk) continue;
+    grid.set(x, 0, z, r < 0.03 ? worn : patch);
+  }
+
+  // --- Plazas: name sign, lamp, then planters that alternate between bench pairs and lawn beds.
   const sign = grid.id(BLOCKS.sign);
   const bush = grid.id(BLOCKS.bush);
+  const bench = grid.id(BLOCKS.bench);
+  const grassId = grid.id(BLOCKS.grass);
   for (const d of layout.districts) {
     if (!d.plaza) continue;
     const x = d.plaza.x0 + 1;
@@ -178,7 +202,23 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
       grid.set(x + 2, 1, z, fence);
       grid.set(x + 2, 2, z, lantern);
     }
-    for (let px = d.plaza.x0 + 5; px < d.plaza.x1 - 1; px += 6) grid.set(px, 1, z, bush);
+    let group = 0;
+    for (let px = d.plaza.x0 + 5; px < d.plaza.x1 - 1; px += 6, group++) {
+      grid.set(px, 1, z, bush);
+      occupied[z * layout.width + px] = 1;
+      if (group % 2 === 1) {
+        // Planter bed: the planter sits in a short strip of lawn.
+        for (let bx = px - 1; bx <= Math.min(px + 1, d.plaza.x1 - 2); bx++) {
+          if (bx === px || grid.get(bx, 1, z) === 0) grid.set(bx, 0, z, grassId);
+        }
+        continue;
+      }
+      for (const sx of [px - 1, px + 1]) {
+        if (sx >= d.plaza.x1 - 1 || occ(sx, z) || grid.get(sx, 1, z) !== 0) continue;
+        grid.set(sx, 1, z, bench);
+        occupied[z * layout.width + sx] = 1;
+      }
+    }
   }
 
   // --- Landmarks: the largest file (by LOC) of each folder with at least three buildings.
@@ -223,7 +263,6 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
   // --- Pocket parks: the space behind street-aligned buildings gets trees,
   // and a pond when there is room. Placement is seeded per lot.
   const water = grid.id(BLOCKS.water);
-  const grassId = grid.id(BLOCKS.grass);
   for (const b of layout.buildings) {
     if (b.kind === 'house') continue;
     const pal = paletteOf(b.file);
