@@ -9,6 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 15:15: mini-map with camera marker and click-to-fly (#105, closes #3). Not released yet. Only v2 issue #8 remains open.
 - 2026-10-16 14:30: docs/BUILDINGS.md with real renders of all nine families (#100, closes #6); home view now backs off until tall building tops are in frame (small repos with one tall file were cut off). Search Home/End/Escape (#102, closes #7). Released v0.13.0 (#103), site redeployed. Open good-first-issues left: #3 mini-map, #8 agents-as-villagers (v2).
 - 2026-10-16 14:00: issue #4 done (#96): Swift/Lua copper town, C#/PHP reef; gravel roof decks replaced by tuff (they fell in game); WorldEdit e2e takes a repo path. Paper: themed repo 118/118, town 158/158 ×3. Released v0.12.0 (#98), site redeployed (theme text).
 - 2026-10-16 12:30: closed stale #5 (--open exists). Linux demo read as a black mass: the sun was behind the home view (every visible face backlit). Three-quarter sun + lighter caves palette (#92). Released v0.11.0 (#94) with re-rendered hero video, demos, README media; site deployed.
