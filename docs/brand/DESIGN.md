@@ -1,54 +1,34 @@
-# Repoville design system
+# Design system
 
-## Idea
-A cartographer's instrument for a city made of code. The city is always the hero; interface chrome is quiet, precise and dark so the warm voxel colours carry the page.
+Since October 2026 repoville follows the same direction as the author's other projects (spillage, hexvero, proxy-scraper): editorial paper, one accent, a large tight headline that states a concrete promise, and real output as the only imagery. The brief that led here is in [MASTER-PROMPT.md](MASTER-PROMPT.md).
 
-## Palette
+## Colour
 
-| Token | Hex | Use |
-|---|---|---|
-| Deepslate | `#23262E` | panels, dark surfaces (page background is the deeper `#191B20`) |
-| Moss | `#4E8C3A` | primary actions, active states, "ok" status (hover `#6FB352`) |
-| Redstone | `#D9382B` | ruins / TODO, destructive or alert states |
-| Lava | `#FF7A1A` | churn / fire, selection outline |
-| Diamond | `#3FD0C9` | links, focus rings, hover outline |
-| Sandstone | `#E8D9A8` | secondary text accents, eyebrows, file stats |
-| Bone | `#F6F1E4` | text on dark |
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| bg | `#F6F3EC` | `#101410` | page and city backdrop (`viewer/stage.ts`) |
+| surface | `#FFFDF8` | `#1B211B` | panels, command boxes |
+| text | `#20231F` | `#F2F1E9` | body and headings |
+| muted | `#596057` | `#B6BDAF` | secondary text |
+| rule | `#D7D9CF` | `#394339` | 1 px separators |
+| accent | `#356449` | `#9CC8A5` | actions, links, selection, focus |
 
-Rules: one accent per component. Lava and Redstone are reserved for the metrics they stand for; never use them decoratively. Text on Deepslate uses Bone (≥ 12:1) or Bone at 66 % (≥ 7:1).
+City colours (fire, moss, cracks, language themes) are data and stay separate from interface colour. The viewer grades block colours (`viewer/grade.ts`) so a frame holds about three material families; fire and selection are the exceptions.
 
 ## Type
 
-| Role | Face | Notes |
-|---|---|---|
-| Wordmark, eyebrows, panel titles | Silkscreen 400 | sparingly, never for running text, ≥ 12 px |
-| Headlines | Inter 800, letter-spacing −0.03em | |
-| UI and body | Inter 400/500/600 | 13 px UI, 17 px web body |
-| Paths, numbers, CLI | JetBrains Mono 400/600 | all file paths and metrics |
+- **Bricolage Grotesque 800** for the wordmark and display headings: `clamp(48px, 8.6vw, 118px)`, line-height .92, tracking −.05em.
+- **System sans** for body and controls, 17 px / 1.55, 52–64 ch measure.
+- **JetBrains Mono** for paths, commands and measured values.
 
-All three are on Google Fonts under the SIL Open Font License. The wordmark is drawn as vector paths, so it does not depend on Silkscreen being loaded.
+## Layout
 
-## Logo
+1120 px wrapper, 24 px gutters (20 px on phones), spacing 8/16/24/40/64/96/112. Asymmetric two-column sections, hairline rules instead of boxes, pill shape only for the primary action.
 
-`assets/brand/`:
+## Mark
 
-| File | Use |
-|---|---|
-| `mark.svg` | avatar, favicon ≥ 32 px, HUD |
-| `favicon.svg` | 16 px |
-| `mark-mono.svg` | single colour (`currentColor`), embossing, print |
-| `wordmark-on-dark.svg` / `wordmark-on-light.svg` | README header (`<picture>` with prefers-color-scheme), site |
-| `social-preview.png` | GitHub social preview, 1280×640, built from a real render |
+Three bars of different heights (`assets/brand/favicon.svg`): muted, text and accent. Drawn as rectangles, no font needed.
 
-The mark: three voxel towers on a sandstone street block; a Diamond git branch runs along the street; one Lava pixel crowns the tallest tower. It is not a grass block and uses no Minecraft textures.
+## Never
 
-Clear space: half the mark's height on every side. Minimum size: 16 px (mark), 180 px wide (wordmark). Do not recolour the towers, rotate the mark, add outlines or effects, or place it on busy imagery without a Deepslate plate.
-
-## Components (viewer)
-- Panels: Deepslate at 90 %, 1 px Bone/12 % border, 6 px radius, no blur-heavy glass.
-- Dock: bottom centre, 36 px targets, icon + label (labels hidden < 720 px).
-- Building card: left border in Lava, facts in a two-column mono grid.
-- Focus: 2 px Diamond outline, 2 px offset. Reduced motion disables camera easing.
-
-## Imagery
-Only real renders. Golden-hour key light from the left-back, cool sky fill, dark background. Hero framing: 3/4 view aimed at the LOC-weighted downtown.
+Gradients, glass, glow, pixel fonts, emoji, stock icons, rainbow districts, identical card grids, scroll reveals, fake terminals, numbers without a source.
