@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1 — 2026-10-16
+
+- **Exports match the game exactly:** stair corners get the inner/outer shapes the game derives, leaves get the right `distance`, and grass under solid blocks is written as dirt. Before this, a WorldEdit paste or live build changed a few blocks on the first block update (found by re-running the Paper 1.21.11 e2e: now WorldEdit 66/66, world 64/64, live 64/64).
+
 ## 0.7.0 — 2026-10-16
 
 - **Roofscapes:** flat roofs get gravel, green or pale decks, stair housings, HVAC units scaled to the roof and timber water tanks; landmark crowns get roof-material caps.
