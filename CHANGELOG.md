@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.2 — 2026-10-16
+
+- **Phones:** the home view looks down more steeply on portrait screens, so the city fills the height, and small screens show at most five district labels.
+- **Docs:** the building-family images use the current look.
+
 ## 0.14.1 — 2026-10-16
 
 - **Quieter roofs:** a burning roof has one fire near its centre with one plume of flames, instead of specks over the whole deck; flat roofs carry one to four rooftop units instead of up to twelve.
