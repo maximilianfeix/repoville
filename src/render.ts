@@ -14,6 +14,7 @@ import { parseDays } from './util/duration.js';
 import { writeLitematic } from './write/litematic.js';
 import { writeWorldZip } from './write/world.js';
 import { renderThumbnail } from './write/thumbnail.js';
+import { readTimeline } from './history/timeline.js';
 import { writeSchem } from './write/schem.js';
 import { writeHtml } from './write/html.js';
 import { badgeMarkdown, SITE } from './badge.js';
@@ -63,7 +64,14 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
   for (const format of cfg.formats) {
     if (format === 'html') {
       const file = join(cfg.out, `${base}.html`);
+      let timeline = null;
+      if (cfg.timelapse) {
+        log('reading line history for the time-lapse');
+        timeline = await readTimeline(src.dir, built.buildings.map((b) => ({ path: b.path, merged: Boolean(b.merged), height: b.height })));
+        lap('timeline');
+      }
       const bytes = writeHtml(file, {
+        timeline,
         city, built, highlights: highlights(city, built.buildings, built.districts), since: cfg.since,
         generator: `repoville ${process.env.REPOVILLE_VERSION ?? 'dev'}`, site: SITE, badge: badgeMarkdown(src.owner, src.repo), textured: cfg.textured,
         source: webBaseFor(src.url),

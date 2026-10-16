@@ -32,6 +32,8 @@ export interface ViewerMeta {
   buildings: BuildingRow[];
   districts: DistrictRow[];
   textured: boolean;
+  /** Optional history time-lapse: frame times and base64 of frames × buildings heights (uint8). */
+  timeline?: { times: number[]; heights: string; colors: number[] } | null;
   /** Files hidden inside LOD towers: [building index, "relative/path\tloc\n…"]. */
   merged?: Array<[number, string]>;
   /** Web view of the repo (GitHub/GitLab) for source links, or null. */

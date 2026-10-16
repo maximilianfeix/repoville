@@ -3,6 +3,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateSync } from 'fflate';
 import { colorOf } from '../build/colors.js';
+import type { Biome } from '../build/palette.js';
+import type { Timeline } from '../history/timeline.js';
 import type { BuiltCity } from '../build/city.js';
 import type { VoxelGrid } from '../build/voxel-grid.js';
 import { files, type CityTree } from '../model/city.js';
@@ -83,7 +85,14 @@ export interface HtmlInput {
   source?: { base: string; host: 'github' | 'gitlab' } | null;
   /** The tree before LOD, used to index files inside merged towers. */
   full?: CityTree;
+  timeline?: Timeline | null;
 }
+
+/** Readable signature colour per theme for the time-lapse blocks. */
+const HISTORY_COLORS: Record<Biome, number> = {
+  nether: 0xb4453c, plains: 0xe0d6a8, jungle: 0x7fb24a, frozen: 0x8fc6e6, badlands: 0xc4673a, caves: 0x8a8f99,
+  cherry: 0xe2a1b8, end: 0xb48ab4, quarry: 0x9a9a9a, library: 0xb08a52, stone: 0xb0b0a8,
+};
 
 /** For each merged tower: the files it stands for, as "relative/path\tloc" lines. */
 function mergedIndex(built: BuiltCity, full: CityTree | undefined): Array<[number, string]> {
@@ -142,6 +151,13 @@ export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
     textured: input.textured,
     source: input.source ?? null,
     merged: mergedIndex(built, input.full),
+    timeline: input.timeline
+      ? {
+          times: input.timeline.times,
+          heights: Buffer.from(input.timeline.heights).toString('base64'),
+          colors: built.buildings.map((b) => HISTORY_COLORS[b.biome]),
+        }
+      : null,
   };
 }
 
@@ -284,6 +300,9 @@ body.ready .progress{opacity:0}
 .foot{position:absolute;right:16px;bottom:30px;max-width:230px;font-size:10.5px;line-height:1.35;color:rgba(246,241,228,.66);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
 .foot a{color:var(--dia);pointer-events:auto}
 .labels{position:absolute;inset:0}
+.timeline{position:absolute;left:50%;top:132px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;width:min(560px,calc(100% - 32px));padding:6px 10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.timeline input{flex:1;accent-color:var(--moss)}
+.timeline span{font:600 12px var(--mono);color:var(--sand);min-width:84px;text-align:right}
 .mc-note{position:absolute;right:16px;bottom:96px;max-width:300px;font-size:11px;color:var(--mute);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
 .mc-note a{color:var(--dia)}
 @media (max-width:720px){.mc-note{bottom:auto;top:62px;right:10px}}

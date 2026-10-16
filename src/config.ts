@@ -18,6 +18,8 @@ export interface RenderConfig {
   textured: boolean;
   open: boolean;
   gallery: boolean;
+  /** Embed a commit-history time-lapse in the viewer (reads line deltas of the whole history). */
+  timelapse: boolean;
   palette?: Partial<Record<Biome, Partial<Palette>>>;
 }
 
@@ -34,6 +36,7 @@ export const DEFAULTS: RenderConfig = {
   textured: false,
   open: false,
   gallery: false,
+  timelapse: false,
 };
 
 export const CONFIG_FILE = 'repoville.config.json';
@@ -58,7 +61,7 @@ const BIOMES = new Set(['nether', 'plains', 'jungle', 'frozen', 'badlands', 'cav
 const SLOTS = new Set(['wall', 'towerWall', 'trim', 'roof', 'roofBlock', 'glass', 'floor', 'ground', 'accent', 'mossyWall', 'treeLog', 'treeLeaves']);
 
 /** Keys a repo's own config file may set. `out` is CLI-only so a repo cannot pick where files are written. */
-const FILE_KEYS = new Set(['format', 'mc', 'maxBuildings', 'since', 'include', 'exclude', 'ignore', 'seed', 'textured', 'palette']);
+const FILE_KEYS = new Set(['format', 'mc', 'maxBuildings', 'since', 'include', 'exclude', 'ignore', 'seed', 'textured', 'timelapse', 'palette']);
 
 /** Reads repoville.config.json from the repo root (if present). Unknown keys are rejected to catch typos. */
 export function readConfigFile(dir: string): Partial<RenderConfig> {
