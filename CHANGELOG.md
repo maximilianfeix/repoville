@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.0 — 2026-10-16
+
+- **Suburb greens:** the space around small houses is lawn with trees instead of the district's road surface (deep folders showed as wide dirt-path areas).
+- **Framing:** the home view includes building height, so a tall tower on a small map is no longer cut off at the top.
+
 ## 0.9.0 — 2026-10-16
 
 - **Terraces:** a folder made mostly of small files (townhouse class) is laid out as rows along lanes, back gardens meeting, files in path order, instead of scattered lots.
