@@ -59,7 +59,7 @@ export function validateBlockState(state: unknown, where: string): string {
   return state;
 }
 
-const BIOMES = new Set(['nether', 'plains', 'jungle', 'frozen', 'badlands', 'caves', 'cherry', 'end', 'quarry', 'library', 'stone']);
+const BIOMES = new Set(['nether', 'plains', 'jungle', 'frozen', 'badlands', 'caves', 'cherry', 'end', 'quarry', 'library', 'stone', 'copper', 'reef']);
 const SLOTS = new Set(['wall', 'towerWall', 'trim', 'roof', 'roofBlock', 'glass', 'floor', 'ground', 'accent', 'mossyWall', 'treeLog', 'treeLeaves']);
 
 /** Keys a repo's own config file may set. `out` is CLI-only so a repo cannot pick where files are written. */

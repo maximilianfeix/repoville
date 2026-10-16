@@ -224,7 +224,7 @@ class Mason {
 
   /**
    * Roof furniture on a flat deck, so a skyline of flat roofs reads as many
-   * buildings instead of one material: gravel, green or pale decks, HVAC
+   * buildings instead of one material: tuff, green or pale decks, HVAC
    * units, a stair housing and, on wider roofs, a timber water tank.
    */
   roofscape(r: Rect, deckTop: number): void {
@@ -234,7 +234,8 @@ class Mason {
     const area = width(inner) * depth(inner);
     const roll = rng();
     const green = this.pal.biome !== 'nether' && this.pal.biome !== 'end';
-    const deck = roll < 0.3 ? 'minecraft:gravel' : roll < 0.48 && green ? 'minecraft:moss_block' : roll < 0.66 ? BLOCKS.roofBox : null;
+    // Tuff, not gravel: decks sit over hollow floors and gravel would fall in game.
+    const deck = roll < 0.3 ? 'minecraft:tuff' : roll < 0.48 && green ? 'minecraft:moss_block' : roll < 0.66 ? BLOCKS.roofBox : null;
     if (deck) this.fill(inner, deckTop - 1, deckTop, deck);
     const free = (x: number, z: number, w: number, d: number) => {
       for (let zz = z; zz < z + d; zz++) for (let xx = x; xx < x + w; xx++) if (this.g.get(xx, deckTop, zz) !== 0) return false;

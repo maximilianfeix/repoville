@@ -1,6 +1,7 @@
 export type Lang =
   | 'rust' | 'typescript' | 'javascript' | 'python' | 'go' | 'java' | 'kotlin'
-  | 'c' | 'cpp' | 'ruby' | 'haskell' | 'fp' | 'shell' | 'config' | 'markdown' | 'other';
+  | 'c' | 'cpp' | 'ruby' | 'haskell' | 'fp' | 'shell' | 'config' | 'markdown'
+  | 'swift' | 'csharp' | 'php' | 'lua' | 'other';
 
 const BY_EXT: Record<string, Lang> = {
   rs: 'rust',
@@ -13,6 +14,7 @@ const BY_EXT: Record<string, Lang> = {
   c: 'c', h: 'c',
   cc: 'cpp', cpp: 'cpp', cxx: 'cpp', hpp: 'cpp', hh: 'cpp', hxx: 'cpp', m: 'c', mm: 'cpp',
   rb: 'ruby', erb: 'ruby', rake: 'ruby',
+  swift: 'swift', cs: 'csharp', csx: 'csharp', php: 'php', phtml: 'php', lua: 'lua', luau: 'lua',
   hs: 'haskell', lhs: 'haskell',
   ml: 'fp', mli: 'fp', elm: 'fp', clj: 'fp', cljs: 'fp', ex: 'fp', exs: 'fp', erl: 'fp', fs: 'fp', fsx: 'fp', purs: 'fp',
   sh: 'shell', bash: 'shell', zsh: 'shell', fish: 'shell', ps1: 'shell', bat: 'shell', cmd: 'shell',

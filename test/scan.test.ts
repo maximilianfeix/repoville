@@ -35,6 +35,10 @@ describe('classify', () => {
     expect(classify('a/b.py').lang).toBe('python');
     expect(classify('Dockerfile').lang).toBe('shell');
     expect(classify('README.md').lang).toBe('markdown');
+    expect(classify('App/View.swift').lang).toBe('swift');
+    expect(classify('src/Program.cs').lang).toBe('csharp');
+    expect(classify('web/index.php').lang).toBe('php');
+    expect(classify('game/init.lua').lang).toBe('lua');
     expect(classify('weird.zzz').lang).toBe('other');
   });
 
