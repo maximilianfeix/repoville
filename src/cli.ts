@@ -31,7 +31,7 @@ function openInBrowser(file: string, hash = ''): void {
 const program = new Command();
 program
   .name('repoville')
-  .description('Walk your codebase. Turn any Git repo into a walkable Minecraft city.')
+  .description('See your repo as a city: folders become districts, files become buildings, git history leaves marks.')
   .version(VERSION);
 
 const collect = (v: string, prev: string[]) => [...prev, ...v.split(',').map((s) => s.trim()).filter(Boolean)];

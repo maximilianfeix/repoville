@@ -1,55 +1,77 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/wordmark-on-dark.svg">
-    <img alt="repoville" src="assets/brand/wordmark-on-light.svg" width="360">
-  </picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/banner-dark.png">
+  <img src="docs/media/banner-light.png" alt="repoville: see your repo as a city. Folders become districts, files become buildings, git history leaves marks." width="100%">
+</picture>
+
+<p>
+  <a href="https://github.com/maximilianfeix/repoville/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/maximilianfeix/repoville?style=flat-square&color=356449&labelColor=20231F"></a>
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-356449?style=flat-square&labelColor=20231F"></a>
+  <a href="#faq"><img alt="Runs locally" src="https://img.shields.io/badge/analysis-local-356449?style=flat-square&labelColor=20231F"></a>
+  <a href="#minecraft"><img alt="Exports .schem, .litematic, world" src="https://img.shields.io/badge/exports-.schem_.litematic_world-356449?style=flat-square&labelColor=20231F"></a>
 </p>
 
-<h3 align="center">Walk your codebase.</h3>
+[Website](https://maximilianfeix.github.io/repoville/) · [Demo](https://maximilianfeix.github.io/repoville/r/facebook/react/) · [Quick start](#quick-start) · [How to read it](#the-legend) · [Exports](#minecraft) · [Options](#options) · [FAQ](#faq)
 
-<p align="center">
-  Repoville turns any Git repository into a city you can walk through in your browser and build in Minecraft.<br>
-  Folders become districts, files become buildings, busy code burns, TODOs crumble and forgotten corners grow moss.
-</p>
+---
 
-<p align="center">
-  <a href="https://github.com/maximilianfeix/repoville/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
-  <a href="https://github.com/maximilianfeix/repoville/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
-</p>
+repoville reads a Git repository and builds it as a city. Every folder is a district, every file a building as tall as its line count, and the last year of commits shows up on the roofs: the busiest files burn, files nobody touched grow moss, TODO comments crack the walls. You get one HTML file you can open, send or host, and the same city as Minecraft blocks if you want to walk it for real.
 
-<p align="center">
-  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><b>Explore React as a city →</b></a> ·
-  <a href="https://maximilianfeix.github.io/repoville/">Website</a> ·
-  <a href="#quick-start">Quick start</a>
-</p>
+<a href="https://maximilianfeix.github.io/repoville/r/facebook/react/#f=packages%2Freact-dom-bindings%2Fsrc%2Fclient%2FReactFiberConfigDOM.js"><img src="docs/media/inspect-busy.jpg" alt="The React repository as a city. The selected tower is ReactFiberConfigDOM.js: 6,581 lines, 42 commits in the last year, fire on the roof." width="100%"></a>
 
-<p align="center">
-  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/flyover.gif" alt="A real recording of the viewer: flying over the facebook/react city, into the burning ReactFiberWorkLoop.js tower (5,268 lines, soul fire, 46 TODOs), then over to react-dom. Rendered with the v2 pixel textures." width="100%"></a>
-</p>
+<sub>facebook/react, with <code>packages/react-dom-bindings/src/client/ReactFiberConfigDOM.js</code> selected: 6,581 lines, 42 commits in the last year. Click to open this exact view.</sub>
 
-<p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">one <code>npx</code> command</a> · <b>Show it off:</b> <code>repoville badge</code></p>
+- **One HTML file.** A 3D viewer with search, building cards, a churn view, history, night mode and photo export. Opens offline; only the web fonts need a connection.
+- **Runs on your machine.** Files and git history are read locally, nothing is uploaded, no telemetry. The city file holds paths and counts, never file contents.
+- **Signals from git.** Height from non-blank lines, fire from commits in the last year, moss after a year without one, cracks from TODO/FIXME/HACK/XXX.
+- **Actual blocks.** `.schem` for WorldEdit, `.litematic` for Litematica, a world folder, or a live build over RCON. Checked on Paper 1.21.11 with WorldEdit 7.3.19.
 
-> Every image here is a real recording or screenshot of the viewer. Click to open the city (one self-contained HTML file).
+## Quick start
 
-## Demos
+Repoville needs **Node.js 22+** and **git**. One command, no install (the npm package is not published yet, so `npx` runs the release tarball):
 
-Every demo is a single HTML file rendered by Repoville. Click a view to jump straight into it.
+```sh
+npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville facebook/react --open
+```
 
-| Repo | City | Night | Churn | More |
-|---|---|---|---|---|
-| facebook/react | [walk](https://maximilianfeix.github.io/repoville/r/facebook/react/) | [night](https://maximilianfeix.github.io/repoville/r/facebook/react/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/facebook/react/?view=churn) | [tour](https://maximilianfeix.github.io/repoville/r/facebook/react/#tour) |
-| torvalds/linux | [walk](https://maximilianfeix.github.io/repoville/r/torvalds/linux/) | [night](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?view=churn) | 96k files in 4k buildings |
-| BurntSushi/ripgrep | [walk](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/) | [night](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?view=churn) | [Minecraft textures](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?mc=1#f=README.md) |
-| pallets/flask | [walk](https://maximilianfeix.github.io/repoville/r/pallets/flask/) | [night](https://maximilianfeix.github.io/repoville/r/pallets/flask/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/pallets/flask/?view=churn) | Python jungle |
-| junegunn/fzf | [walk](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/) | [night](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?view=churn) | Go frozen peaks |
-| repoville | [walk](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/) | [night](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=churn) | [history](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=history) |
+Use `.` for the current folder, `owner/repo`, or any git URL. From source instead:
 
-## What you get
+```sh
+git clone https://github.com/maximilianfeix/repoville && cd repoville
+npm ci && npm run build
+node dist/cli.js facebook/react --open
+```
 
-- **A 3D city in one HTML file.** No Minecraft needed: orbit, fly, search, click a building for its facts, switch to a plain metric view. Pixel textures, soft shadows, ambient occlusion. Works offline and on GitHub Pages (only the web fonts need a connection).
-- **Minecraft exports.** Sponge `.schem` v3 for WorldEdit and `.litematic` for Litematica, targeting Java Edition 1.21.11 by default.
-- **Local and private.** Analysis runs on your machine. Nothing is uploaded, there is no telemetry, and the city file holds paths and counts, never file contents.
+That writes `repoville-out/facebook-react.html` and `repoville-out/facebook-react.schem` and prints a short tour:
+
+```
+repoville: building facebook/react
+  7,165 files · 903,811 LOC · 678 commits · 3,294 buildings on 1024×1024 blocks
+  hottest districts (commits in 1y):
+    packages/react-devtools-shared/src: 125 commits, 3 roofs on fire
+  most ruined buildings (TODO/FIXME/HACK/XXX):
+    packages/react-reconciler/src/ReactFiberCommitWork.js: 73 markers in 5231 lines
+```
+
+### Options
+
+```
+node dist/cli.js [build] <path|owner/repo|url>
+  -o, --out <dir>          output folder (default repoville-out)
+  --format <list>          html,schem,litematic,world,json (default html,schem)
+  --mc <version>           target Minecraft Java version (default 1.21.11)
+  --max-buildings <n>      merge folders into landmark towers above this (default 4000)
+  --since <duration>       churn window: 30d, 6m, 1y (default 1y)
+  --include / --exclude    glob filters, repeatable
+  --seed <n>               decoration seed
+  --ref <commit>           render a specific commit of a remote repo
+  --timelapse              add a History view: the city growing over the git history
+  --diff <ref>             add a Diff view: buildings added/changed since the merge base with <ref>
+node dist/cli.js badge [owner/repo]   print the README badge
+MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
+```
+
+A `repoville.config.json` in a local repo can set `format`, `mc`, `maxBuildings`, `since`, `include`, `exclude`, `ignore`, `seed`, `textured` and `palette` overrides (output folder, `--open` and `--gallery` stay command-line only). Config files inside cloned remote repos are ignored.
+
 
 ## The legend
 
@@ -101,52 +123,18 @@ Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers 
   </tr>
 </table>
 
-## Quick start
+## Demos
 
-Repoville needs **Node.js 22+** and **git**. One command, no install (the npm package is not published yet, so `npx` runs the release tarball):
+Each demo is the HTML file repoville wrote, unchanged.
 
-```sh
-npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville facebook/react --open
-```
-
-Use `.` for the current folder, `owner/repo`, or any git URL. From source instead:
-
-```sh
-git clone https://github.com/maximilianfeix/repoville && cd repoville
-npm ci && npm run build
-node dist/cli.js facebook/react --open
-```
-
-That writes `repoville-out/facebook-react.html` and `repoville-out/facebook-react.schem` and prints a short tour:
-
-```
-repoville: building facebook/react
-  7,165 files · 903,811 LOC · 678 commits · 3,294 buildings on 1024×1024 blocks
-  hottest districts (commits in 1y):
-    packages/react-devtools-shared/src: 125 commits, 3 roofs on fire
-  most ruined buildings (TODO/FIXME/HACK/XXX):
-    packages/react-reconciler/src/ReactFiberCommitWork.js: 73 markers in 5231 lines
-```
-
-### Options
-
-```
-node dist/cli.js [build] <path|owner/repo|url>
-  -o, --out <dir>          output folder (default repoville-out)
-  --format <list>          html,schem,litematic,world,json (default html,schem)
-  --mc <version>           target Minecraft Java version (default 1.21.11)
-  --max-buildings <n>      merge folders into landmark towers above this (default 4000)
-  --since <duration>       churn window: 30d, 6m, 1y (default 1y)
-  --include / --exclude    glob filters, repeatable
-  --seed <n>               decoration seed
-  --ref <commit>           render a specific commit of a remote repo
-  --timelapse              add a History view: the city growing over the git history
-  --diff <ref>             add a Diff view: buildings added/changed since the merge base with <ref>
-node dist/cli.js badge [owner/repo]   print the README badge
-MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
-```
-
-A `repoville.config.json` in a local repo can set `format`, `mc`, `maxBuildings`, `since`, `include`, `exclude`, `ignore`, `seed`, `textured` and `palette` overrides (output folder, `--open` and `--gallery` stay command-line only). Config files inside cloned remote repos are ignored.
+| Repository | Language | Size | Views |
+|---|---|---|---|
+| [facebook/react](https://maximilianfeix.github.io/repoville/r/facebook/react/) | JavaScript | 7,165 files, 903,811 lines | [night](https://maximilianfeix.github.io/repoville/r/facebook/react/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/facebook/react/?view=churn) |
+| [torvalds/linux](https://maximilianfeix.github.io/repoville/r/torvalds/linux/) | C | 95,858 files, 33,779,818 lines | [night](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?view=churn) |
+| [BurntSushi/ripgrep](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/) | Rust | 227 files, 68,267 lines | [night](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?view=churn) |
+| [junegunn/fzf](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/) | Go | 161 files, 53,292 lines | [night](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?view=churn) |
+| [pallets/flask](https://maximilianfeix.github.io/repoville/r/pallets/flask/) | Python | 230 files, 26,369 lines | [night](https://maximilianfeix.github.io/repoville/r/pallets/flask/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/pallets/flask/?view=churn) |
+| [maximilianfeix/repoville](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/) | TypeScript | 135 files, 10,780 lines | [night](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?time=night) · [churn](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=churn) |
 
 ## Publish your repo's city (GitHub Action)
 

@@ -1,7 +1,7 @@
 {
   "name": "repoville",
   "version": "0.13.0",
-  "description": "Walk your codebase. Turn any Git repo into a walkable Minecraft city \u2014 folders are districts, files are buildings, churn burns, TODOs are ruins.",
+  "description": "See your repo as a city: folders become districts, files become buildings, git history leaves its marks. One HTML file, plus Minecraft schematic and world exports.",
   "type": "module",
   "bin": {
     "repoville": "dist/cli.js"
