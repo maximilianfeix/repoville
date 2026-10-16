@@ -47,6 +47,9 @@ export function chooseStyle(b: StyleInput): Style {
   return 'tower';
 }
 
+const LAB_WHITES = ['minecraft:white_concrete', 'minecraft:smooth_quartz', 'minecraft:white_terracotta'];
+const LAB_STRIPES = ['minecraft:light_gray_concrete', 'minecraft:light_blue_concrete', 'minecraft:lime_concrete'];
+
 const slab = (material: string) => `minecraft:${material}_slab[type=bottom,waterlogged=false]`;
 
 function inset(r: Rect, n: number): Rect {
@@ -363,14 +366,18 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
     }
     case 'testlab': {
       // Large test files: a calm white lab block with a red beacon on the roof.
-      const lab: Palette = { ...pal, wall: 'minecraft:calcite', towerWall: 'minecraft:white_concrete', trim: 'minecraft:light_gray_concrete', floor: 'minecraft:smooth_stone' };
+      // Each lab picks one of a few whites and an accent stripe, so a district of labs is not one flat field.
+      const white = LAB_WHITES[Math.floor(rng() * LAB_WHITES.length)]!;
+      const stripe = LAB_STRIPES[Math.floor(rng() * LAB_STRIPES.length)]!;
+      const lab: Palette = { ...pal, wall: 'minecraft:calcite', towerWall: white, trim: 'minecraft:light_gray_concrete', floor: 'minecraft:smooth_stone' };
       const lm = new Mason(g, lab, rng);
-      lm.shell(fp, 1, H + 1, lab.towerWall, { window: grid((y) => y % 3 === 1), band: (y) => (y % 9 === 0 ? lab.trim : null) });
+      lm.shell(fp, 1, H + 1, lab.towerWall, { window: grid((y) => y % 3 === 1), band: (y) => (y % 9 === 0 ? stripe : null) });
       lm.floors(fp, 4, H + 1, 3);
       lm.door(fp);
       const deck = lm.flatRoof(fp, H + 1, lab.floor, lab.trim);
       lm.put(fp.x0 + Math.floor(width(fp) / 2), deck, fp.z0 + Math.floor(depth(fp) / 2), BLOCKS.lighthouseB);
       lm.put(fp.x0 + Math.floor(width(fp) / 2), deck + 1, fp.z0 + Math.floor(depth(fp) / 2), 'minecraft:redstone_lamp[lit=true]');
+      lm.roofscape(fp, deck);
       m.walls.push(...lm.walls);
       m.top = Math.max(m.top, lm.top);
       break;
@@ -480,8 +487,9 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
   }
 
   // Later steps (doors, columns, roofs) may have replaced some wall cells.
-  const plain = new Set([g.id(pal.wall), g.id(pal.towerWall), g.id(BLOCKS.lighthouseA), g.id('minecraft:white_concrete')]);
-  plain.delete(g.id(pal.trim));
-  const walls = m.walls.filter((c) => plain.has(g.get(c.x, c.y, c.z)));
+  // Compare by name so checking never registers unused states in the export palette.
+  const plain = new Set<string>([pal.wall, pal.towerWall, BLOCKS.lighthouseA, ...LAB_WHITES]);
+  plain.delete(pal.trim);
+  const walls = m.walls.filter((c) => plain.has(g.state(c.x, c.y, c.z)));
   return { walls, height: H, topY: m.top };
 }
