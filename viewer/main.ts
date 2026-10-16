@@ -669,7 +669,7 @@ function main() {
     labelLayer.append(node);
     let top = 0;
     for (const b of m.buildings) if (b[0].startsWith(d[0] + '/')) top = Math.max(top, b[5]);
-    return { node, pos: new Vector3((d[2] + d[4]) / 2 + ox, Math.min(top + 8, 70), (d[3] + d[5]) / 2 + oz), path: d[0] };
+    return { node, pos: new Vector3((d[2] + d[4]) / 2 + ox, Math.min(top + 8, 70), (d[3] + d[5]) / 2 + oz), path: d[0], size: null as [number, number] | null };
   });
   // Keyboard-reachable list of the same districts the floating labels show.
   drawer.querySelector('#rv-districts')!.innerHTML = labelDistricts
@@ -681,12 +681,25 @@ function main() {
     const w = window.innerWidth;
     const hh = window.innerHeight;
     const dist = camera.position.distanceTo(orbit.target);
+    // Labels come sorted by district area; a smaller district's label yields when it would overlap.
+    const placed: Array<[number, number, number, number]> = [];
     for (const l of labels) {
       projected.copy(l.pos).project(camera);
-      const visible = showLabels && !fly.isLocked && projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05;
-      const near = camera.position.distanceTo(l.pos) < dist * 2.2;
-      l.node.style.display = visible && near ? 'block' : 'none';
-      if (visible && near) l.node.style.transform = `translate(${((projected.x + 1) / 2) * w}px, ${((1 - projected.y) / 2) * hh}px) translate(-50%, -100%)`;
+      let show = showLabels && !fly.isLocked && projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05 && camera.position.distanceTo(l.pos) < dist * 2.2;
+      const x = ((projected.x + 1) / 2) * w;
+      const y = ((1 - projected.y) / 2) * hh;
+      if (show) {
+        if (!l.size) {
+          l.node.style.display = 'block';
+          l.size = [l.node.offsetWidth, l.node.offsetHeight];
+        }
+        const [lw, lh] = l.size;
+        const r: [number, number, number, number] = [x - lw / 2 - 4, y - lh - 2, x + lw / 2 + 4, y + 2];
+        if (placed.some((p) => r[0] < p[2] && r[2] > p[0] && r[1] < p[3] && r[3] > p[1])) show = false;
+        else placed.push(r);
+      }
+      l.node.style.display = show ? 'block' : 'none';
+      if (show) l.node.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
     }
   }
   labelLayer.addEventListener('click', (e) => {
