@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.0 — 2026-10-16
+
+- **New themes:** Swift and Lua build a copper town (waxed copper, so worlds never oxidise it), C# and PHP a prismarine reef on sand. These languages used to fall back to plain stone.
+- **Exports:** roof decks use tuff instead of gravel, which fell into hollow floors once the game updated it.
+
 ## 0.11.0 — 2026-10-16
 
 - **Lighting:** the sun now lights the facades the home view sees (it used to sit behind them, so every visible wall was in shade). Towers read as lit and shaded faces; dark themes are legible.
