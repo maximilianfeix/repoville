@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "cd9e7e5a10bf62ecfce821e014047367818d5d70dda23cdb595ef1143650b72d",
-  "litematicNbtSha256": "9e2945c42c89e6314516508e9fe832a7d4c75d11c1efde461e6f3003c08314eb",
+  "schemNbtSha256": "7884a83d6ae22941fda578525faf0f2fe2c31ea3456e1ba12762ba03cfd0b75d",
+  "litematicNbtSha256": "b3e59156bb823e6f32bc6bf8fe530a3f2c50703a8b05cc1a3a1206e3f7e325b0",
   "summary": {
     "dimensions": [
       69,
@@ -80,7 +80,6 @@
       "minecraft:jungle_planks",
       "minecraft:jungle_log[axis=y]",
       "minecraft:lime_stained_glass",
-      "minecraft:mud_bricks",
       "minecraft:birch_planks",
       "minecraft:red_concrete",
       "minecraft:iron_bars[east=false,north=false,south=false,waterlogged=false,west=false]",
