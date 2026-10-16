@@ -5,7 +5,7 @@ import { deflateSync } from 'fflate';
 import { colorOf } from '../build/colors.js';
 import type { BuiltCity } from '../build/city.js';
 import type { VoxelGrid } from '../build/voxel-grid.js';
-import type { CityTree } from '../model/city.js';
+import { files, type CityTree } from '../model/city.js';
 import type { Highlights } from '../summary.js';
 import { encodePayload, type ViewerMeta } from '../../viewer/format.js';
 
@@ -81,6 +81,32 @@ export interface HtmlInput {
   badge: string;
   textured: boolean;
   source?: { base: string; host: 'github' | 'gitlab' } | null;
+  /** The tree before LOD, used to index files inside merged towers. */
+  full?: CityTree;
+}
+
+/** For each merged tower: the files it stands for, as "relative/path\tloc" lines. */
+function mergedIndex(built: BuiltCity, full: CityTree | undefined): Array<[number, string]> {
+  if (!full) return [];
+  const towers = new Map<string, number>();
+  built.buildings.forEach((b, i) => b.merged && towers.set(b.path, i));
+  if (!towers.size) return [];
+  const lines = new Map<number, string[]>();
+  for (const f of files(full.root)) {
+    // Walk up the folder chain until a merged tower is found.
+    let p = f.path;
+    for (let cut = p.lastIndexOf('/'); cut > 0; cut = p.lastIndexOf('/')) {
+      p = p.slice(0, cut);
+      const i = towers.get(p);
+      if (i !== undefined) {
+        const list = lines.get(i) ?? [];
+        list.push(`${f.path.slice(p.length + 1)}\t${f.loc}`);
+        lines.set(i, list);
+        break;
+      }
+    }
+  }
+  return [...lines.entries()].sort((a, b) => a[0] - b[0]).map(([i, l]) => [i, l.join('\n')]);
 }
 
 export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
@@ -115,6 +141,7 @@ export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
     districts: built.districts.map((d) => [d.path, d.depth, d.x0, d.z0, d.x1, d.z1]),
     textured: input.textured,
     source: input.source ?? null,
+    merged: mergedIndex(built, input.full),
   };
 }
 
@@ -247,6 +274,7 @@ body.ready .progress{opacity:0}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .tag{font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid}
 .tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}.tag.gold{color:#f6d03d;border-color:rgba(246,208,61,.5)}
+.inner-note{font:12px var(--mono);color:var(--sand);margin:-4px 0 8px;word-break:break-all}
 .card-a{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .card-a a.small{text-decoration:none;color:var(--dia)}
 .tip{position:absolute;left:0;top:0;display:none;padding:5px 8px;background:var(--panel-solid);border:1px solid var(--line-hi);border-radius:5px;font-size:12px;white-space:nowrap}

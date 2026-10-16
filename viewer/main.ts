@@ -741,6 +741,12 @@ function main() {
     const t = (e.target as HTMLElement).closest<HTMLElement>('[data-path]');
     if (!t) return;
     focusPath(t.dataset.path!);
+    if (t.dataset.inner) {
+      // A file inside a merged tower: say so on the card.
+      const note = el('div', { class: 'inner-note' });
+      note.textContent = `Contains ${t.dataset.inner.split('/').pop()} · ${fmt(Number(t.dataset.loc))} lines (${t.dataset.inner})`;
+      card.querySelector('.path-full')?.after(note);
+    }
     if (window.innerWidth < 720) setDrawer(false);
     matches.hidden = true;
   });
@@ -748,6 +754,20 @@ function main() {
   // ---------- Search ----------
   const search = dock.querySelector<HTMLInputElement>('#rv-search')!;
   const allDistricts = m.districts.map((d) => d[0]).filter(Boolean);
+  // Files inside merged towers, decoded lazily on the first search.
+  let hidden: Array<{ path: string; loc: number; tower: number }> | null = null;
+  const hiddenFiles = () => {
+    if (hidden) return hidden;
+    hidden = [];
+    for (const [tower, text] of m.merged ?? []) {
+      const base = m.buildings[tower]![0];
+      for (const line of text.split('\n')) {
+        const tab = line.lastIndexOf('\t');
+        hidden.push({ path: `${base}/${line.slice(0, tab)}`, loc: Number(line.slice(tab + 1)), tower });
+      }
+    }
+    return hidden;
+  };
   search.addEventListener('input', () => {
     const q = search.value.trim().toLowerCase();
     if (q.length < 2) {
@@ -756,9 +776,11 @@ function main() {
     }
     const ds = allDistricts.filter((d) => d.toLowerCase().includes(q)).slice(0, 4);
     const fs = m.buildings.filter((b) => b[0].toLowerCase().includes(q)).slice(0, 10);
+    const hs = fs.length < 10 ? hiddenFiles().filter((h) => h.path.toLowerCase().includes(q)).slice(0, 10 - fs.length) : [];
     matches.innerHTML = [
       ...ds.map((d) => `<li role="option"><button class="path" data-path="${esc(d)}"><i>folder</i>${esc(d)}/</button></li>`),
       ...fs.map((b) => `<li role="option"><button class="path" data-path="${esc(b[0])}"><i>${compact(b[6])} ln</i>${esc(b[0])}</button></li>`),
+      ...hs.map((h) => `<li role="option"><button class="path" data-path="${esc(m.buildings[h.tower]![0])}" data-inner="${esc(h.path)}" data-loc="${h.loc}"><i>in tower</i>${esc(h.path)}</button></li>`),
     ].join('') || '<li class="none">No match</li>';
     matches.hidden = false;
   });

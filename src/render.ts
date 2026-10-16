@@ -67,6 +67,7 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
         city, built, highlights: highlights(city, built.buildings, built.districts), since: cfg.since,
         generator: `repoville ${process.env.REPOVILLE_VERSION ?? 'dev'}`, site: SITE, badge: badgeMarkdown(src.owner, src.repo), textured: cfg.textured,
         source: webBaseFor(src.url),
+        full,
       });
       outputs.push({ format, file, bytes });
     } else if (format === 'schem') {
