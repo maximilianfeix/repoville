@@ -9,7 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
-- 2026-10-16 09:45: terraces for folders of small towers (#81, research #12 done after a planning agent); golden unchanged by keeping d3 insertion order. Next: v0.9.0 with #79 + #81 and re-rendered demos.
+- 2026-10-16 09:45: terraces for folders of small towers (#81, research #12 done after a planning agent); golden unchanged by keeping d3 insertion order. Released as v0.9.0 (#83) with re-rendered demos, README media, flyover; site deployed.
 - 2026-10-16 08:30: tried recessed punched windows on test labs; rejected after before/after renders (single inset cells lose the glass colour, read as white notches). Kept the shared `Mason.recessGlass` refactor (#77). Test-lab districts then varied via whites, accent stripes and roofscapes (#79); not released yet.
 - 2026-10-16 07:30: midrise ribbon windows (recessed), bar/fence connections in settle, e2e now checks every distinct block state (#73): Paper WorldEdit/world/live 159/159 each. Released in v0.8.0 (#75) with re-rendered demos, README media and flyover; site deployed.
 - 2026-10-16 07:00: facade research (viewer meshes stairs/slabs as cubes → depth only from whole-block offsets); wide towers get piers, glass strips and a cornice (#71). Next: ribbon windows on midrises, recessed punched windows on testlabs (research #3).
