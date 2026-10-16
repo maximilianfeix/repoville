@@ -9,7 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
-- 2026-10-16 14:00: issue #4 done (#96): Swift/Lua copper town, C#/PHP reef; gravel roof decks replaced by tuff (they fell in game); WorldEdit e2e takes a repo path. Paper: themed repo 118/118, town 158/158 ×3. Not released yet.
+- 2026-10-16 14:00: issue #4 done (#96): Swift/Lua copper town, C#/PHP reef; gravel roof decks replaced by tuff (they fell in game); WorldEdit e2e takes a repo path. Paper: themed repo 118/118, town 158/158 ×3. Released v0.12.0 (#98), site redeployed (theme text).
 - 2026-10-16 12:30: closed stale #5 (--open exists). Linux demo read as a black mass: the sun was behind the home view (every visible face backlit). Three-quarter sun + lighter caves palette (#92). Released v0.11.0 (#94) with re-rendered hero video, demos, README media; site deployed.
 - 2026-10-16 11:00: reviewed the other demos; Flask tests/test_apps was a dirt-path wasteland (suburb space kept the deep road surface). Suburb greens with lawns and trees (#87), Paper e2e 159/159. Height-aware home framing (fzf tower was cropped, #89). Released v0.10.0 (#90), site redeployed.
 - 2026-10-16 10:30: landing hero video was still the 02:58 recording (pre-v2 textures); re-recorded from the real viewer (#85), site redeployed. Landing page checked at 1440 and 390 px (no overflow). Repo metadata already complete (20 topics).
