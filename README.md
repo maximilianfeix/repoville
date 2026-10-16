@@ -13,6 +13,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/maximilianfeix/repoville/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
+  <a href="https://github.com/maximilianfeix/repoville/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/maximilianfeix/repoville?color=4E8C3A&labelColor=23262E"></a>
+</p>
+
+<p align="center">
   <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><b>Explore React as a city →</b></a> ·
   <a href="https://maximilianfeix.github.io/repoville/">Website</a> ·
   <a href="#quick-start">Quick start</a>
@@ -25,6 +31,19 @@
 <p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">one <code>npx</code> command</a> · <b>Show it off:</b> <code>repoville badge</code></p>
 
 > Every image here is a real recording or screenshot of the viewer. Click to open the city (one self-contained HTML file).
+
+## Demos
+
+Every demo is a single HTML file rendered by Repoville. Click a view to jump straight into it.
+
+| Repo | City | Night | Churn | More |
+|---|---|---|---|---|
+| facebook/react | [walk](https://maximilianfeix.github.io/repoville/r/facebook/react/) | [night](https://maximilianfeix.github.io/repoville/r/facebook/react/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/facebook/react/?view=churn) | [tour](https://maximilianfeix.github.io/repoville/r/facebook/react/#tour) |
+| torvalds/linux | [walk](https://maximilianfeix.github.io/repoville/r/torvalds/linux/) | [night](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/torvalds/linux/?view=churn) | 96k files in 4k buildings |
+| BurntSushi/ripgrep | [walk](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/) | [night](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?view=churn) | [Minecraft textures](https://maximilianfeix.github.io/repoville/r/BurntSushi/ripgrep/?mc=1#f=README.md) |
+| pallets/flask | [walk](https://maximilianfeix.github.io/repoville/r/pallets/flask/) | [night](https://maximilianfeix.github.io/repoville/r/pallets/flask/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/pallets/flask/?view=churn) | Python jungle |
+| junegunn/fzf | [walk](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/) | [night](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/junegunn/fzf/?view=churn) | Go frozen peaks |
+| repoville | [walk](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/) | [night](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?time=night) | [churn](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=churn) | [history](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=history) |
 
 ## What you get
 
