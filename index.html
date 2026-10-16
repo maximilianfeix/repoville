@@ -3,263 +3,324 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Repoville · Walk your codebase</title>
-<meta name="description" content="Repoville turns any Git repository into a voxel city you can walk through in your browser and build in Minecraft. Folders are districts, files are buildings, churn burns, TODOs crumble.">
-<meta property="og:title" content="Repoville · Walk your codebase">
-<meta property="og:description" content="Turn any Git repo into a walkable voxel city. Runs locally.">
+<title>repoville: see your repo as a city</title>
+<meta name="description" content="repoville turns a Git repository into a city you can open in your browser: folders become districts, files become buildings, git history leaves its marks. Runs locally. Exports to Minecraft schematics and worlds.">
+<meta property="og:title" content="repoville: see your repo as a city">
+<meta property="og:description" content="Folders become districts, files become buildings, git history leaves its marks. One HTML file, made on your machine.">
 <meta property="og:image" content="https://maximilianfeix.github.io/repoville/media/social.png">
+<meta property="og:url" content="https://maximilianfeix.github.io/repoville/">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F6F3EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101410" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>try{const t=localStorage.getItem('rv-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
-:root{--bg:#191b20;--deep:#23262E;--card:#20232a;--moss:#4E8C3A;--moss-hi:#6fb352;--red:#D9382B;--lava:#FF7A1A;--dia:#3FD0C9;--sand:#E8D9A8;--bone:#F6F1E4;--mute:rgba(246,241,228,.7);--line:rgba(246,241,228,.12);--mono:'JetBrains Mono',ui-monospace,monospace;--px:Silkscreen,var(--mono);--wrap:min(1160px,calc(100% - 40px))}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--bone);font:17px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:var(--dia)}
-img{max-width:100%;display:block}
-code{font:.9em var(--mono);color:var(--sand)}
-:focus-visible{outline:2px solid var(--dia);outline-offset:3px}
-.wrap{width:var(--wrap);margin:0 auto}
-.nav{position:absolute;inset:0 0 auto;z-index:3}
-.nav .wrap{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--bone);font:400 16px var(--px)}
-.logo img{width:36px;height:36px}
-.nav nav{display:flex;gap:22px;font-size:15px}
-.nav nav a{color:var(--bone);text-decoration:none;opacity:.85}
-.nav nav a:hover{opacity:1;text-decoration:underline}
-.hero{position:relative;min-height:min(92vh,900px);display:flex;align-items:flex-end;overflow:hidden;background:#15171b}
-.hero .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 50%}
-.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(21,23,27,.94) 0%,rgba(21,23,27,.72) 34%,rgba(21,23,27,0) 64%),linear-gradient(0deg,var(--bg) 0%,rgba(25,27,32,0) 26%)}
-.hero .wrap{position:relative;z-index:2;padding:0 0 84px}
-.hero img.portrait{display:none}
-.eyebrow{font:400 16px var(--px);color:var(--sand);margin:0 0 16px}
-h1{font:800 clamp(46px,7vw,90px)/.98 Inter,sans-serif;letter-spacing:-.035em;margin:0 0 20px;max-width:11ch}
-.lede{font-size:clamp(17px,1.6vw,20px);color:var(--mute);max-width:38ch;margin:0 0 30px}
-.lede b{color:var(--bone);font-weight:600}
-.ctas{display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:8px;font-weight:600;text-decoration:none;font-size:16px;border:1px solid transparent}
-.btn.primary{background:var(--moss);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 8px 24px rgba(78,140,58,.35)}
-.btn.primary:hover{background:#579c41}
-.btn.ghost{color:var(--bone);border-color:rgba(246,241,228,.32)}
-.btn.ghost:hover{border-color:var(--bone)}
-.note{margin-top:18px;font:13px var(--mono);color:var(--mute)}
-section{padding:88px 0}
-h2{font:800 clamp(30px,4vw,46px)/1.05 Inter,sans-serif;letter-spacing:-.03em;margin:0 0 14px}
-.sub{color:var(--mute);max-width:58ch;margin:0 0 36px}
-.kicker{font:600 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--moss-hi);margin:0 0 14px}
-.demos{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-.demo{position:relative;border-radius:10px;overflow:hidden;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--bone);grid-column:span 4;transition:transform .2s ease,border-color .2s}
-#demos .demo.big{grid-column:span 8;grid-row:span 2}
-.demo:hover{transform:translateY(-3px);border-color:rgba(63,208,201,.5)}
-.demo img{width:100%;aspect-ratio:16/10;object-fit:cover}
-#demos .demo.big img{height:100%;aspect-ratio:auto}
-.demo .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;background:linear-gradient(0deg,rgba(18,20,24,.92),rgba(18,20,24,0))}
-.demo .cap b{font:600 15px var(--mono);display:block}
-.demo .cap span{font-size:13px;color:var(--mute)}
-.demo .walk{position:absolute;top:12px;right:12px;font:600 12px var(--mono);background:rgba(18,20,24,.82);border:1px solid var(--line);padding:4px 8px;border-radius:5px;color:var(--dia)}
-.compare{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/10;background:#15171b;--x:50%}
-.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.compare .after{clip-path:inset(0 0 0 var(--x))}
-.compare .bar{position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--bone);box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
-.compare .bar::after{content:'⟷';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bone);color:var(--deep);font:700 14px var(--mono);border-radius:50%;width:34px;height:34px;display:grid;place-items:center}
-.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
-.compare:focus-within{outline:2px solid var(--dia);outline-offset:3px}
-.compare .tag{position:absolute;top:12px;font:600 12px var(--mono);background:rgba(18,20,24,.85);border:1px solid var(--line);border-radius:5px;padding:4px 8px}
-.compare .tag.l{left:12px}.compare .tag.r{right:12px}
-.fine{font-size:13px;color:var(--mute);margin-top:12px}
-.map{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.map div{background:var(--bg);padding:24px}
-.map dt{display:flex;align-items:center;gap:12px;font-weight:600;margin-bottom:6px}
-.map dd{margin:0;color:var(--mute);font-size:15px}
-.sw{width:24px;height:24px;border-radius:3px;flex:none;image-rendering:pixelated;box-shadow:0 0 0 1px rgba(246,241,228,.18)}
-.honest{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-top:56px}
-.honest img{border-radius:10px;border:1px solid var(--line)}
-.honest ul{margin:0;padding:0;list-style:none}
-.honest li{margin:0 0 14px;color:var(--mute)}
-.honest b{color:var(--bone)}
-.formats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.fmt{border:1px solid var(--line);border-radius:10px;padding:22px;background:var(--card)}
-.fmt h3{margin:0 0 4px;font:600 16px var(--mono);color:var(--sand)}
-.fmt p{margin:0 0 12px;color:var(--mute);font-size:15px}
-.status{font:600 11px var(--mono);padding:3px 8px;border-radius:4px;display:inline-block;color:var(--moss-hi);border:1px solid rgba(78,140,58,.6)}
-.split{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:start}
-pre{margin:0;background:#121418;border:1px solid var(--line);border-radius:10px;padding:22px 24px;overflow:auto;font:14px/1.7 var(--mono);color:var(--bone)}
-pre .c{color:rgba(246,241,228,.62)}
-pre .o{color:var(--sand)}
-pre .p{color:var(--moss-hi);user-select:none}
-.trust{margin-top:28px;display:grid;gap:14px}
-.trust div{display:flex;gap:12px}
-.trust b{display:block}
-.trust span{color:var(--mute);font-size:15px}
-.trust i{flex:none;width:8px;height:8px;margin-top:9px;border-radius:2px;background:var(--moss)}
-.cta{text-align:center;border-top:1px solid var(--line)}
-.cta .ctas{justify-content:center}
-footer{border-top:1px solid var(--line);padding:36px 0 48px;font-size:13px;color:var(--mute)}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-footer .legal{font:11px var(--mono);letter-spacing:.02em;max-width:60ch}
-@media (max-width:900px){.demo,#demos .demo.big{grid-column:span 6;grid-row:auto}#demos .demo.big img{aspect-ratio:16/10}.map{grid-template-columns:1fr 1fr}.split,.honest{grid-template-columns:1fr}.formats{grid-template-columns:1fr 1fr}.nav nav a:not(.gh){display:none}}
-@media (max-width:560px){
- section{padding:60px 0}.demo,#demos .demo.big{grid-column:span 12}.map,.formats{grid-template-columns:1fr}
- .hero{min-height:auto;display:block;padding-top:70px}
- .hero .bg{position:static;height:auto;aspect-ratio:4/3;object-position:40% 60%}
- .hero img.bg,.hero video.bg{display:none}
- .hero img.portrait{display:block;aspect-ratio:4/5;object-position:50% 40%}
- .hero::after{display:none}
- .hero .wrap{padding:28px 0 40px}
- h1{font-size:44px}
+:root{
+  --bg:#F6F3EC;--surface:#FFFDF8;--text:#20231F;--muted:#596057;--rule:#D7D9CF;--accent:#356449;--accent-ink:#FFFDF8;--plate:#E9E5DB;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.hero video.bg{display:none}.hero img.bg{display:block!important}}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#101410;--surface:#1B211B;--text:#F2F1E9;--muted:#B6BDAF;--rule:#394339;--accent:#9CC8A5;--accent-ink:#101410;--plate:#1B211B;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#101410;--surface:#1B211B;--text:#F2F1E9;--muted:#B6BDAF;--rule:#394339;--accent:#9CC8A5;--accent-ink:#101410;--plate:#1B211B;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--text);scroll-behavior:smooth}
+body{margin:0;font:17px/1.55 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:3px}
+a:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+code{font-family:var(--mono);font-size:.88em}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.skip{position:absolute;left:-999px}.skip:focus{left:24px;top:12px;background:var(--text);color:var(--bg);padding:6px 10px;border-radius:6px;z-index:9}
+
+/* top */
+header nav{display:flex;align-items:center;gap:24px;padding:26px 0;font-size:15px}
+.brand{display:flex;align-items:center;gap:10px;font:800 21px/1 var(--display);letter-spacing:-.02em;text-decoration:none;margin-right:auto}
+.brand svg{width:22px;height:22px}
+header nav a:not(.brand):not(.star){color:var(--muted);text-decoration:none}
+header nav a:not(.brand):not(.star):hover{color:var(--text)}
+.star{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;border:1px solid var(--rule);border-radius:999px;min-height:40px;padding:0 15px 0 13px;background:var(--surface)}
+.star:hover{border-color:var(--accent);color:var(--text)}
+.star svg{width:15px;height:15px;fill:currentColor}
+.theme{background:none;border:1px solid var(--rule);border-radius:999px;width:40px;height:40px;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.theme:hover{color:var(--text);border-color:var(--muted)}
+.theme svg{width:16px;height:16px}
+
+/* hero */
+.hero{padding:56px 0 0}
+h1{font:800 clamp(48px,8.6vw,118px)/.92 var(--display);letter-spacing:-.05em;margin:0;max-width:10ch;font-variation-settings:"opsz" 96}
+.lede{max-width:52ch;font-size:21px;line-height:1.5;color:var(--muted);margin:30px 0 0}
+.lede b{color:var(--text);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin:34px 0 0}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;text-decoration:none}
+.btn:hover{color:var(--accent-ink);filter:brightness(1.08)}
+.quiet{color:var(--muted)}
+
+/* the one moment: pick a file, see its building */
+.inspect{display:grid;grid-template-columns:300px 1fr;margin:64px 0 0;border-top:1px solid var(--text)}
+.pick{display:flex;flex-direction:column;border-right:1px solid var(--rule)}
+.pick button{all:unset;box-sizing:border-box;cursor:pointer;display:block;padding:18px 22px 18px 0;border-bottom:1px solid var(--rule);color:var(--muted)}
+.pick button span{display:block;font:700 19px/1.2 var(--display);letter-spacing:-.01em;margin-bottom:6px}
+.pick button code{display:block;font-size:12.5px;line-height:1.45;overflow-wrap:anywhere}
+.pick button code i{font-style:normal;opacity:.7}
+.pick button code b{font-weight:600}
+.pick button[aria-selected=true]{color:var(--text);box-shadow:inset -3px 0 0 var(--accent)}
+.pick button:hover{color:var(--text)}
+.pick button:focus-visible{outline-offset:-2px}
+.inspect figure{margin:0;min-width:0}
+.inspect .shot{display:block;background:var(--plate)}
+.inspect .shot img{aspect-ratio:14/9;object-fit:cover;width:100%;transition:opacity .2s ease}
+.inspect figcaption{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:18px 0 0 24px}
+.inspect dl{display:grid;grid-template-columns:repeat(6,auto);gap:4px 24px;margin:0}
+.inspect dt{font-size:12px;color:var(--muted);white-space:nowrap}
+.inspect dd{margin:2px 0 0;font:600 15px var(--mono);white-space:nowrap}
+.open{font-weight:600;white-space:nowrap}
+.prov{font-size:13px;color:var(--muted);margin:14px 0 0}
+
+/* sections */
+section{padding:112px 0 0}
+h2{font:800 clamp(34px,4.6vw,56px)/1 var(--display);letter-spacing:-.04em;margin:0;max-width:14ch}
+.sub{max-width:60ch;color:var(--muted);margin:18px 0 0}
+.split{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:start}
+.split>*,.inspect>*{min-width:0}
+
+.cmd{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:10px 10px 10px 18px;max-width:100%}
+.cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font-size:14.5px;padding:6px 0}
+.cmd code::before{content:"$ ";color:var(--muted)}
+.cmd button{flex:none;font:600 13px var(--sans);background:var(--text);color:var(--bg);border:0;border-radius:7px;min-height:40px;padding:0 15px;cursor:pointer}
+.note{font-size:15px;color:var(--muted);margin:14px 0 0;max-width:64ch}
+.out{margin:28px 0 0;font:12.5px/1.75 var(--mono);color:var(--muted);border-left:2px solid var(--rule);padding:2px 0 2px 18px;white-space:pre;overflow-x:auto}
+.out b{color:var(--text);font-weight:600}
+.out i{font-style:normal;color:var(--accent)}
+
+table.map{width:100%;border-collapse:collapse;font-size:16px}
+.map th,.map td{text-align:left;padding:15px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.map th{font-weight:600;width:42%;padding-right:20px}
+.map td{color:var(--muted)}
+.map tr:first-child th,.map tr:first-child td{border-top:1px solid var(--text)}
+.fine{font-size:15px;color:var(--muted);margin:20px 0 0;max-width:62ch}
+
+.lead-demo{display:block;margin:40px 0 0;text-decoration:none}
+.lead-demo img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--plate)}
+.lead-demo>span{display:flex;justify-content:space-between;gap:16px;padding:14px 0 0;font-size:15px}
+.lead-demo b{font-family:var(--mono);font-weight:600}
+.rows{margin:28px 0 0;border-top:1px solid var(--text)}
+.row{display:grid;grid-template-columns:128px 1fr auto;grid-template-areas:"img nm go" "img st go";column-gap:22px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule);text-decoration:none}
+.row img{grid-area:img;width:128px;aspect-ratio:16/10;object-fit:cover;background:var(--plate)}
+.row .nm{grid-area:nm;font:600 16px var(--mono);align-self:end}
+.row .st{grid-area:st;font-size:14.5px;color:var(--muted);align-self:start}
+.row .go{grid-area:go;color:var(--muted);font-size:15px}
+.row:hover .go,.row:hover .nm{color:var(--accent)}
+
+.formats{list-style:none;margin:0;padding:0;border-top:1px solid var(--text)}
+.formats li{display:grid;grid-template-columns:130px 1fr;gap:20px;padding:15px 0;border-bottom:1px solid var(--rule)}
+.formats code{font-weight:600;font-size:15px}
+.formats span{color:var(--muted)}
+
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 40px;margin:40px 0 0;border-top:1px solid var(--text);padding-top:26px}
+.facts h3{font:700 19px/1.25 var(--display);margin:0 0 8px;letter-spacing:-.01em}
+.facts p{margin:0;font-size:15.5px;color:var(--muted)}
+
+footer{margin:128px 0 0;border-top:1px solid var(--text);padding:44px 0 56px}
+footer .end{font:800 clamp(30px,4vw,48px)/1.02 var(--display);letter-spacing:-.04em;margin:0 0 26px;max-width:18ch}
+footer .links{display:flex;flex-wrap:wrap;gap:22px;font-size:15px}
+footer .legal{margin:36px 0 0;font:12px/1.6 var(--mono);color:var(--muted);letter-spacing:.02em;max-width:80ch}
+
+@media (max-width:900px){
+  .inspect{grid-template-columns:1fr;border-top:0}
+  .pick{flex-direction:row;overflow-x:auto;border-right:0;border-top:1px solid var(--text);scroll-snap-type:x mandatory}
+  .pick button{flex:0 0 74%;padding:14px 18px 14px 0;margin-right:18px;scroll-snap-align:start;border-bottom:0}
+  .pick button[aria-selected=true]{box-shadow:inset 0 -3px 0 var(--accent)}
+  .inspect figcaption{flex-direction:column;align-items:flex-start;padding:16px 0 0}
+  .inspect dl{grid-template-columns:repeat(3,auto)}
+  .split{grid-template-columns:1fr;gap:28px}
+  .facts{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .wrap{padding:0 20px}
+  header nav{gap:12px}
+  header nav .hide-s{display:none}
+  .lede{font-size:18px}
+  section{padding:80px 0 0}
+  .row{grid-template-columns:88px 1fr;grid-template-areas:"img nm" "img st"}
+  .row img{width:88px}
+  .row .go{display:none}
+  .formats li{grid-template-columns:1fr;gap:4px}
+  .facts{grid-template-columns:1fr}
+  .map th{width:46%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<header class="nav">
-  <div class="wrap">
-    <a class="logo" href="./"><img src="brand/mark.svg" alt="" width="36" height="36">repoville</a>
-    <nav aria-label="Main"><a href="#demos">Demos</a><a href="#how">How it works</a><a href="#minecraft">Minecraft</a><a href="#cli">Run it</a><a class="gh" href="https://github.com/maximilianfeix/repoville">GitHub</a></nav>
-  </div>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+<header>
+  <nav aria-label="Main">
+    <a class="brand" href="./" aria-label="repoville home"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="12" width="6" height="10" fill="var(--muted)"/><rect x="9" y="4" width="6" height="18" fill="var(--text)"/><rect x="16" y="9" width="6" height="13" fill="var(--accent)"/></svg>repoville</a>
+    <a class="hide-s" href="#demos">Demos</a>
+    <a class="hide-s" href="#how">How it works</a>
+    <button class="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+    <a class="star" href="https://github.com/maximilianfeix/repoville"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>Star on GitHub</a>
+  </nav>
 </header>
 
-<main>
-<section class="hero" aria-labelledby="h1">
-  <img class="bg" src="media/hero-react.jpg" alt="The React repository as a voxel city: a downtown of towers, a red Rust district, canals and parks.">
-  <img class="bg portrait" src="media/hero-portrait.jpg" alt="" aria-hidden="true">
-  <video class="bg" autoplay muted loop playsinline preload="metadata" poster="media/hero-react.jpg" aria-hidden="true"><source src="media/hero-loop.mp4" type="video/mp4"></video>
-  <div class="wrap">
-    <p class="eyebrow">repoville</p>
-    <h1 id="h1">Walk your codebase.</h1>
-    <p class="lede">Repoville turns any Git repository into a city. <b>Folders become districts, files become buildings,</b> busy code burns, TODOs crumble and forgotten corners grow moss.</p>
-    <div class="ctas">
-      <a class="btn primary" href="r/facebook/react/">Explore React as a city →</a>
-      <a class="btn ghost" href="#cli">Run it on your repo</a>
-    </div>
-    <p class="note">Runs locally · MIT · React (7,165 files) renders in ~2 s once cloned</p>
+<main id="main">
+<div class="hero">
+  <h1>See your repo as a city.</h1>
+  <p class="lede">Folders become districts. Files become buildings. <b>Git history leaves its marks.</b> Open the result in your browser, or build it in Minecraft.</p>
+  <div class="actions">
+    <a class="btn" href="r/facebook/react/">Explore React</a>
+    <a class="quiet" href="#run">Run it on your repo</a>
   </div>
-</section>
-
-<section id="demos" aria-labelledby="demos-h">
-  <div class="wrap">
-    <p class="kicker">Real repos, real renders</p>
-    <h2 id="demos-h">Pick a city and walk in.</h2>
-    <p class="sub">Every picture on this page is a screenshot of the actual viewer. Click one to open the city; each is a single HTML file that also works offline.</p>
-    <div class="demos">
-      <a class="demo big" href="r/facebook/react/"><img src="media/react-clean.jpg" alt="React city" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>facebook/react</b><span>JavaScript · 7,165 files · 3,294 buildings</span></span></a>
-      <a class="demo" href="r/torvalds/linux/"><img src="media/linux.jpg" alt="Linux kernel city" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>torvalds/linux</b><span>C · 95,948 files folded into 3,986 buildings</span></span></a>
-      <a class="demo" href="r/BurntSushi/ripgrep/"><img src="media/ripgrep.jpg" alt="ripgrep city in the nether theme" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>BurntSushi/ripgrep</b><span>Rust · nether district</span></span></a>
-      <a class="demo" href="r/pallets/flask/"><img src="media/flask.jpg" alt="Flask city in the jungle theme" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>pallets/flask</b><span>Python · jungle</span></span></a>
-      <a class="demo" href="r/junegunn/fzf/"><img src="media/fzf.jpg" alt="fzf city in the frozen theme" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>junegunn/fzf</b><span>Go · frozen peaks</span></span></a>
-      <a class="demo" href="r/maximilianfeix/repoville/"><img src="media/repoville.jpg" alt="Repoville's own repository as a city" loading="lazy"><span class="walk">walk it →</span><span class="cap"><b>repoville</b><span>TypeScript · this project</span></span></a>
-    </div>
+  <div class="inspect" data-files='[{&quot;key&quot;:&quot;busy&quot;,&quot;label&quot;:&quot;The busiest file&quot;,&quot;path&quot;:&quot;packages/react-dom-bindings/src/client/ReactFiberConfigDOM.js&quot;,&quot;lines&quot;:6581,&quot;commits&quot;:42,&quot;todos&quot;:35,&quot;last&quot;:&quot;2026-10-12&quot;,&quot;height&quot;:107,&quot;style&quot;:&quot;tower&quot;,&quot;fire&quot;:2,&quot;mossy&quot;:false,&quot;facts&quot;:&quot;&lt;div&gt;&lt;dt&gt;Lines&lt;/dt&gt;&lt;dd&gt;6,581&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Height&lt;/dt&gt;&lt;dd&gt;107 blocks&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Commits, last year&lt;/dt&gt;&lt;dd&gt;42&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;TODO markers&lt;/dt&gt;&lt;dd&gt;35&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Last change&lt;/dt&gt;&lt;dd&gt;2026-10-12&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Building&lt;/dt&gt;&lt;dd&gt;tower&lt;/dd&gt;&lt;/div&gt;&quot;,&quot;href&quot;:&quot;r/facebook/react/#f=packages%2Freact-dom-bindings%2Fsrc%2Fclient%2FReactFiberConfigDOM.js&quot;},{&quot;key&quot;:&quot;ruins&quot;,&quot;label&quot;:&quot;Most TODO markers&quot;,&quot;path&quot;:&quot;packages/react-reconciler/src/ReactFiberCommitWork.js&quot;,&quot;lines&quot;:5231,&quot;commits&quot;:21,&quot;todos&quot;:73,&quot;last&quot;:&quot;2026-10-07&quot;,&quot;height&quot;:95,&quot;style&quot;:&quot;tower&quot;,&quot;fire&quot;:2,&quot;mossy&quot;:false,&quot;facts&quot;:&quot;&lt;div&gt;&lt;dt&gt;Lines&lt;/dt&gt;&lt;dd&gt;5,231&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Height&lt;/dt&gt;&lt;dd&gt;95 blocks&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Commits, last year&lt;/dt&gt;&lt;dd&gt;21&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;TODO markers&lt;/dt&gt;&lt;dd&gt;73&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Last change&lt;/dt&gt;&lt;dd&gt;2026-10-07&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Building&lt;/dt&gt;&lt;dd&gt;tower&lt;/dd&gt;&lt;/div&gt;&quot;,&quot;href&quot;:&quot;r/facebook/react/#f=packages%2Freact-reconciler%2Fsrc%2FReactFiberCommitWork.js&quot;},{&quot;key&quot;:&quot;quiet&quot;,&quot;label&quot;:&quot;A quiet corner&quot;,&quot;path&quot;:&quot;scripts/eslint-rules/safe-string-coercion.js&quot;,&quot;lines&quot;:349,&quot;commits&quot;:0,&quot;todos&quot;:0,&quot;last&quot;:&quot;2023-11-01&quot;,&quot;height&quot;:28,&quot;style&quot;:&quot;midrise&quot;,&quot;fire&quot;:0,&quot;mossy&quot;:true,&quot;facts&quot;:&quot;&lt;div&gt;&lt;dt&gt;Lines&lt;/dt&gt;&lt;dd&gt;349&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Height&lt;/dt&gt;&lt;dd&gt;28 blocks&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Commits, last year&lt;/dt&gt;&lt;dd&gt;0&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;TODO markers&lt;/dt&gt;&lt;dd&gt;0&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Last change&lt;/dt&gt;&lt;dd&gt;2023-11-01&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt&gt;Building&lt;/dt&gt;&lt;dd&gt;midrise&lt;/dd&gt;&lt;/div&gt;&quot;,&quot;href&quot;:&quot;r/facebook/react/#f=scripts%2Feslint-rules%2Fsafe-string-coercion.js&quot;}]'>
+    <div class="pick" role="tablist" aria-label="Pick a file"><button type="button" role="tab" aria-selected="true" data-k="0"><span>The busiest file</span><code><i>packages/react-dom-bindings/src/client/</i><b>ReactFiberConfigDOM.js</b></code></button><button type="button" role="tab" aria-selected="false" data-k="1"><span>Most TODO markers</span><code><i>packages/react-reconciler/src/</i><b>ReactFiberCommitWork.js</b></code></button><button type="button" role="tab" aria-selected="false" data-k="2"><span>A quiet corner</span><code><i>scripts/eslint-rules/</i><b>safe-string-coercion.js</b></code></button></div>
+    <figure><a class="shot" href="r/facebook/react/#f=packages%2Freact-dom-bindings%2Fsrc%2Fclient%2FReactFiberConfigDOM.js"><img src="media/inspect-busy.jpg" width="1400" height="900" alt="packages/react-dom-bindings/src/client/ReactFiberConfigDOM.js as a building in the React city"></a>
+    <figcaption><dl><div><dt>Lines</dt><dd>6,581</dd></div><div><dt>Height</dt><dd>107 blocks</dd></div><div><dt>Commits, last year</dt><dd>42</dd></div><div><dt>TODO markers</dt><dd>35</dd></div><div><dt>Last change</dt><dd>2026-10-12</dd></div><div><dt>Building</dt><dd>tower</dd></div></dl><a class="open" href="r/facebook/react/#f=packages%2Freact-dom-bindings%2Fsrc%2Fclient%2FReactFiberConfigDOM.js">Open this building →</a></figcaption></figure>
   </div>
-</section>
+  <p class="prov">facebook/react at <code>098d2e8</code>, rendered with repoville defaults. Commits counted over the last year.</p>
+</div>
 
-<section aria-labelledby="tex-h">
-  <div class="wrap">
-    <p class="kicker">Look closer</p>
-    <h2 id="tex-h">Pixel-perfect up close.</h2>
-    <p class="sub">Every block carries a 16×16 pixel texture drawn by Repoville itself. Prefer the original look? Turn on Minecraft textures in the viewer and your browser loads them at runtime. Drag to compare.</p>
-    <div class="compare" id="compare">
-      <img src="media/ripgrep-closeup.jpg" alt="ripgrep with Repoville's own pixel textures" loading="lazy">
-      <img class="after" src="media/ripgrep-mc.jpg" alt="The same view with Minecraft textures loaded at runtime" loading="lazy">
-      <span class="bar" aria-hidden="true"></span>
-      <span class="tag l">Repoville textures</span><span class="tag r">Minecraft textures</span>
-      <input type="range" min="0" max="100" value="50" aria-label="Compare Repoville textures and Minecraft textures">
-    </div>
-    <p class="fine">Minecraft textures © Mojang. They are fetched from a public mirror when you switch them on and are never bundled with Repoville.</p>
+<section id="run" class="split">
+  <div>
+    <h2>Your repo. One command.</h2>
+    <p class="sub">Point it at a folder, <code>owner/repo</code> or a git URL. It writes one HTML file and opens it.</p>
   </div>
-</section>
-
-<section aria-labelledby="night-h" style="padding-top:0">
-  <div class="wrap">
-    <p class="kicker">After dark</p>
-    <h2 id="night-h">Every city has a night shift.</h2>
-    <p class="sub">Flip on night mode and the towers light up window by window. Same data, better screenshots.</p>
-    <a class="demo" style="display:block" href="r/facebook/react/?time=night#f=packages/react-reconciler/src/ReactFiberWorkLoop.js"><img src="media/react-night.jpg" alt="The React downtown at night with lit windows" loading="lazy"><span class="walk">walk it at night →</span></a>
-  </div>
-</section>
-
-<section id="how" aria-labelledby="how-h">
-  <div class="wrap">
-    <p class="kicker">The legend</p>
-    <h2 id="how-h">Every block means something.</h2>
-    <p class="sub">The city comes from your files and your git history. Same commit in, same city out.</p>
-    <dl class="map">
-      <div><dt><img class="sw" src="media/swatches/district.png" alt="">Folders → districts</dt><dd>Nested folders become nested districts with roads, plazas and name signs. Top-level folders are islands between canals.</dd></div>
-      <div><dt><img class="sw" src="media/swatches/building.png" alt="">Files → buildings</dt><dd>Height is <code>4 + 4·√(lines/10)</code>, capped at 250. Small files are houses, big ones towers; the largest file of each folder wears a gold crown.</dd></div>
-      <div><dt><img class="sw" src="media/swatches/fire.png" alt="">Churn → fire</dt><dd>The 10% most-changed files of the last year burn on the roof; the top 2% get soul fire.</dd></div>
-      <div><dt><img class="sw" src="media/swatches/ruins.png" alt="">TODOs → ruins</dt><dd>The share of TODO/FIXME/HACK lines becomes the share of cracked and cobwebbed wall.</dd></div>
-      <div><dt><img class="sw" src="media/swatches/moss.png" alt="">Untouched → moss</dt><dd>Files without a commit for over a year grow moss and vines.</dd></div>
-      <div><dt><img class="sw" src="media/swatches/theme.png" alt="">Language → theme</dt><dd>TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java badlands, C/C++ deep caves, Ruby cherry grove, Swift/Lua copper town, C#/PHP reef.</dd></div>
-    </dl>
-    <div class="honest">
-      <img src="media/react-churn.jpg" alt="React in churn view: plain columns sized and coloured by commits per file" loading="lazy">
-      <ul>
-        <li><b>Fire is activity, not bad code.</b> Busy files are often the most important ones.</li>
-        <li><b>Moss is age, not rot.</b> Stable code nobody needs to touch is a good sign.</li>
-        <li><b>The numbers are one click away.</b> Every building shows lines, commits, last change and TODO count, and the metric view swaps the city for plain columns.</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section id="minecraft" aria-labelledby="mc-h">
-  <div class="wrap">
-    <p class="kicker">Take it into the game</p>
-    <h2 id="mc-h">Then build it for real.</h2>
-    <p class="sub">The same city exports to Minecraft Java Edition, or builds itself on your server. Every format below is tested against a real Paper 1.21.11 server or an independent reader.</p>
-    <div class="formats">
-      <div class="fmt"><h3>.schem</h3><p>Sponge v3 for WorldEdit. Pasted and block-checked on Paper.</p><span class="status">tested · WorldEdit</span></div>
-      <div class="fmt"><h3>.litematic</h3><p>For Litematica. Round-trip checked with litemapy.</p><span class="status">tested · litemapy</span></div>
-      <div class="fmt"><h3>world.zip</h3><p>Creative superflat world with the city at spawn.</p><span class="status">tested · Paper 1.21.11</span></div>
-      <div class="fmt"><h3>live</h3><p>Builds on a running server over RCON, no plugin needed.</p><span class="status">tested · Paper 1.21.11</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="cli" aria-labelledby="cli-h">
-  <div class="wrap split">
-    <div>
-      <p class="kicker">Run it on your repo</p>
-      <h2 id="cli-h">One command, nothing uploaded.</h2>
-      <p class="sub">A local folder, <code>owner/repo</code> or any git URL. Needs Node 22+ and git; <code>npx</code> runs the latest release, no install.</p>
-      <div class="trust">
-        <div><i></i><p style="margin:0"><b>Local analysis</b><span>Lines and git history are read on your machine. No upload, no telemetry.</span></p></div>
-        <div><i></i><p style="margin:0"><b>Paths and counts only</b><span>The city file holds file paths and numbers, never file contents.</span></p></div>
-        <div><i></i><p style="margin:0"><b>Nothing runs</b><span>Repoville never executes code from the repos it renders.</span></p></div>
-      </div>
-    </div>
-<pre><span class="p">$ </span>npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz \
-    repoville facebook/react --open
-<span class="o">  7,165 files · 903,811 LOC · 3,294 buildings
+  <div>
+    <div class="cmd"><code id="cmd">npx --package=https://github.com/maximilianfeix/repoville/releases/latest/download/repoville.tgz repoville . --open</code><button type="button" data-copy="cmd">Copy</button></div>
+    <p class="note">Needs Node.js 22 or newer and git. The package installs from the GitHub release; it is not on npm yet.</p>
+    <div class="out" role="region" aria-label="Output of a real run on facebook/react" tabindex="0">$ repoville facebook/react -o out
+repoville: building <b>facebook/react</b>
+  merged 3871 files into folder towers to stay under 4000 buildings
+  <b>7,165 files · 903,811 LOC · 678 commits · 3,294 buildings</b> on 1024×1024 blocks
   hottest districts (commits in 1y):
-    packages/react-devtools-shared/src: 125 commits
-  wrote html  repoville-out/facebook-react.html</span>
-
-<span class="c"># then add the badge to your README</span>
-<span class="p">$ </span>npx --package=… repoville badge</pre>
+    packages/react-devtools-shared/src: 125 commits, 3 roofs on fire
+    packages/react-dom/src/__tests__: 114 commits, 9 roofs on fire
+    packages/react-reconciler/src: 107 commits, 14 roofs on fire
+  most ruined buildings (TODO/FIXME/HACK/XXX):
+    packages/react-reconciler/src/ReactFiberCommitWork.js: 73 markers in 5231 lines
+  oldest mossy corner: scripts/bench/benchmarks/pe-class-components/benchmark.js
+  wrote html      out/facebook-react.html
+  <i>done in 7.6 s · analysis ran locally, nothing was uploaded</i></div>
+    <p class="note">A real run on a Mac, October 2026. Output shortened: two of the three ruined buildings and the schematic line are left out.</p>
   </div>
 </section>
 
-<section class="cta" aria-labelledby="cta-h">
-  <div class="wrap">
-    <h2 id="cta-h">What does your repo look like?</h2>
-    <p class="sub" style="margin:0 auto 28px">Open a demo, then try it on your own code. If you enjoy it, a star helps other people find it.</p>
-    <div class="ctas"><a class="btn primary" href="r/facebook/react/">Explore a demo</a><a class="btn ghost" href="https://github.com/maximilianfeix/repoville">Star on GitHub</a></div>
+<section id="how" class="split">
+  <div>
+    <h2>The buildings are data.</h2>
+    <p class="sub">Every building is a file, and everything that happens to it is something git can tell.</p>
+    <p class="fine">Fire means activity. Moss means time since the last change. Neither is a code review.</p>
+  </div>
+  <div>
+    <table class="map">
+      <tr><th scope="row">A folder</th><td>A district with streets, a plaza and a name sign</td></tr>
+      <tr><th scope="row">A file</th><td>A building. Height grows with the square root of its lines, capped at 250 blocks</td></tr>
+      <tr><th scope="row">Commits in the last year</th><td>Fire on the roof of the busiest files</td></tr>
+      <tr><th scope="row">TODO, FIXME, HACK</th><td>Cracked walls</td></tr>
+      <tr><th scope="row">No commit for a year</th><td>Moss and vines</td></tr>
+      <tr><th scope="row">The language</th><td>The district's materials</td></tr>
+    </table>
+    <p class="fine">Large repositories fold whole folders into one tower, so the city stays small enough to open. <a href="https://github.com/maximilianfeix/repoville/blob/main/docs/BUILDINGS.md">All nine building types</a>.</p>
+  </div>
+</section>
+
+<section id="demos">
+  <h2>Try another repository.</h2>
+  <p class="sub">Each of these is the file repoville wrote, unchanged. Open one and click any building.</p>
+  <a class="lead-demo" href="r/facebook/react/"><img src="media/hero-react.jpg" width="1920" height="1080" alt="The React repository as a city, seen from above the react-reconciler district" loading="lazy"><span><b>facebook/react</b><span>Open the city →</span></span></a>
+  <div class="rows"><a class="row" href="r/torvalds/linux/"><img src="media/linux.jpg" alt="" loading="lazy" width="1280" height="800"><span class="nm">torvalds/linux</span><span class="st">C · 95,858 files, 33,779,818 lines</span><span class="go">Open →</span></a><a class="row" href="r/BurntSushi/ripgrep/"><img src="media/ripgrep.jpg" alt="" loading="lazy" width="1280" height="800"><span class="nm">BurntSushi/ripgrep</span><span class="st">Rust · 227 files, 68,267 lines</span><span class="go">Open →</span></a><a class="row" href="r/junegunn/fzf/"><img src="media/fzf.jpg" alt="" loading="lazy" width="1280" height="800"><span class="nm">junegunn/fzf</span><span class="st">Go · 161 files, 53,292 lines</span><span class="go">Open →</span></a><a class="row" href="r/pallets/flask/"><img src="media/flask.jpg" alt="" loading="lazy" width="1280" height="800"><span class="nm">pallets/flask</span><span class="st">Python · 230 files, 26,369 lines</span><span class="go">Open →</span></a><a class="row" href="r/maximilianfeix/repoville/"><img src="media/repoville.jpg" alt="" loading="lazy" width="1280" height="800"><span class="nm">maximilianfeix/repoville</span><span class="st">TypeScript · 136 files, 10,785 lines</span><span class="go">Open →</span></a></div>
+</section>
+
+<section id="keep" class="split">
+  <div>
+    <h2>One HTML file. Or actual blocks.</h2>
+    <p class="sub">The viewer is a single file you can send to someone. The same city exports as blocks for a Minecraft Java world.</p>
+  </div>
+  <div>
+    <ul class="formats">
+      <li><code>.html</code><span>The 3D viewer: search, building cards, history and churn views, night mode, photo export</span></li>
+      <li><code>.schem</code><span>Sponge schematic for WorldEdit</span></li>
+      <li><code>.litematic</code><span>For Litematica</span></li>
+      <li><code>world</code><span>A world folder to open in singleplayer</span></li>
+      <li><code>--live</code><span>Builds into a running server over RCON</span></li>
+    </ul>
+    <p class="fine">Checked on Paper 1.21.11 with WorldEdit 7.3.19: one block of every type in the test city survives a paste, a world load and a live build. <a href="https://github.com/maximilianfeix/repoville#minecraft">How to load it</a>.</p>
+  </div>
+</section>
+
+<section id="local">
+  <h2>The analysis runs on your machine.</h2>
+  <div class="facts">
+    <div><h3>No upload</h3><p>Files and git history are read locally. Remote repositories are cloned with your own git.</p></div>
+    <div><h3>Two optional requests</h3><p>The viewer loads web fonts when you are online, and fetches original block textures only if you switch them on.</p></div>
+    <div><h3>Mind what you share</h3><p>The HTML file contains file paths, line counts and commit counts. Share it like you would share the file listing.</p></div>
   </div>
 </section>
 </main>
 
 <footer>
-  <div class="wrap">
-    <span><img src="brand/mark.svg" alt="" width="20" height="20" style="display:inline;vertical-align:-5px;margin-right:6px">Repoville · MIT licensed · <a href="https://github.com/maximilianfeix/repoville">GitHub</a></span>
-    <span class="legal">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</span>
+  <p class="end">Try it on a repo you know.</p>
+  <div class="links">
+    <a href="#run">The command</a>
+    <a href="https://github.com/maximilianfeix/repoville">GitHub</a>
+    <a href="https://github.com/maximilianfeix/repoville/releases">Releases</a>
+    <a href="https://github.com/maximilianfeix/repoville/issues">Report a problem</a>
   </div>
+  <p class="legal">Made by Maxi · MIT licence<br>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
 </footer>
+</div>
+
 <script>
-  const c = document.getElementById('compare');
-  c.querySelector('input').addEventListener('input', (e) => c.style.setProperty('--x', e.target.value + '%'));
+(() => {
+  const root = document.documentElement;
+  document.querySelector('.theme').addEventListener('click', () => {
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('rv-theme', root.dataset.theme); } catch (e) {}
+  });
+  for (const b of document.querySelectorAll('[data-copy]')) {
+    b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent); b.textContent = 'Copied'; }
+      catch (e) { b.textContent = 'Select it'; }
+      setTimeout(() => (b.textContent = 'Copy'), 1600);
+    });
+  }
+  const box = document.querySelector('.inspect');
+  if (!box) return;
+  const files = JSON.parse(box.dataset.files);
+  const tabs = [...box.querySelectorAll('[role=tab]')];
+  const img = box.querySelector('.shot img');
+  const links = box.querySelectorAll('.shot, .open');
+  const dl = box.querySelector('dl');
+  for (const f of files) { const p = new Image(); p.src = `media/inspect-${f.key}.jpg`; }
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function show(k) {
+    const f = files[k];
+    tabs.forEach((t, i) => { t.setAttribute('aria-selected', String(i === k)); t.tabIndex = i === k ? 0 : -1; });
+    img.style.opacity = still ? '1' : '0';
+    setTimeout(() => { img.src = `media/inspect-${f.key}.jpg`; img.alt = `${f.path} as a building in the React city`; img.style.opacity = '1'; }, still ? 0 : 140);
+    dl.innerHTML = f.facts;
+    links.forEach((a) => (a.href = f.href));
+  }
+  tabs.forEach((t, i) => {
+    t.tabIndex = i === 0 ? 0 : -1;
+    t.addEventListener('click', () => show(i));
+    t.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      const n = (i + d + tabs.length) % tabs.length;
+      tabs[n].focus();
+      show(n);
+    });
+  });
+})();
 </script>
 </body>
 </html>

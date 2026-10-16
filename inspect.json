@@ -1,0 +1,45 @@
+{
+  "repo": "facebook/react",
+  "head": "098d2e8",
+  "files": [
+    {
+      "key": "busy",
+      "label": "The busiest file",
+      "path": "packages/react-dom-bindings/src/client/ReactFiberConfigDOM.js",
+      "lines": 6581,
+      "commits": 42,
+      "todos": 35,
+      "last": "2026-10-12",
+      "height": 107,
+      "style": "tower",
+      "fire": 2,
+      "mossy": false
+    },
+    {
+      "key": "ruins",
+      "label": "Most TODO markers",
+      "path": "packages/react-reconciler/src/ReactFiberCommitWork.js",
+      "lines": 5231,
+      "commits": 21,
+      "todos": 73,
+      "last": "2026-10-07",
+      "height": 95,
+      "style": "tower",
+      "fire": 2,
+      "mossy": false
+    },
+    {
+      "key": "quiet",
+      "label": "A quiet corner",
+      "path": "scripts/eslint-rules/safe-string-coercion.js",
+      "lines": 349,
+      "commits": 0,
+      "todos": 0,
+      "last": "2023-11-01",
+      "height": 28,
+      "style": "midrise",
+      "fire": 0,
+      "mossy": true
+    }
+  ]
+}
