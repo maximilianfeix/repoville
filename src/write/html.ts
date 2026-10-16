@@ -11,6 +11,7 @@ import type { VoxelGrid } from '../build/voxel-grid.js';
 import { files, type CityTree } from '../model/city.js';
 import type { Highlights } from '../summary.js';
 import { encodePayload, type ViewerMeta } from '../../viewer/format.js';
+import { stageCss } from '../../viewer/stage.js';
 
 export function kindOf(state: string): number {
   if (state === 'minecraft:air') return 0;
@@ -349,8 +350,7 @@ body.flying #ui>*:not(.foot){display:none!important}
 body.no-ui #ui{display:none}
 .fatal{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--bone)}
 [hidden]{display:none!important}
-body:not(.night){background:radial-gradient(120% 95% at 50% 32%,#2d313b 0%,#1f2128 55%,#15161b 100%)}
-body.night{background:radial-gradient(120% 90% at 50% 30%,#1b2238 0%,#11131b 60%,#0b0c10 100%)!important}
+${stageCss()}
 @media (max-width:900px){.stats{display:none}.search{width:180px}}
 @media (max-width:720px){
  .brand{top:10px;left:10px}

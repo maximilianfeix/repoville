@@ -10,11 +10,11 @@ export const TILE = 16;
 export type RGB8 = [number, number, number];
 
 // ---------- colour math (sRGB <-> linear <-> OKLab, Ottosson 2020) ----------
-const toLin = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-const toSrgb = (c: number) => (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055);
-const hexLin = (h: number): [number, number, number] => [toLin(((h >> 16) & 255) / 255), toLin(((h >> 8) & 255) / 255), toLin((h & 255) / 255)];
+export const toLin = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+export const toSrgb = (c: number) => (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055);
+export const hexLin = (h: number): [number, number, number] => [toLin(((h >> 16) & 255) / 255), toLin(((h >> 8) & 255) / 255), toLin((h & 255) / 255)];
 
-function linToOklab(r: number, g: number, b: number): [number, number, number] {
+export function linToOklab(r: number, g: number, b: number): [number, number, number] {
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
@@ -35,7 +35,7 @@ function oklabToLin(L: number, a: number, b: number): [number, number, number] {
   ];
 }
 /** OKLCh -> linear sRGB, reducing chroma until the colour fits the gamut. */
-function lchToLin(L: number, C: number, h: number): [number, number, number] {
+export function lchToLin(L: number, C: number, h: number): [number, number, number] {
   for (let i = 0; i < 24; i++) {
     const rgb = oklabToLin(L, C * Math.cos(h), C * Math.sin(h));
     if (rgb.every((v) => v >= -1e-4 && v <= 1 + 1e-4)) return rgb.map((v) => Math.min(1, Math.max(0, v))) as [number, number, number];
@@ -49,7 +49,8 @@ const DEG = Math.PI / 180;
 const COOL = 285 * DEG; // OKLCh hue of blue-violet
 const WARM = 85 * DEG;  // OKLCh hue of warm yellow
 /** Lightness offsets for steps 0..4 (step 2 = the palette colour itself). */
-const L_STEP = [-0.2, -0.095, 0, 0.075, 0.14];
+// Kept shallow: at city scale a wide ramp turns every facade into noise.
+const L_STEP = [-0.11, -0.05, 0, 0.04, 0.075];
 
 function rotateToward(h: number, target: number, maxRad: number): number {
   let d = target - h;
@@ -62,7 +63,7 @@ function rotateToward(h: number, target: number, maxRad: number): number {
  * Darker: toward blue/violet, +chroma. Lighter: toward yellow, −chroma.
  * Neutral greys get a faint cool/warm tint so stone still feels lit.
  */
-export function makeRamp(hex: number, hueStepDeg = 11): Array<[number, number, number]> {
+export function makeRamp(hex: number, hueStepDeg = 5): Array<[number, number, number]> {
   const [L, a, b] = linToOklab(...hexLin(hex));
   const C = Math.hypot(a, b);
   const h = Math.atan2(b, a);
@@ -79,7 +80,7 @@ export function makeRamp(hex: number, hueStepDeg = 11): Array<[number, number, n
     const target = dark ? COOL : WARM;
     const h2 = grey ? target : rotateToward(h, target, hueStepDeg * DEG * n);
     const tint = (dark ? 0.009 : 0.006) * n;
-    const C2 = grey ? C + tint : dark ? C * (1 + 0.14 * n) : C * (1 - 0.16 * n);
+    const C2 = grey ? C + tint * 0.5 : dark ? C * (1 + 0.06 * n) : C * (1 - 0.1 * n);
     return lchToLin(L2, C2, h2);
   });
 }
@@ -283,8 +284,8 @@ const mix = (a: number, b: number, t: number) => {
 const ACCENTS: Partial<Record<Family, (base: number) => number[]>> = {
   bricks: (b) => [mix(b, 0xaaa59c, 0.6)],                // mortar
   logTop: (b) => [mix(b, 0xc49a5e, 0.55)],               // inner wood
-  grassSide: () => [0x866043],                           // dirt
-  bookshelf: (b) => [mix(b, 0x9a3328, 0.75), mix(b, 0x34508a, 0.75), mix(b, 0x4f7a34, 0.7)],
+  grassSide: () => [0x7a6c5c],                           // dirt
+  bookshelf: (b) => [mix(b, 0x8a5a50, 0.4), mix(b, 0x5a6478, 0.4), mix(b, 0x66705a, 0.35)],
 };
 /** How strongly the tile's mean is pulled back to the palette colour (distance colour accuracy). */
 const NORMALIZE: Partial<Record<Family, number>> = { grassSide: 0, logTop: 0, glass: 0.5 };
