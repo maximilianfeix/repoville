@@ -925,6 +925,8 @@ function main() {
   });
 
   const flyBtn = dock.querySelector<HTMLButtonElement>('#rv-fly')!;
+  // Fly mode needs a keyboard and pointer lock; hide it on touch-only devices.
+  if (window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches) flyBtn.hidden = true;
   flyBtn.addEventListener('click', () => fly.lock());
   fly.addEventListener('lock', () => {
     orbit.enabled = false;
