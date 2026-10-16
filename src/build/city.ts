@@ -85,6 +85,10 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
   for (const d of districts) grid.fill(d.rect.x0, 0, d.rect.z0, d.rect.x1, 1, d.rect.z1, roadFor(d.depth));
   for (const d of districts) if (d.plaza) grid.fill(d.plaza.x0, 0, d.plaza.z0, d.plaza.x1, 1, d.plaza.z1, plaza);
 
+  // Suburb greens: the ground around small houses is lawn, not the district's road surface.
+  const lawn = grid.id(BLOCKS.grass);
+  for (const r of layout.greens ?? []) grid.fill(r.x0, 0, r.z0, r.x1, 1, r.z1, lawn);
+
   const paletteOf = (f: { isDoc: boolean; lang: Parameters<typeof biomeFor>[0] }) => palettes[f.isDoc ? 'library' : biomeFor(f.lang)];
   for (const b of layout.buildings) {
     const ground = grid.id(b.kind === 'house' ? BLOCKS.grass : paletteOf(b.file).ground);
@@ -297,6 +301,17 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
         plantTree(grid, pal, x, z, 3 + Math.floor(rng() * 3));
         occupied[z * layout.width + x] = 1;
       }
+    }
+  }
+  // Trees on suburb greens, sparse and seeded, away from houses.
+  for (const r of layout.greens ?? []) {
+    const rng = mulberry32(fnv1a(`green:${r.x0},${r.z0}`) ^ seed);
+    const pal = palettes.plains;
+    for (let z = r.z0 + 1; z < r.z1 - 1; z += 4) for (let x = r.x0 + 1; x < r.x1 - 1; x += 4) {
+      if (rng() > 0.45) continue;
+      if (grid.get(x, 0, z) !== grassId || !canPlant(grid, occ, x, z)) continue;
+      plantTree(grid, pal, x, z, 3 + Math.floor(rng() * 3));
+      occupied[z * layout.width + x] = 1;
     }
   }
   // A few bushes next to building entrances (sparse on purpose: clutter hides the city).

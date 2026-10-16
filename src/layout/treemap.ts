@@ -33,6 +33,8 @@ export interface CityLayout {
   length: number;
   districts: DistrictLayout[];
   buildings: BuildingLayout[];
+  /** Suburb areas: the space around their houses is a green, not road. */
+  greens?: Rect[];
 }
 
 export const MAX_SIDE = 1024;
@@ -278,6 +280,7 @@ export function layoutCity(city: CityTree): CityLayout {
     gatherDowntown(laid);
     const districts: DistrictLayout[] = [];
     const buildings: BuildingLayout[] = [];
+    const greens: Rect[] = [];
     const failed: Array<Extract<LNode, { kind: 'file' | 'suburb' | 'rows' }>> = [];
     let squeezed = 0;
     let leaves = 0;
@@ -310,8 +313,10 @@ export function layoutCity(city: CityTree): CityLayout {
         else failed.push(d);
       } else {
         const houses = placeSuburb(d.files, rect, side < MAX_SIDE && attempt < MAX_ATTEMPTS / 2);
-        if (houses) buildings.push(...houses);
-        else failed.push(d);
+        if (houses) {
+          buildings.push(...houses);
+          greens.push(rect);
+        } else failed.push(d);
       }
     }
 
@@ -332,6 +337,7 @@ export function layoutCity(city: CityTree): CityLayout {
 
     buildings.sort((a, b) => byCodeUnit(a.file.path, b.file.path));
     districts.sort((a, b) => byCodeUnit(a.path, b.path));
-    return { width: side, length: side, districts, buildings };
+    greens.sort((a, b) => a.z0 - b.z0 || a.x0 - b.x0);
+    return { width: side, length: side, districts, buildings, greens };
   }
 }
