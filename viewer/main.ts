@@ -85,10 +85,12 @@ function main() {
 
   const camera = new PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.5, span * 6);
   const homeDir = new Vector3(0.74, 0.6, 0.82).normalize();
+  // Tall towers on a small map stuck out of the top of the home view; include height in the fit.
+  const maxTop = m.buildings.reduce((t, b) => Math.max(t, b[5]), 0);
   const fitDistance = () => {
     const vfov = (camera.fov * Math.PI) / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
-    const r = span * 0.6;
+    const r = Math.max(span * 0.6, maxTop * 0.75);
     // Landscape crops the empty corners of the diorama; portrait needs the full width.
     return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 ? 0.98 : 0.8);
   };
@@ -104,6 +106,7 @@ function main() {
     }
     if (wsum > 0) downtown.multiplyScalar(1 / wsum);
     downtown.clampLength(0, span * 0.18);
+    downtown.y = maxTop * 0.25;
   }
   const homePos = () => homeDir.clone().multiplyScalar(fitDistance()).add(downtown);
   camera.position.copy(homePos());
