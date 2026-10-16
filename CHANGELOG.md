@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.3 — 2026-10-16
+
+- **Windows read as openings again:** window glass is a clear step darker than the pale walls in the graded palette.
+
 ## 0.14.2 — 2026-10-16
 
 - **Phones:** the home view looks down more steeply on portrait screens, so the city fills the height, and small screens show at most five district labels.
