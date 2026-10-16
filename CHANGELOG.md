@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0 — 2026-10-16
+
+- **Lighting:** the sun now lights the facades the home view sees (it used to sit behind them, so every visible wall was in shade). Towers read as lit and shaded faces; dark themes are legible.
+- **C/C++ theme:** tuff walls instead of deepslate, plus a light calcite neighbourhood.
+- Landing hero video, demos, README screenshots and flyover re-rendered.
+
 ## 0.10.0 — 2026-10-16
 
 - **Suburb greens:** the space around small houses is lawn with trees instead of the district's road surface (deep folders showed as wide dirt-path areas).
