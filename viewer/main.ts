@@ -1,6 +1,6 @@
 import { inflateSync } from 'fflate';
 import {
-  ACESFilmicToneMapping, AdditiveBlending, Box3, DataArrayTexture, LinearMipmapLinearFilter, NearestFilter, RGBAFormat, UnsignedByteType, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
+  ACESFilmicToneMapping, AdditiveBlending, Box3, DataArrayTexture, DataTexture, FloatType, RedFormat, LinearMipmapLinearFilter, NearestFilter, RGBAFormat, UnsignedByteType, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
   HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
@@ -11,6 +11,7 @@ import { decodePayload, fillChunk, type BuildingRow, type Payload } from './form
 import { greedyMesh } from './mesher.js';
 import { buildDetailLayers, familyOf, FAMILIES, TILE } from './textures.js';
 import { loadMcLayers } from './mctextures.js';
+import { buildPixelLayers, TILE as PIX_TILE } from './pixeltex.js';
 
 declare global {
   interface Window {
@@ -163,6 +164,25 @@ function main() {
   const sideLayer = m.states.map((st) => FAMILIES.indexOf(familyOf(st)));
   const topLayer = m.states.map((st, i) => (/_log|_stem|pillar/.test(st) ? FAMILIES.indexOf('logTop') : sideLayer[i]!));
   const detail = { value: params.get('textures') === '0' ? 0 : 1 };
+  // Pixel textures v2: coloured, hue-shifted 16×16 tiles per (material family, palette colour).
+  const pix = buildPixelLayers(m.states, m.colors, familyOf);
+  const gl = renderer.getContext() as WebGL2RenderingContext;
+  const maxLayers = (gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS) as number) || 256;
+  const pixTex = new DataArrayTexture(pix.data, PIX_TILE, PIX_TILE, Math.max(1, pix.layers));
+  pixTex.format = RGBAFormat;
+  pixTex.type = UnsignedByteType;
+  pixTex.colorSpace = SRGBColorSpace;
+  pixTex.magFilter = NearestFilter;
+  pixTex.minFilter = LinearMipmapLinearFilter;
+  pixTex.generateMipmaps = true;
+  pixTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  pixTex.needsUpdate = true;
+  const pixLut = new DataTexture(pix.lut, Math.max(1, m.states.length * 2), 1, RedFormat, FloatType);
+  pixLut.magFilter = NearestFilter;
+  pixLut.minFilter = NearestFilter;
+  pixLut.needsUpdate = true;
+  // Fall back to the classic grey detail maps on GPUs with too few array layers, or on request.
+  const pixMode = { value: params.get('textures') === 'classic' || pix.layers > maxLayers ? 0 : 1 };
   // Optional original textures, fetched at runtime (see mctextures.ts). A 1-layer placeholder until loaded.
   const mcMap = { value: new DataArrayTexture(new Uint8Array([128, 128, 128, 255]), 1, 1, 1) };
   mcMap.value.needsUpdate = true;
@@ -204,6 +224,9 @@ function main() {
     shader.uniforms.detailMap = { value: detailTex };
     shader.uniforms.detailStrength = detail;
     shader.uniforms.mcMap = mcMap;
+    shader.uniforms.pixMap = { value: pixTex };
+    shader.uniforms.pixLut = { value: pixLut };
+    shader.uniforms.pixMode = pixMode;
     shader.uniforms.mcMode = mcMode;
     shader.uniforms.night = night;
     shader.uniforms.glassLayer = { value: glassLayer };
@@ -211,7 +234,7 @@ function main() {
       .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform highp sampler2DArray pixMap;\nuniform highp sampler2D pixLut;\nuniform float pixMode;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nvarying vec4 vTex;\nvarying float vUp;')
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>
@@ -225,6 +248,11 @@ function main() {
             float face = vUp > 0.5 ? 0.0 : 1.0;
             vec3 mc = textureGrad(mcMap, vec3(fract(st), pid * 2.0 + face), gx, gy).rgb;
             diffuseColor.rgb = mc * vTex.w;
+          } else if (pixMode > 0.5 && detailStrength > 0.5) {
+            // Coloured pixel tile for this palette id and face; light and AO from the mesh.
+            float pface = vUp > 0.5 ? 0.0 : 1.0;
+            float pl = texelFetch(pixLut, ivec2(int(pid) * 2 + int(pface), 0), 0).r;
+            diffuseColor.rgb = textureGrad(pixMap, vec3(fract(st), pl), gx, gy).rgb * vTex.w;
           } else {
             // Gradients from the continuous coordinate keep mip selection stable across tile seams.
             float dd = textureGrad(detailMap, vec3(fract(st), layer), gx, gy).r * (255.0 / 128.0);
