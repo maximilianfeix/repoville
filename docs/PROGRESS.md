@@ -8,6 +8,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 06:25: street detail via worktree agent (#65: crosswalks, sidewalk wear, plaza benches), v0.7.0 released (#66; demos, README media, flyover re-rendered; site deployed; v0 tag moved). Launch drafts committed for 0.7.0 (drafts only).
 - 2026-10-16 06:10: on main since v0.6.0: roofscapes (#58), animated pixel-snapped water (#59), day vignette + matching Photo export (#60), label collision culling (#61), portrait framing fix (fit was clamped by maxDistance; fog/far now scale) + on-screen edge labels (#62), warmer night windows (#63). Launch drafts refreshed in launch/ (uncommitted until the next release). Street-level detail pass running in a worktree.
 - 2026-10-16 06:10: pixel textures v2 (#54), README media + flyover re-rendered (#55), v0.6.0 released (#56, release tarball verified: 0.6.0 with pixel layers), site redeployed. Awesome-list PRs opened (author disclosed): dictcp/awesome-git#215, bs-community/awesome-minecraft#81, AxiomeCG/awesome-threejs#62, toolleeo/awesome-cli-apps-in-a-csv#515.
 - 2026-10-16 05:00: Diff view (#50) and v0.5.0 (#51); action has diff/timelapse inputs (verified locally against the release). Deadline extended to 20:00.
@@ -51,7 +52,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ### P0 — visual quality
 - [x] Texture v2: hue-shifted colour ramps per palette colour (#54, v0.6.0).
-- [x] Roofscapes (#58), water ripples (#59), night windows (#63). [ ] Street-level detail (crosswalks, lamps, plazas) — in progress. [ ] v0.7.0 + re-render site/README.
+- [x] Roofscapes (#58), water ripples (#59), night windows (#63). [x] Street-level detail (#65). [x] v0.7.0 + re-render site/README (#66).
 
 ### P0 — next
 - [x] Hardening from the Codex inventory (#37) (docs/engineering/codex-inventory.md §2): symlinks, URL/cache identity, ref cache, RCON deadlines, template names, force-load cleanup, LOD budget, roof validation, chunk retention + doc accuracy fixes.
