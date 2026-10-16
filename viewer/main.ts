@@ -12,6 +12,8 @@ import { greedyMesh } from './mesher.js';
 import { buildDetailLayers, familyOf, FAMILIES, TILE } from './textures.js';
 import { loadMcLayers } from './mctextures.js';
 import { buildPixelLayers, TILE as PIX_TILE } from './pixeltex.js';
+import { gradePalette } from './grade.js';
+import { STAGE } from './stage.js';
 
 declare global {
   interface Window {
@@ -58,6 +60,8 @@ type Metric = 'none' | 'churn' | 'age' | 'todos' | 'history' | 'diff';
 function main() {
   const p = loadPayload();
   const m = p.meta;
+  // Graded colours for the browser city; exports keep the raw palette (see grade.ts).
+  const colors = gradePalette(m.states, m.colors);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const params = new URLSearchParams(location.search);
   const lowPower = (navigator.hardwareConcurrency ?? 8) <= 4 || /Mobi|Android/i.test(navigator.userAgent);
@@ -77,7 +81,7 @@ function main() {
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.shadowMap.type = PCFShadowMap;
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = 1.1;
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const scene = new Scene();
@@ -147,7 +151,7 @@ function main() {
   camera.position.copy(homePos());
   // Portrait screens sit further back than 3 spans; keep fog, far plane and zoom-out limit beyond that.
   const reach = Math.max(span * 3, homeDistance() * 1.25);
-  scene.fog = new Fog(0x262931, reach * 0.55, reach * 1.35);
+  scene.fog = new Fog(STAGE.day.fog, reach * 0.8, reach * 1.7);
   camera.far = reach * 2;
   camera.updateProjectionMatrix();
 
@@ -162,9 +166,10 @@ function main() {
   orbit.update();
   const fly = new PointerLockControls(camera, document.body);
 
-  const hemi = new HemisphereLight(0xcfdcff, 0x7a5f45, 1.5);
+  // One warm-white key light and a neutral sky/ground fill: colour comes from the materials, not the lights.
+  const hemi = new HemisphereLight(0xeef0f2, 0x8c867c, 1.1);
   scene.add(hemi);
-  const sun = new DirectionalLight(0xffcf9a, 2.8);
+  const sun = new DirectionalLight(0xfff2e0, 3.3);
   // Three-quarter light: the home camera looks from +x/+z, so the sun lights the +x faces it sees
   // and leaves the +z faces in shade (two-tone facades instead of a backlit skyline).
   sun.position.set(span * 0.55, span * 0.45, -span * 0.3);
@@ -174,7 +179,7 @@ function main() {
   sc.near = 1; sc.far = span * 3;
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.6;
-  sun.shadow.radius = 2;
+  sun.shadow.radius = 3;
   // The city never moves: render the shadow map only when meshes are added or quality changes.
   sun.shadow.autoUpdate = false;
   scene.add(sun, sun.target);
@@ -182,14 +187,14 @@ function main() {
   // Diorama base: the city floats on a slab of earth and stone.
   const DIRT = 9;
   const base = new Mesh(new BoxGeometry(m.width, DIRT, m.length), [
-    new MeshLambertMaterial({ color: 0x6b4a33 }), new MeshLambertMaterial({ color: 0x5c3f2b }),
-    new MeshLambertMaterial({ color: 0x4e8c3a }), new MeshLambertMaterial({ color: 0x3a3d45 }),
-    new MeshLambertMaterial({ color: 0x74513a }), new MeshLambertMaterial({ color: 0x5f432f }),
+    new MeshLambertMaterial({ color: 0x5f5a52 }), new MeshLambertMaterial({ color: 0x55504a }),
+    new MeshLambertMaterial({ color: 0x7d8172 }), new MeshLambertMaterial({ color: 0x3a3936 }),
+    new MeshLambertMaterial({ color: 0x625d55 }), new MeshLambertMaterial({ color: 0x57524b }),
   ]);
   base.position.set(0, -DIRT / 2 - 0.01, 0);
   base.receiveShadow = true;
   scene.add(base);
-  const bedrock = new Mesh(new BoxGeometry(m.width - 2, 3, m.length - 2), new MeshLambertMaterial({ color: 0x4a4d55 }));
+  const bedrock = new Mesh(new BoxGeometry(m.width - 2, 3, m.length - 2), new MeshLambertMaterial({ color: 0x46433f }));
   bedrock.position.set(0, -DIRT - 1.5, 0);
   scene.add(bedrock);
 
@@ -210,7 +215,7 @@ function main() {
   const topLayer = m.states.map((st, i) => (/_log|_stem|pillar/.test(st) ? FAMILIES.indexOf('logTop') : sideLayer[i]!));
   const detail = { value: params.get('textures') === '0' ? 0 : 1 };
   // Pixel textures v2: coloured, hue-shifted 16×16 tiles per (material family, palette colour).
-  const pix = buildPixelLayers(m.states, m.colors, familyOf);
+  const pix = buildPixelLayers(m.states, colors, familyOf);
   const gl = renderer.getContext() as WebGL2RenderingContext;
   const maxLayers = (gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS) as number) || 256;
   const pixTex = new DataArrayTexture(pix.data, PIX_TILE, PIX_TILE, Math.max(1, pix.layers));
@@ -280,10 +285,10 @@ function main() {
     shader.uniforms.waterLayer = { value: waterLayer };
     shader.uniforms.uTime = uTime;
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;');
+      .replace('#include <common>', '#include <common>\nattribute vec4 tex;\nvarying vec4 vTex;\nvarying float vUp;\nvarying float vY;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTex = tex;\nvUp = normal.y;\nvY = transformed.y;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform highp sampler2DArray pixMap;\nuniform highp sampler2D pixLut;\nuniform float pixMode;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nuniform float waterLayer;\nuniform float uTime;\nvarying vec4 vTex;\nvarying float vUp;')
+      .replace('#include <common>', '#include <common>\nuniform highp sampler2DArray detailMap;\nuniform highp sampler2DArray mcMap;\nuniform highp sampler2DArray pixMap;\nuniform highp sampler2D pixLut;\nuniform float pixMode;\nuniform float detailStrength;\nuniform float mcMode;\nuniform float night;\nuniform float glassLayer;\nuniform float waterLayer;\nuniform float uTime;\nvarying vec4 vTex;\nvarying float vUp;\nvarying float vY;')
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>
@@ -307,6 +312,9 @@ function main() {
             float dd = textureGrad(detailMap, vec3(fract(st), layer), gx, gy).r * (255.0 / 128.0);
             diffuseColor.rgb *= mix(1.0, dd, detailStrength);
           }
+          // Roofs (upward faces above street level) sit a step darker than the pale walls,
+          // so the city reads as stone blocks with dark lids rather than one bright mass.
+          if (mcMode < 0.5 && vUp > 0.5 && vY > 2.5) diffuseColor.rgb *= 0.62;
           // Night: about 60% of windows are lit, chosen per window by a hash.
           if (night > 0.5 && abs(layer - glassLayer) < 0.5 && vUp < 0.5) {
             vec2 cell = floor(st + 0.001);
@@ -388,7 +396,7 @@ function main() {
       const sz = Math.min(CHUNK, m.length - z0);
       const top = fillChunk(p, x0, z0, sx, sz, vox);
       // The dense array keeps the full-height stride; meshing only walks up to this chunk's top.
-      const out = greedyMesh(vox, sx, top, sz, m.colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo, { side: sideLayer, top: topLayer, origin: [x0, z0] });
+      const out = greedyMesh(vox, sx, top, sz, colors, m.kinds, [x0 + ox, 0, z0 + oz], true, bakeAo, { side: sideLayer, top: topLayer, origin: [x0, z0] });
       state.chunksDone++;
       progress.style.setProperty('--p', String(state.chunksDone / state.chunks));
       if (!out.quads) continue;
@@ -1135,7 +1143,8 @@ function main() {
     hemi.color.setHex(on ? 0x5d6f9e : dayLight.hemiSky);
     sun.intensity = on ? 0.75 : dayLight.sun;
     sun.color.setHex(on ? 0x9fb4ff : dayLight.sunColor);
-    renderer.toneMappingExposure = on ? 1.6 : 1.25;
+    renderer.toneMappingExposure = on ? 1.6 : 1.1;
+    (scene.fog as Fog).color.setHex(on ? STAGE.night.fog : STAGE.day.fog);
     document.body.classList.toggle('night', on);
     sun.shadow.needsUpdate = true;
   }
@@ -1259,7 +1268,7 @@ function main() {
     ctx.fillRect(0, 0, w, h + strip);
     // Same backdrop as the page (radial vignette, darker at night).
     const bg = ctx.createRadialGradient(w / 2, h * 0.32, 0, w / 2, h * 0.32, Math.hypot(w, h) * 0.6);
-    const stops = night.value ? ['#1b2238', '#11131b', '#0b0c10'] : ['#2d313b', '#1f2128', '#15161b'];
+    const stops = (night.value ? STAGE.night : STAGE.day).stops;
     bg.addColorStop(0, stops[0]!);
     bg.addColorStop(0.55, stops[1]!);
     bg.addColorStop(1, stops[2]!);
