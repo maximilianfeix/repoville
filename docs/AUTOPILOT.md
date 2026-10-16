@@ -7,7 +7,7 @@ Every iteration starts by reading this file and `docs/PROGRESS.md`.
 
 Make Repoville a project people want to try after one screenshot: a beautiful, data-faithful
 voxel city, a premium viewer and landing page, strong branding, a README that converts,
-and exports that really work in Minecraft. Deadline for this run: **2026-10-16 15:00 local**.
+and exports that really work in Minecraft. Deadline for this run: **2026-10-16 20:00 local** (extended by the owner).
 
 ## Loop (one iteration ≈ one focused task, 20–60 min)
 
@@ -27,7 +27,7 @@ and exports that really work in Minecraft. Deadline for this run: **2026-10-16 1
 
 ## Hard rules
 
-- Never post to social media, never publish to npm, never change secrets or repo settings beyond what PROGRESS lists as approved.
+- Promotion is approved by the owner (2026-10-16): dev.to, X, Reddit, GitHub awesome lists. Follow each venue's rules, disclose AI assistance where required, one post per venue, no replies under unrelated threads, no vote manipulation. Never publish to npm or change secrets without asking.
 - No faked screenshots, numbers, stars or badges. Claims only after testing. Unverified marketing claims get `[CONFIRM]`.
 - No Mojang assets; "Minecraft" never in the product name; keep the disclaimer.
 - Do not delete history or other people's work. Ask nothing interactively — if blocked, write it into PROGRESS under "Needs Maxi".
