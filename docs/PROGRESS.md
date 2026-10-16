@@ -11,6 +11,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 17:45: family images in 0.14 look (#117); phones get a steeper home view and max five labels (#118); site redeployed. Not in a release yet (viewer-only).
 - 2026-10-16 17:00: roofs still looked noisy in close-ups: one fire cluster per roof + single flame plume, 1–4 rooftop units (#113). v0.14.1 released, README media and site re-rendered, Paper e2e 158/158.
 - 2026-10-16 18:00: redesign after "sieht hässlich aus": Codex wrote docs/brand/MASTER-PROMPT.md from spillage/hexvero/proxy-scraper; calmer render (#107), paper/ink HUD (#108), site + README + brand (#109), v0.14.0 released (#110), site deployed, repo description updated. X post prepared (launch/x-post.md, #111) but posting from the browser was blocked by the auto-mode classifier; no stray likes/posts on @44errrr (checked).
 - 2026-10-16 15:15: mini-map with camera marker and click-to-fly (#105, closes #3). Not released yet. Only v2 issue #8 remains open.
