@@ -250,6 +250,7 @@ body.ready .progress{opacity:0}
 .drawer h3{margin:8px 0 6px;font:600 12px var(--ui);color:var(--bone);display:flex;align-items:center;gap:7px}
 .drawer ul{margin:0;padding:0;list-style:none}
 .drawer li{margin:0 0 8px;display:flex;flex-direction:column}
+.drawer .districts li{margin-bottom:4px}
 .drawer li span{color:var(--mute);font-size:12px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--mute)}
 .dot.lava{background:var(--lava)}.dot.red{background:var(--red)}.dot.moss{background:var(--moss)}

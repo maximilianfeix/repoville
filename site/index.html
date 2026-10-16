@@ -65,6 +65,7 @@ h2{font:800 clamp(30px,4vw,46px)/1.05 Inter,sans-serif;letter-spacing:-.03em;mar
 .compare .bar{position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--bone);box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
 .compare .bar::after{content:'⟷';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bone);color:var(--deep);font:700 14px var(--mono);border-radius:50%;width:34px;height:34px;display:grid;place-items:center}
 .compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.compare:focus-within{outline:2px solid var(--dia);outline-offset:3px}
 .compare .tag{position:absolute;top:12px;font:600 12px var(--mono);background:rgba(18,20,24,.85);border:1px solid var(--line);border-radius:5px;padding:4px 8px}
 .compare .tag.l{left:12px}.compare .tag.r{right:12px}
 .fine{font-size:13px;color:var(--mute);margin-top:12px}
