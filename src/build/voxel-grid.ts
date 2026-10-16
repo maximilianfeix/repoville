@@ -113,6 +113,24 @@ export class VoxelGrid {
     return true;
   }
 
+  /** Calls `fn` for every cell whose palette id passes `want` (walks stored sections only). */
+  each(want: (id: number) => boolean, fn: (x: number, y: number, z: number, id: number) => void): void {
+    const plane = this.tilesX * this.tilesZ;
+    for (const [k, s] of this.sections) {
+      const sy = Math.floor(k / plane);
+      const tz = Math.floor((k % plane) / this.tilesX);
+      const tx = k % this.tilesX;
+      for (let i = 0; i < s.length; i++) {
+        const id = s[i]!;
+        if (!id || !want(id)) continue;
+        const x = tx * TILE + (i % TILE);
+        const z = tz * TILE + (Math.floor(i / TILE) % TILE);
+        const y = sy * SECTION + Math.floor(i / (TILE * TILE));
+        fn(x, y, z, id);
+      }
+    }
+  }
+
   /** Highest non-air y + 1 (0 if empty). */
   topY(): number {
     let top = 0;
