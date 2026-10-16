@@ -10,6 +10,7 @@ export function settle(grid: VoxelGrid): void {
   settleStairs(grid);
   settleLeaves(grid);
   settleGrass(grid);
+  settleConnections(grid);
 }
 
 // Blocks grass survives under (light passes); anything else, water included, turns it to dirt on a random tick.
@@ -130,4 +131,31 @@ function settleLeaves(grid: VoxelGrid): void {
     const state = `${m[1]}[distance=${dist.get(key(x, y, z))},persistent=${m[2]},waterlogged=${m[3]}]`;
     if (state !== grid.palette[id]) grid.setState(x, y, z, state);
   }
+}
+
+const CONNECTS = /^minecraft:(iron_bars|[a-z_]+_fence)\[east=(true|false),north=(true|false),south=(true|false),waterlogged=(true|false),west=(true|false)\]$/;
+// Not a full sturdy face, or an exception the game never connects to (leaves).
+const NOT_STURDY = /^minecraft:(air|water|lava|[a-z_]+_leaves|[a-z_]+_slab|[a-z_]+_stairs|[a-z_]+_fence|[a-z_]+_fence_gate|iron_bars|[a-z_]*_pane|[a-z_]*lantern|[a-z_]+_sign|[a-z_]*torch|poppy|dandelion|[a-z_]+_tulip|short_grass|tall_grass|fern|[a-z_]*campfire|lightning_rod|vine|cobweb|[a-z_]+_carpet|scaffolding|snow|[a-z_]+_button|lever|chain|end_rod|flower_pot|[a-z_]+_trapdoor|[a-z_]+_door|ladder|bell|[a-z_]*fire|lectern|azalea|flowering_azalea)([[,]|$)/;
+
+/** Iron bars and fences connect to their own kind and to sturdy faces on every block update. */
+function settleConnections(grid: VoxelGrid): void {
+  const ids = new Set<number>();
+  grid.palette.forEach((st, i) => { if (CONNECTS.test(st)) ids.add(i); });
+  if (!ids.size) return;
+  const kind = (st: string) => (st.startsWith('minecraft:iron_bars') || /_pane([[,]|$)/.test(st) ? 'bars' : /_fence(\[|$)/.test(st) && !st.includes('nether_brick') ? 'wood' : st.includes('nether_brick_fence') ? 'nether' : null);
+  const sides: Array<['east' | 'north' | 'south' | 'west', number, number]> = [['east', 1, 0], ['north', 0, -1], ['south', 0, 1], ['west', -1, 0]];
+  const updates: Array<[number, number, number, string]> = [];
+  grid.each((id) => ids.has(id), (x, y, z, id) => {
+    const st = grid.palette[id]!;
+    const m = CONNECTS.exec(st)!;
+    const own = kind(st);
+    const conn: Record<string, boolean> = {};
+    for (const [side, dx, dz] of sides) {
+      const n = grid.palette[grid.get(x + dx, y, z + dz)]!;
+      conn[side] = kind(n) === own || !NOT_STURDY.test(n);
+    }
+    const next = `minecraft:${m[1]}[east=${conn.east},north=${conn.north},south=${conn.south},waterlogged=${m[5]},west=${conn.west}]`;
+    if (next !== st) updates.push([x, y, z, next]);
+  });
+  for (const [x, y, z, st] of updates) grid.setState(x, y, z, st);
 }

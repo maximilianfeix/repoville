@@ -363,11 +363,24 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
     }
     case 'midrise': {
       m.shell(fp, 1, 3, pal.wall, { window: (a, len) => a > 0 && a < len - 1 && a % 3 !== 0 });
+      // Ribbon windows: one continuous glass row per floor, set one block back so the
+      // spandrels between them cast a shadow line (different read from the towers' piers).
       m.shell(fp, 3, H + 1, pal.towerWall, {
-        window: grid((y) => y % 3 === 1),
+        window: (a, len, y) => a > 0 && a < len - 1 && y % 3 === 1 && y < H - 1,
         band: (y) => (y === H ? pal.trim : null),
       });
       m.floors(fp, 3, H + 1, 3);
+      if (width(fp) >= 4 && depth(fp) >= 4) {
+        const glassId = g.id(pal.glass);
+        for (let y = 4; y < H - 1; y += 3) for (let z = fp.z0; z < fp.z1; z++) for (let x = fp.x0; x < fp.x1; x++) {
+          if (g.get(x, y, z) !== glassId) continue;
+          const ix = x === fp.x0 ? 1 : x === fp.x1 - 1 ? -1 : 0;
+          const iz = z === fp.z0 ? 1 : z === fp.z1 - 1 ? -1 : 0;
+          if (!ix === !iz) continue; // corners and interior cells stay
+          g.set(x, y, z, 0);
+          g.set(x + ix, y, z + iz, glassId);
+        }
+      }
       m.door(fp);
       const deckTop = m.flatRoof(fp, H + 1, pal.floor, pal.trim);
       m.roofscape(fp, deckTop);

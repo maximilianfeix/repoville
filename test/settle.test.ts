@@ -58,3 +58,17 @@ describe('settle grass', () => {
     expect(h.state(0, 0, 0)).toBe('minecraft:dirt');
   });
 });
+
+describe('settle connections', () => {
+  it('connects iron bars to bars and solid blocks, not to air or leaves', () => {
+    const bars = (e: boolean, n: boolean, s: boolean, w: boolean) => `minecraft:iron_bars[east=${e},north=${n},south=${s},waterlogged=false,west=${w}]`;
+    const g = new VoxelGrid(3, 1, 3);
+    g.setState(1, 0, 1, bars(false, false, false, false));
+    g.setState(2, 0, 1, bars(false, false, false, false));
+    g.setState(1, 0, 0, 'minecraft:stone');
+    g.setState(0, 0, 1, 'minecraft:oak_leaves[distance=7,persistent=true,waterlogged=false]');
+    settle(g);
+    expect(g.state(1, 0, 1)).toBe(bars(true, true, false, false));
+    expect(g.state(2, 0, 1)).toBe(bars(false, false, false, true));
+  });
+});

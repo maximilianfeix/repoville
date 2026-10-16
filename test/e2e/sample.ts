@@ -1,10 +1,15 @@
 import type { VoxelGrid } from '../../src/build/voxel-grid.js';
 import type { Expect } from './server.js';
 
-/** Deterministic sample of non-air blocks plus every block of the listed states, translated to world coords. */
+/**
+ * Deterministic sample of non-air blocks, plus the first cell of every distinct block state in the
+ * grid (so any state the game would rewrite on update is caught), translated to world coords.
+ * `mustInclude` states must exist in the grid.
+ */
 export function sampleBlocks(grid: VoxelGrid, origin: [number, number, number], count: number, mustInclude: string[] = []): Expect[] {
   const out: Expect[] = [];
   const want = new Set(mustInclude);
+  const firstOf = new Set<string>();
   let seen = 0;
   const top = grid.topY();
   const total: Array<[number, number, number, string]> = [];
@@ -13,8 +18,9 @@ export function sampleBlocks(grid: VoxelGrid, origin: [number, number, number], 
     if (!id) continue;
     const s = grid.palette[id]!;
     total.push([x, y, z, s]);
-    if (want.has(s)) {
-      want.delete(s);
+    want.delete(s);
+    if (!firstOf.has(s)) {
+      firstOf.add(s);
       out.push({ x: x + origin[0], y: y + origin[1], z: z + origin[2], block: s });
     }
     seen++;
