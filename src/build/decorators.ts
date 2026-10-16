@@ -55,10 +55,13 @@ export function addFire(grid: VoxelGrid, b: BuildingLayout, shell: Shell, level:
   const { x0, z0, x1, z1 } = b.footprint;
   const area = (x1 - x0) * (z1 - z0);
   const campfire = grid.id(BLOCKS.campfire);
-  const count = Math.max(1, Math.min(6, Math.round(area / 20)));
+  // One fire near the middle of the roof (where the viewer's flames rise), not sparks all over it.
+  const count = Math.max(1, Math.min(4, Math.round(area / 40)));
+  const mx = x0 + (x1 - x0) / 2, mz = z0 + (z1 - z0) / 2;
+  const reach = Math.max(1, Math.min(3, Math.floor(Math.min(x1 - x0, z1 - z0) / 4)));
   for (let i = 0; i < count; i++) {
-    const x = x0 + Math.floor(rng() * (x1 - x0));
-    const z = z0 + Math.floor(rng() * (z1 - z0));
+    const x = Math.min(x1 - 1, Math.max(x0, Math.round(mx + (rng() * 2 - 1) * reach)));
+    const z = Math.min(z1 - 1, Math.max(z0, Math.round(mz + (rng() * 2 - 1) * reach)));
     const top = surface(grid, x, z, shell.topY);
     if (top >= 0 && top + 1 < grid.height) grid.set(x, top + 1, z, campfire);
   }

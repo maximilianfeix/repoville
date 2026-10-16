@@ -264,8 +264,8 @@ class Mason {
         this.fill(tank, deckTop + 3, deckTop + 4, slab('spruce'));
       }
     }
-    // HVAC units, more on larger decks (about one per 30 cells, at most 12).
-    const units = Math.min(12, 1 + Math.floor((area / 30) * (0.6 + rng() * 0.8)));
+    // A few units, not a scatter: busy decks read as noise from above.
+    const units = Math.min(4, 1 + Math.floor(area / 90));
     for (let i = 0; i < units; i++) {
       const along = rng() < 0.5;
       const u = along ? spot(2, 1) : spot(1, 2);
