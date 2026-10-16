@@ -38,7 +38,7 @@ export const PALETTES: Record<Biome, Palette> = {
   jungle: { biome: 'jungle', wall: 'minecraft:jungle_planks', towerWall: 'minecraft:mud_bricks', trim: log('jungle_log'), roof: 'mossy_cobblestone', roofBlock: 'minecraft:mossy_cobblestone', glass: 'minecraft:lime_stained_glass', floor: 'minecraft:jungle_planks', ground: GRASS, accent: 'minecraft:lime_concrete', mossyWall: 'minecraft:mossy_cobblestone', treeLog: log('jungle_log'), treeLeaves: leaves('jungle_leaves') },
   frozen: { biome: 'frozen', wall: 'minecraft:white_concrete', towerWall: 'minecraft:light_blue_terracotta', trim: 'minecraft:packed_ice', roof: 'dark_prismarine', roofBlock: 'minecraft:dark_prismarine', glass: 'minecraft:light_blue_stained_glass', floor: 'minecraft:spruce_planks', ground: 'minecraft:snow_block', accent: 'minecraft:blue_ice', mossyWall: 'minecraft:moss_block', treeLog: log('spruce_log'), treeLeaves: leaves('spruce_leaves') },
   badlands: { biome: 'badlands', wall: 'minecraft:white_terracotta', towerWall: 'minecraft:terracotta', trim: log('dark_oak_log'), roof: 'red_sandstone', roofBlock: 'minecraft:cut_red_sandstone', glass: 'minecraft:orange_stained_glass', floor: 'minecraft:dark_oak_planks', ground: 'minecraft:red_sand', accent: 'minecraft:orange_terracotta', mossyWall: 'minecraft:moss_block', treeLog: log('acacia_log'), treeLeaves: leaves('acacia_leaves') },
-  caves: { biome: 'caves', wall: 'minecraft:tuff_bricks', towerWall: 'minecraft:deepslate_bricks', trim: 'minecraft:polished_deepslate', roof: 'deepslate_tile', roofBlock: 'minecraft:deepslate_tiles', glass: 'minecraft:light_gray_stained_glass', floor: 'minecraft:polished_deepslate', ground: GRASS, accent: 'minecraft:iron_block', mossyWall: 'minecraft:cracked_deepslate_bricks', treeLog: log('dark_oak_log'), treeLeaves: leaves('dark_oak_leaves') },
+  caves: { biome: 'caves', wall: 'minecraft:polished_tuff', towerWall: 'minecraft:tuff_bricks', trim: 'minecraft:polished_deepslate', roof: 'deepslate_tile', roofBlock: 'minecraft:deepslate_tiles', glass: 'minecraft:light_gray_stained_glass', floor: 'minecraft:polished_deepslate', ground: GRASS, accent: 'minecraft:iron_block', mossyWall: 'minecraft:cracked_deepslate_bricks', treeLog: log('dark_oak_log'), treeLeaves: leaves('dark_oak_leaves') },
   cherry: { biome: 'cherry', wall: 'minecraft:cherry_planks', towerWall: 'minecraft:pink_terracotta', trim: log('cherry_log'), roof: 'dark_oak', roofBlock: 'minecraft:dark_oak_planks', glass: 'minecraft:pink_stained_glass', floor: 'minecraft:cherry_planks', ground: GRASS, accent: 'minecraft:pink_concrete', mossyWall: 'minecraft:moss_block', treeLog: log('cherry_log'), treeLeaves: leaves('cherry_leaves') },
   end: { biome: 'end', wall: 'minecraft:end_stone_bricks', towerWall: 'minecraft:purpur_block', trim: log('purpur_pillar'), roof: 'purpur', roofBlock: 'minecraft:purpur_block', glass: 'minecraft:magenta_stained_glass', floor: 'minecraft:end_stone_bricks', ground: 'minecraft:end_stone', accent: 'minecraft:end_rod[facing=up]', mossyWall: 'minecraft:moss_block', treeLog: log('purpur_pillar'), treeLeaves: 'minecraft:chorus_flower[age=0]' },
   quarry: { biome: 'quarry', wall: 'minecraft:cobblestone', towerWall: 'minecraft:andesite', trim: log('stripped_spruce_log'), roof: 'cobblestone', roofBlock: 'minecraft:cobblestone', glass: 'minecraft:glass', floor: 'minecraft:spruce_planks', ground: 'minecraft:coarse_dirt', accent: 'minecraft:scaffolding[bottom=false,distance=0,waterlogged=false]', mossyWall: 'minecraft:mossy_cobblestone', treeLog: log('spruce_log'), treeLeaves: leaves('spruce_leaves') },
@@ -79,9 +79,12 @@ export const VARIANTS: Record<Biome, Array<{ wall: string; towerWall: string }>>
     { wall: 'minecraft:white_terracotta', towerWall: 'minecraft:terracotta' },
     { wall: 'minecraft:smooth_red_sandstone', towerWall: 'minecraft:orange_terracotta' },
   ],
+  // Mid-tone tuff walls with dark deepslate trim (value structure: dark ground, mid walls, light roofs);
+  // one calcite neighbourhood keeps a light accent in large C/C++ cities.
   caves: [
-    { wall: 'minecraft:tuff_bricks', towerWall: 'minecraft:deepslate_bricks' },
-    { wall: 'minecraft:polished_tuff', towerWall: 'minecraft:polished_deepslate' },
+    { wall: 'minecraft:polished_tuff', towerWall: 'minecraft:tuff_bricks' },
+    { wall: 'minecraft:tuff_bricks', towerWall: 'minecraft:tuff' },
+    { wall: 'minecraft:polished_tuff', towerWall: 'minecraft:calcite' },
   ],
   cherry: [
     { wall: 'minecraft:cherry_planks', towerWall: 'minecraft:pink_terracotta' },

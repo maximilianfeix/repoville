@@ -130,7 +130,9 @@ function main() {
   const hemi = new HemisphereLight(0xcfdcff, 0x7a5f45, 1.5);
   scene.add(hemi);
   const sun = new DirectionalLight(0xffcf9a, 2.8);
-  sun.position.set(-span * 0.5, span * 0.42, -span * 0.3);
+  // Three-quarter light: the home camera looks from +x/+z, so the sun lights the +x faces it sees
+  // and leaves the +z faces in shade (two-tone facades instead of a backlit skyline).
+  sun.position.set(span * 0.55, span * 0.45, -span * 0.3);
   sun.shadow.mapSize.set(4096, 4096);
   const sc = sun.shadow.camera;
   sc.left = -span * 0.75; sc.right = span * 0.75; sc.top = span * 0.75; sc.bottom = -span * 0.75;
