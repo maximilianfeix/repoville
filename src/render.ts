@@ -15,6 +15,7 @@ import { writeLitematic } from './write/litematic.js';
 import { writeWorldZip } from './write/world.js';
 import { renderThumbnail } from './write/thumbnail.js';
 import { readTimeline } from './history/timeline.js';
+import { readDiff } from './history/diff.js';
 import { writeSchem } from './write/schem.js';
 import { writeHtml } from './write/html.js';
 import { badgeMarkdown, SITE } from './badge.js';
@@ -70,8 +71,14 @@ export async function render(src: ResolvedSource, cfg: RenderConfig, log: (m: st
         timeline = await readTimeline(src.dir, built.buildings.map((b) => ({ path: b.path, merged: Boolean(b.merged), height: b.height })));
         lap('timeline');
       }
+      let diff = null;
+      if (cfg.diff) {
+        diff = await readDiff(src.dir, cfg.diff);
+        log(`diff vs ${cfg.diff} (${diff.baseCommit.slice(0, 7)}): ${diff.changes.size} changed paths`);
+      }
       const bytes = writeHtml(file, {
         timeline,
+        diff,
         city, built, highlights: highlights(city, built.buildings, built.districts), since: cfg.since,
         generator: `repoville ${process.env.REPOVILLE_VERSION ?? 'dev'}`, site: SITE, badge: badgeMarkdown(src.owner, src.repo), textured: cfg.textured,
         source: webBaseFor(src.url),

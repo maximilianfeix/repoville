@@ -32,6 +32,8 @@ export interface ViewerMeta {
   buildings: BuildingRow[];
   districts: DistrictRow[];
   textured: boolean;
+  /** Optional diff against a base ref: per building [index, 'A'|'M', added, removed]; deleted paths listed. */
+  diff?: { base: string; baseCommit: string; files: Array<[number, 'A' | 'M', number, number]>; deleted: string[]; deletedCount: number } | null;
   /** Optional history time-lapse: frame times and base64 of frames × buildings heights (uint8). */
   timeline?: { times: number[]; heights: string; colors: number[] } | null;
   /** Files hidden inside LOD towers: [building index, "relative/path\tloc\n…"]. */

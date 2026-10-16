@@ -120,6 +120,7 @@ node dist/cli.js [build] <path|owner/repo|url>
   --seed <n>               decoration seed
   --ref <commit>           render a specific commit of a remote repo
   --timelapse              add a History view: the city growing over the git history
+  --diff <ref>             add a Diff view: buildings added/changed since the merge base with <ref>
 node dist/cli.js badge [owner/repo]   print the README badge
 MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
 ```
@@ -155,6 +156,8 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v4
 ```
+
+For pull requests, `with: { diff: origin/${{ github.base_ref }} }` adds a **Diff** view that highlights new and changed buildings (needs `fetch-depth: 0`); `timelapse: true` adds the History view.
 
 The job summary prints a badge that links to your city. Inputs: `path`, `since`, `max-buildings`, `formats` (add `schem,litematic,world` to publish Minecraft files next to the viewer) and `version`. The render script (`action/render.sh`) is tested locally; the action has not run on GitHub-hosted runners yet.
 

@@ -52,6 +52,7 @@ program
   .option('--open', 'open the 3D preview when done')
   .option('--gallery', 'also write gallery/<owner>-<repo>/ for a gallery PR')
   .option('--timelapse', 'embed a time-lapse of the whole git history in the viewer')
+  .option('--diff <ref>', 'add a Diff view: buildings added/changed since the merge base with <ref> (e.g. origin/main)')
   .addOption(new Option('--ref <commit>', 'render this commit of a remote repo'))
   .addOption(new Option('--refresh', 'fetch the latest commit for a cached remote repo'))
   .action(async (target: string, o: Record<string, string | boolean | string[] | undefined>) => {
@@ -79,6 +80,7 @@ program
       open: Boolean(o.open),
       gallery: Boolean(o.gallery),
       timelapse: Boolean(o.timelapse ?? fileCfg.timelapse),
+      ...(o.diff ? { diff: String(o.diff) } : {}),
       palette: fileCfg.palette,
     };
     if (!Number.isInteger(cfg.maxBuildings) || cfg.maxBuildings < 1) throw new Error('--max-buildings must be a positive integer');
