@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0 — 2026-10-16
+
+- **Diff view** (`--diff <ref>`): what a branch changed, as a city. New buildings glow Diamond, changed ones Lava; deleted files are listed. The GitHub Action gains `diff` and `timelapse` inputs for pull-request previews.
+
 ## 0.4.0 — 2026-10-16
 
 - **History time-lapse** (`--timelapse`): a History view where the city grows commit by commit, with play, scrubber and date.
