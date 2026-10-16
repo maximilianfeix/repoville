@@ -445,9 +445,11 @@ function main() {
       const j = i * PER + k;
       const r = Math.abs(Math.sin(j * 12.9898) * 43758.5453) % 1;
       const g = Math.abs(Math.sin(j * 78.233) * 12345.678) % 1;
-      firePos[j * 3] = b[1] + ox + r * (b[3] - b[1]);
+      // One tight plume per roof, not sparks spread over the whole deck.
+      const spread = Math.min(2.4, 0.35 * Math.min(b[3] - b[1], b[4] - b[2]));
+      firePos[j * 3] = (b[1] + b[3]) / 2 + ox + (r - 0.5) * spread;
       firePos[j * 3 + 1] = b[5] + 2;
-      firePos[j * 3 + 2] = b[2] + oz + g * (b[4] - b[2]);
+      firePos[j * 3 + 2] = (b[2] + b[4]) / 2 + oz + (g - 0.5) * spread;
       const c = b[10] === 2 && k % 2 === 0 ? soul : lava;
       fireCol.set([c.r, c.g, c.b], j * 3);
       fireSeed[j] = r * 10;
@@ -456,7 +458,7 @@ function main() {
   const fireGeo = new BufferGeometry();
   fireGeo.setAttribute('position', new BufferAttribute(firePos, 3));
   fireGeo.setAttribute('color', new BufferAttribute(fireCol, 3));
-  const flames = new Points(fireGeo, new PointsMaterial({ size: 4, vertexColors: true, transparent: true, opacity: 0.9, blending: AdditiveBlending, depthWrite: false }));
+  const flames = new Points(fireGeo, new PointsMaterial({ size: 2.6, vertexColors: true, transparent: true, opacity: 0.85, blending: AdditiveBlending, depthWrite: false }));
   scene.add(flames);
 
   // ---------- Metric view: factual columns over the city ----------
