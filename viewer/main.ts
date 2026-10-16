@@ -581,6 +581,75 @@ function main() {
   ui.prepend(labelLayer);
   ui.append(brand, stats, metricLegend, card, tip, viewMenu, matches, dock, drawer, foot);
 
+  // ---------- Mini-map: districts and buildings from above, camera marker, click to fly ----------
+  // Mouse-only convenience; the drawer's district list is the keyboard route.
+  const mini = el('canvas', { class: 'minimap', 'aria-hidden': 'true', title: 'Mini-map: click a district to fly there' }) as HTMLCanvasElement;
+  ui.append(mini);
+  const MINI = 168;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  mini.width = mini.height = MINI * dpr;
+  const miniScale = (MINI - 12) / Math.max(m.width, m.length);
+  const miniOff = [(MINI - m.width * miniScale) / 2, (MINI - m.length * miniScale) / 2] as const;
+  const miniBase = document.createElement('canvas');
+  miniBase.width = miniBase.height = MINI * dpr;
+  {
+    const c = miniBase.getContext('2d')!;
+    c.scale(dpr, dpr);
+    c.translate(miniOff[0], miniOff[1]);
+    c.fillStyle = '#2b2f38';
+    c.fillRect(0, 0, m.width * miniScale, m.length * miniScale);
+    for (const d of m.districts) {
+      if (d[1] < 1 || d[1] > 2) continue;
+      c.fillStyle = d[1] === 1 ? '#3a404b' : '#434a56';
+      c.fillRect(d[2] * miniScale, d[3] * miniScale, (d[4] - d[2]) * miniScale, (d[5] - d[3]) * miniScale);
+    }
+    const maxH = Math.max(1, ...m.buildings.map((b) => b[5]));
+    for (const b of m.buildings) {
+      const t = Math.sqrt(b[5] / maxH);
+      c.fillStyle = b[10] > 0 ? '#ff7a1a' : `rgba(232,217,168,${0.35 + 0.65 * t})`;
+      c.fillRect(b[1] * miniScale, b[2] * miniScale, Math.max(1, (b[3] - b[1]) * miniScale), Math.max(1, (b[4] - b[2]) * miniScale));
+    }
+  }
+  const miniCtx = mini.getContext('2d')!;
+  let miniKey = '';
+  function drawMiniMap() {
+    mini.hidden = !card.hidden || metric === 'history';
+    if (mini.hidden) return;
+    const tx = orbit.target.x - ox, tz = orbit.target.z - oz;
+    const dx = camera.position.x - orbit.target.x, dz = camera.position.z - orbit.target.z;
+    const key = `${tx.toFixed(1)},${tz.toFixed(1)},${Math.atan2(dz, dx).toFixed(2)}`;
+    if (key === miniKey) return;
+    miniKey = key;
+    miniCtx.setTransform(1, 0, 0, 1, 0, 0);
+    miniCtx.clearRect(0, 0, mini.width, mini.height);
+    miniCtx.drawImage(miniBase, 0, 0);
+    miniCtx.setTransform(dpr, 0, 0, dpr, dpr * miniOff[0], dpr * miniOff[1]);
+    const px = tx * miniScale, pz = tz * miniScale;
+    // View direction: from the camera towards the target, drawn as a short wedge.
+    const a = Math.atan2(-dz, -dx);
+    miniCtx.fillStyle = 'rgba(63,208,201,.28)';
+    miniCtx.beginPath();
+    miniCtx.moveTo(px, pz);
+    miniCtx.arc(px, pz, 26, a - 0.45, a + 0.45);
+    miniCtx.closePath();
+    miniCtx.fill();
+    miniCtx.fillStyle = '#3fd0c9';
+    miniCtx.beginPath();
+    miniCtx.arc(px, pz, 3.2, 0, Math.PI * 2);
+    miniCtx.fill();
+  }
+  mini.addEventListener('click', (e) => {
+    const r = mini.getBoundingClientRect();
+    const gx = ((e.clientX - r.left) * (MINI / r.width) - miniOff[0]) / miniScale;
+    const gz = ((e.clientY - r.top) * (MINI / r.height) - miniOff[1]) / miniScale;
+    let best: (typeof m.districts)[number] | null = null;
+    for (const d of m.districts) {
+      if (d[1] < 1 || gx < d[2] || gx >= d[4] || gz < d[3] || gz >= d[5]) continue;
+      if (!best || d[1] > best[1]) best = d;
+    }
+    if (best) focusPath(best[0]);
+  });
+
   // ---------- History time-lapse ----------
   const tl = m.timeline;
   const tlHeights = tl ? Uint8Array.from(atob(tl.heights), (c) => c.charCodeAt(0)) : null;
@@ -1276,6 +1345,7 @@ function main() {
     if (!reduceMotion) uTime.value = now / 1000;
     renderer.render(scene, camera);
     placeLabels();
+    drawMiniMap();
     frames++;
     if (now - fpsT > 1000) {
       state.fps = Math.round((frames * 1000) / (now - fpsT));
