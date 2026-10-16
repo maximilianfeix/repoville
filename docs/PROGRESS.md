@@ -9,7 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
-- 2026-10-16 08:30: tried recessed punched windows on test labs; rejected after before/after renders (single inset cells lose the glass colour, read as white notches). Kept the shared `Mason.recessGlass` refactor (#77). Open: test-lab districts still read as a uniform white field.
+- 2026-10-16 08:30: tried recessed punched windows on test labs; rejected after before/after renders (single inset cells lose the glass colour, read as white notches). Kept the shared `Mason.recessGlass` refactor (#77). Test-lab districts then varied via whites, accent stripes and roofscapes (#79); not released yet.
 - 2026-10-16 07:30: midrise ribbon windows (recessed), bar/fence connections in settle, e2e now checks every distinct block state (#73): Paper WorldEdit/world/live 159/159 each. Released in v0.8.0 (#75) with re-rendered demos, README media and flyover; site deployed.
 - 2026-10-16 07:00: facade research (viewer meshes stairs/slabs as cubes → depth only from whole-block offsets); wide towers get piers, glass strips and a cornice (#71). Next: ribbon windows on midrises, recessed punched windows on testlabs (research #3).
 - 2026-10-16 07:00: Paper e2e re-run after v0.7.0 found real mismatches (WorldEdit/live 2 failures: stair corner shapes, leaf distance; grass under floors). Settle pass with vanilla rules (#68), v0.7.1 released (#69). Paper 1.21.11: WorldEdit 66/66, world 64/64, live 64/64. X not posted: browser is logged into @44errrr, not a confirmed Repoville/Maxi account.
