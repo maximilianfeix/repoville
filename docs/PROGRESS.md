@@ -3,11 +3,13 @@
 Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ## Needs Maxi
+- X launch: which account should post the thread (`launch/x-thread.md`)? Chrome is logged into @44errrr; nothing was posted.
 - `gh auth refresh -h github.com -u maximilianfeix -s workflow` — without it no `.github/workflows/*` can be pushed (CI, Pages workflow).
 - Upload `assets/brand/social-preview.png` as the repo's social preview (Settings → General; no API for it).
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 07:00: Paper e2e re-run after v0.7.0 found real mismatches (WorldEdit/live 2 failures: stair corner shapes, leaf distance; grass under floors). Settle pass with vanilla rules (#68), v0.7.1 released (#69). Paper 1.21.11: WorldEdit 66/66, world 64/64, live 64/64. X not posted: browser is logged into @44errrr, not a confirmed Repoville/Maxi account.
 - 2026-10-16 06:25: street detail via worktree agent (#65: crosswalks, sidewalk wear, plaza benches), v0.7.0 released (#66; demos, README media, flyover re-rendered; site deployed; v0 tag moved). Launch drafts committed for 0.7.0 (drafts only).
 - 2026-10-16 06:10: on main since v0.6.0: roofscapes (#58), animated pixel-snapped water (#59), day vignette + matching Photo export (#60), label collision culling (#61), portrait framing fix (fit was clamped by maxDistance; fog/far now scale) + on-screen edge labels (#62), warmer night windows (#63). Launch drafts refreshed in launch/ (uncommitted until the next release). Street-level detail pass running in a worktree.
 - 2026-10-16 06:10: pixel textures v2 (#54), README media + flyover re-rendered (#55), v0.6.0 released (#56, release tarball verified: 0.6.0 with pixel layers), site redeployed. Awesome-list PRs opened (author disclosed): dictcp/awesome-git#215, bs-community/awesome-minecraft#81, AxiomeCG/awesome-threejs#62, toolleeo/awesome-cli-apps-in-a-csv#515.
@@ -62,7 +64,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [ ] Shader-based facade windows to cut quads (perf-research #3); packed attributes (#2).
 - [x] Class massing (#1). [ ] Suburb rows (#12).
 - [ ] npm pack dry run + cold `npx` test from a tarball.
-- [ ] Re-run all Paper e2e (WorldEdit, world, live) after the geometry changes; CI once workflow scope exists.
+- [x] Re-run all Paper e2e after the geometry changes (#68, v0.7.1). [ ] CI once workflow scope exists.
 
 ### P1 — product completeness
 - [x] World zip export verified on Paper (#13).
