@@ -1,7 +1,7 @@
 import { inflateSync } from 'fflate';
 import {
   ACESFilmicToneMapping, AdditiveBlending, Box3, DataArrayTexture, DataTexture, FloatType, RedFormat, LinearMipmapLinearFilter, NearestFilter, RGBAFormat, UnsignedByteType, Box3Helper, BoxGeometry, BufferAttribute, BufferGeometry, Color, DirectionalLight, Fog,
-  HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
+  HemisphereLight, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PCFShadowMap,
   PerspectiveCamera, Points, PointsMaterial, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -22,8 +22,9 @@ declare global {
 }
 
 const CHUNK = 32;
+const DISCLAIMER = 'NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.';
+const THEME_KEY = 'repoville.panels';
 const DAY = 86400;
-const MARK = `<svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#16181D" d="M6.4 46.3L32 59.1L32 62.7L6.4 49.9Z"/><path fill="#23262E" d="M57.6 46.3L32 59.1L32 62.7L57.6 49.9Z"/><path fill="#2E323B" d="M32 33.5L57.6 46.3L32 59.1L6.4 46.3Z"/><path fill="none" stroke="#3FD0C9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12.48 47.1L32 56.86M22.72 52.22L38.4 53.34"/><path fill="#E8D9A8" d="M22.4 40.86L32 45.66L32 14.16L22.4 9.36Z"/><path fill="#A8996E" d="M41.6 40.86L32 45.66L32 14.16L41.6 9.36Z"/><path fill="#F6F1E4" d="M32 4.56L41.6 9.36L32 14.16L22.4 9.36Z"/><path fill="#3A3F4B" d="M24.8 38.46L26.72 39.42L26.72 37.32L24.8 36.36Z"/><path fill="#6E6650" d="M39.2 38.46L37.28 39.42L37.28 37.32L39.2 36.36Z"/><path fill="#3A3F4B" d="M27.68 39.9L29.6 40.86L29.6 38.76L27.68 37.8Z"/><path fill="#6E6650" d="M36.32 39.9L34.4 40.86L34.4 38.76L36.32 37.8Z"/><path fill="#3A3F4B" d="M24.8 33.66L26.72 34.62L26.72 32.52L24.8 31.56Z"/><path fill="#6E6650" d="M39.2 33.66L37.28 34.62L37.28 32.52L39.2 31.56Z"/><path fill="#3A3F4B" d="M27.68 35.1L29.6 36.06L29.6 33.96L27.68 33Z"/><path fill="#6E6650" d="M36.32 35.1L34.4 36.06L34.4 33.96L36.32 33Z"/><path fill="#3A3F4B" d="M24.8 28.86L26.72 29.82L26.72 27.72L24.8 26.76Z"/><path fill="#6E6650" d="M39.2 28.86L37.28 29.82L37.28 27.72L39.2 26.76Z"/><path fill="#3A3F4B" d="M27.68 30.3L29.6 31.26L29.6 29.16L27.68 28.2Z"/><path fill="#6E6650" d="M36.32 30.3L34.4 31.26L34.4 29.16L36.32 28.2Z"/><path fill="#3A3F4B" d="M24.8 24.06L26.72 25.02L26.72 22.92L24.8 21.96Z"/><path fill="#6E6650" d="M39.2 24.06L37.28 25.02L37.28 22.92L39.2 21.96Z"/><path fill="#3A3F4B" d="M27.68 25.5L29.6 26.46L29.6 24.36L27.68 23.4Z"/><path fill="#6E6650" d="M36.32 25.5L34.4 26.46L34.4 24.36L36.32 23.4Z"/><path fill="#3A3F4B" d="M24.8 19.26L26.72 20.22L26.72 18.12L24.8 17.16Z"/><path fill="#6E6650" d="M39.2 19.26L37.28 20.22L37.28 18.12L39.2 17.16Z"/><path fill="#3A3F4B" d="M27.68 20.7L29.6 21.66L29.6 19.56L27.68 18.6Z"/><path fill="#6E6650" d="M36.32 20.7L34.4 21.66L34.4 19.56L36.32 18.6Z"/><path fill="#3A3F4B" d="M24.8 14.46L26.72 15.42L26.72 13.32L24.8 12.36Z"/><path fill="#6E6650" d="M39.2 14.46L37.28 15.42L37.28 13.32L39.2 12.36Z"/><path fill="#3A3F4B" d="M27.68 15.9L29.6 16.86L29.6 14.76L27.68 13.8Z"/><path fill="#6E6650" d="M36.32 15.9L34.4 16.86L34.4 14.76L36.32 13.8Z"/><path fill="#FFB066" d="M32 3.66L36.8 6.06L32 8.46L27.2 6.06Z"/><path fill="#FF7A1A" d="M27.2 9.36L32 11.76L32 8.46L27.2 6.06Z"/><path fill="#D45F10" d="M36.8 9.36L32 11.76L32 8.46L36.8 6.06Z"/><path fill="#E8D9A8" d="M35.2 46.62L43.52 50.78L43.52 30.38L35.2 26.22Z"/><path fill="#A8996E" d="M51.84 46.62L43.52 50.78L43.52 30.38L51.84 26.22Z"/><path fill="#F6F1E4" d="M43.52 22.06L51.84 26.22L43.52 30.38L35.2 26.22Z"/><path fill="#3A3F4B" d="M37.28 44.06L38.94 44.89L38.94 42.79L37.28 41.96Z"/><path fill="#6E6650" d="M49.76 44.06L48.1 44.89L48.1 42.79L49.76 41.96Z"/><path fill="#3A3F4B" d="M39.78 45.31L41.44 46.14L41.44 44.04L39.78 43.21Z"/><path fill="#6E6650" d="M47.26 45.31L45.6 46.14L45.6 44.04L47.26 43.21Z"/><path fill="#3A3F4B" d="M37.28 39.26L38.94 40.09L38.94 37.99L37.28 37.16Z"/><path fill="#6E6650" d="M49.76 39.26L48.1 40.09L48.1 37.99L49.76 37.16Z"/><path fill="#3A3F4B" d="M39.78 40.51L41.44 41.34L41.44 39.24L39.78 38.41Z"/><path fill="#6E6650" d="M47.26 40.51L45.6 41.34L45.6 39.24L47.26 38.41Z"/><path fill="#3A3F4B" d="M37.28 34.46L38.94 35.29L38.94 33.19L37.28 32.36Z"/><path fill="#6E6650" d="M49.76 34.46L48.1 35.29L48.1 33.19L49.76 32.36Z"/><path fill="#3A3F4B" d="M39.78 35.71L41.44 36.54L41.44 34.44L39.78 33.61Z"/><path fill="#6E6650" d="M47.26 35.71L45.6 36.54L45.6 34.44L47.26 33.61Z"/><path fill="#E8D9A8" d="M16 46.62L24.32 50.78L24.32 38.78L16 34.62Z"/><path fill="#A8996E" d="M31.36 47.26L24.32 50.78L24.32 38.78L31.36 35.26Z"/><path fill="#F6F1E4" d="M23.04 31.1L31.36 35.26L24.32 38.78L16 34.62Z"/><path fill="#3A3F4B" d="M18.08 44.06L19.74 44.89L19.74 42.79L18.08 41.96Z"/><path fill="#6E6650" d="M29.6 44.54L28.19 45.24L28.19 43.14L29.6 42.44Z"/><path fill="#3A3F4B" d="M20.58 45.31L22.24 46.14L22.24 44.04L20.58 43.21Z"/><path fill="#6E6650" d="M27.49 45.6L26.08 46.3L26.08 44.2L27.49 43.5Z"/><path fill="#3A3F4B" d="M18.08 39.26L19.74 40.09L19.74 37.99L18.08 37.16Z"/><path fill="#6E6650" d="M29.6 39.74L28.19 40.44L28.19 38.34L29.6 37.64Z"/><path fill="#3A3F4B" d="M20.58 40.51L22.24 41.34L22.24 39.24L20.58 38.41Z"/><path fill="#6E6650" d="M27.49 40.8L26.08 41.5L26.08 39.4L27.49 38.7Z"/></svg>`;
 
 const ICON = {
   search: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2a5 5 0 1 0 3.1 8.9l3 3 1.4-1.4-3-3A5 5 0 0 0 7 2Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>',
@@ -34,6 +35,7 @@ const ICON = {
   guide: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h12v2H2zm0 5h12v2H2zm0 5h8v2H2z"/></svg>',
   camera: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2 4.5 4H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2.5l-1-2zM8 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>',
   close: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.4 2 4.6 4.6L12.6 2 14 3.4 9.4 8l4.6 4.6-1.4 1.4L8 9.4 3.4 14 2 12.6 6.6 8 2 3.4z"/></svg>',
+  more: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6.5h3v3H2zm4.5 0h3v3h-3zm4.5 0h3v3h-3z"/></svg>',
 };
 
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<string, string> = {}, html = ''): HTMLElementTagNameMap[K] => {
@@ -485,40 +487,50 @@ function main() {
     age: '<b>Age</b> days since the last commit, as colour; height stays the building height. Old is not bad.',
     todos: '<b>TODO density</b> TODO / FIXME / HACK / XXX markers per line, as height and colour.',
     diff: m.diff
-      ? `<b>Diff</b> vs ${esc(m.diff.base)} (${esc(m.diff.baseCommit.slice(0, 7))}): <span style="color:#3FD0C9">${m.diff.files.filter((f) => f[1] === 'A').length} added</span>, <span style="color:#FF7A1A">${m.diff.files.filter((f) => f[1] === 'M').length} changed</span>, ${m.diff.deletedCount} deleted${m.diff.deleted.length ? ` <details><summary>deleted files</summary>${m.diff.deleted.slice(0, 30).map(esc).join('<br>')}${m.diff.deletedCount > 30 ? '<br>…' : ''}</details>` : ''}`
+      ? `<b>Diff</b> vs ${esc(m.diff.base)} (${esc(m.diff.baseCommit.slice(0, 7))}): <span style="color:var(--new)">${m.diff.files.filter((f) => f[1] === 'A').length} added</span>, <span style="color:var(--fire)">${m.diff.files.filter((f) => f[1] === 'M').length} changed</span>, ${m.diff.deletedCount} deleted${m.diff.deleted.length ? ` <details><summary>deleted files</summary>${m.diff.deleted.slice(0, 30).map(esc).join('<br>')}${m.diff.deletedCount > 30 ? '<br>…' : ''}</details>` : ''}`
       : '',
     history: '<b>History</b> the city growing commit by commit (line counts from git, scaled to today\'s heights).',
   };
 
   // ---------- Hover and selection outlines ----------
   const hoverBox = new Box3();
-  const outline = new Box3Helper(hoverBox, 0x3fd0c9);
+  const outline = new Box3Helper(hoverBox, 0x9cc8a5);
   outline.visible = false;
   scene.add(outline);
+  // Selection: a light line with a dark one just outside, so it reads on pale and dark walls alike.
   const selBox = new Box3();
-  const selOutline = new Box3Helper(selBox, 0xff7a1a);
+  const selHaloBox = new Box3();
+  const selOutline = new Group();
+  selOutline.add(new Box3Helper(selHaloBox, 0x101410), new Box3Helper(selBox, 0xb4e0bd));
+  // Exact colours: keep the outlines out of tone mapping.
+  for (const helper of [outline, ...selOutline.children] as Box3Helper[]) (helper.material as { toneMapped: boolean }).toneMapped = false;
   selOutline.visible = false;
   scene.add(selOutline);
   const boxFor = (b: BuildingRow, target: Box3) => target.set(new Vector3(b[1] + ox - 0.15, 0, b[2] + oz - 0.15), new Vector3(b[3] + ox + 0.15, b[5] + 2.3, b[4] + oz + 0.15));
 
   // ---------- HUD ----------
-  const brand = el('header', { class: 'brand' }, `${MARK}<div><div class="word">repoville</div><div class="repo" title="${esc(m.name)}">${esc(m.name)}${m.head ? `<span>@${esc(m.head.slice(0, 7))}</span>` : ''}</div></div>`);
-  const stats = el('dl', { class: 'stats' }, [
-    ['files', compact(m.stats.files)],
-    ['lines', compact(m.stats.loc)],
-    [`commits · ${m.since}`, compact(m.stats.commits)],
-    ['buildings', compact(m.stats.buildings)],
-  ].map(([k, v]) => `<div><dt>${esc(k!)}</dt><dd>${esc(v!)}</dd></div>`).join(''));
+  const brand = el('header', { class: 'brand' }, `<span class="word">repoville</span><div class="repo" title="${esc(m.name)}">${esc(m.name)}${m.head ? `<span>@${esc(m.head.slice(0, 7))}</span>` : ''}</div><div class="sum">${compact(m.stats.files)} files · ${compact(m.stats.loc)} lines</div>`);
+  const stats = el('dl', { class: 'stats', 'aria-label': 'Repository summary' }, [
+    ['files', compact(m.stats.files), fmt(m.stats.files)],
+    ['lines', compact(m.stats.loc), fmt(m.stats.loc)],
+    [`commits · ${m.since}`, compact(m.stats.commits), fmt(m.stats.commits)],
+    ['buildings', compact(m.stats.buildings), fmt(m.stats.buildings)],
+  ].map(([k, v, full]) => `<div title="${esc(full!)} ${esc(k!)}"><dt>${esc(k!)}</dt><dd>${esc(v!)}</dd></div>`).join(''));
 
+  // Search, Tour and Fit stay in the dock; the secondary tools sit after a rule on wide screens
+  // and fold into a "More" popover on narrow ones (CSS decides, the buttons are the same).
   const dock = el('nav', { class: 'dock', 'aria-label': 'City controls' });
   dock.innerHTML = `
     <div class="search">${ICON.search}<input id="rv-search" type="search" placeholder="Search files" autocomplete="off" spellcheck="false" aria-label="Find a file or folder" aria-controls="rv-matches"><kbd>/</kbd></div>
     <button class="tool" id="rv-tour" title="Tour the highlights (T)" aria-pressed="false">${ICON.tour}<span>Tour</span></button>
     <button class="tool" id="rv-home" title="Fit the city (R)">${ICON.reset}<span>Fit</span></button>
-    <button class="tool" id="rv-fly" title="Walk / fly (F)" aria-pressed="false">${ICON.fly}<span>Fly</span></button>
-    <button class="tool" id="rv-view" title="Metric view (V)" aria-expanded="false" aria-controls="rv-viewmenu">${ICON.layers}<span>View</span></button>
-    <button class="tool" id="rv-guide" title="Guide (G)" aria-expanded="false" aria-controls="rv-drawer">${ICON.guide}<span>Guide</span></button>
-    <button class="tool" id="rv-shot" title="Save a screenshot (P)">${ICON.camera}<span>Photo</span></button>`;
+    <button class="tool" id="rv-more" title="More tools" aria-label="More tools" aria-expanded="false" aria-controls="rv-more-group">${ICON.more}<span>More</span></button>
+    <div class="more-group" id="rv-more-group" role="group" aria-label="More tools">
+      <button class="tool" id="rv-view" title="Metric view (V)" aria-expanded="false" aria-controls="rv-viewmenu">${ICON.layers}<span>View</span><kbd>V</kbd></button>
+      <button class="tool" id="rv-guide" title="Guide (G)" aria-expanded="false" aria-controls="rv-drawer">${ICON.guide}<span>Guide</span><kbd>G</kbd></button>
+      <button class="tool" id="rv-fly" title="Walk / fly (F)" aria-pressed="false">${ICON.fly}<span>Fly</span><kbd>F</kbd></button>
+      <button class="tool" id="rv-shot" title="Save a screenshot (P)">${ICON.camera}<span>Photo</span><kbd>P</kbd></button>
+    </div>`;
   const matches = el('ul', { class: 'matches', id: 'rv-matches', role: 'listbox' });
   matches.hidden = true;
   const viewMenu = el('div', { class: 'menu', id: 'rv-viewmenu' });
@@ -537,7 +549,13 @@ function main() {
     <label><input type="checkbox" id="rv-night"> Night</label>
     <label><input type="checkbox" id="rv-labels" checked> District labels</label>
     <label><input type="checkbox" id="rv-flames" checked> Flames</label>
-    <label><input type="checkbox" id="rv-shadows"> Shadows</label>`;
+    <label><input type="checkbox" id="rv-shadows"> Shadows</label>
+    <div class="menu-h" id="rv-theme-h">Panels</div>
+    <div class="seg" role="radiogroup" aria-labelledby="rv-theme-h">
+      <button role="radio" data-theme="auto" aria-checked="true" title="Paper by day, ink at night">Auto</button>
+      <button role="radio" data-theme="paper" aria-checked="false">Paper</button>
+      <button role="radio" data-theme="ink" aria-checked="false">Ink</button>
+    </div>`;
   const metricLegend = el('div', { class: 'metric-legend' });
   metricLegend.hidden = true;
 
@@ -579,12 +597,13 @@ function main() {
     <section class="share">
       <button class="wide" id="rv-badge">Copy README badge</button>
       <p class="fine">Generated by ${esc(m.generator)}. The analysis ran locally; this page holds only paths and counts.</p>
+      <p class="fine disclaimer">Made with <a href="${esc(m.site)}" target="_blank" rel="noopener">repoville</a>. ${DISCLAIMER}</p>
     </section>`;
 
   const card = el('div', { class: 'card', role: 'dialog', 'aria-label': 'Building details' });
   card.hidden = true;
   const tip = el('div', { class: 'tip', role: 'tooltip' });
-  const foot = el('footer', { class: 'foot' }, `Made with <a href="${esc(m.site)}" target="_blank" rel="noopener">repoville</a>. Not an official Minecraft product; not approved by or associated with Mojang or Microsoft.`);
+  const foot = el('footer', { class: 'foot' }, `Made with <a href="${esc(m.site)}" target="_blank" rel="noopener">repoville</a>.<span class="disc">${DISCLAIMER}</span>`);
   const labelLayer = el('div', { class: 'labels', 'aria-hidden': 'true' });
   ui.prepend(labelLayer);
   ui.append(brand, stats, metricLegend, card, tip, viewMenu, matches, dock, drawer, foot);
@@ -600,23 +619,29 @@ function main() {
   const miniOff = [(MINI - m.width * miniScale) / 2, (MINI - m.length * miniScale) / 2] as const;
   const miniBase = document.createElement('canvas');
   miniBase.width = miniBase.height = MINI * dpr;
-  {
+  const maxH = Math.max(1, ...m.buildings.map((b) => b[5]));
+  const miniInk = { accent: '#356449', wedge: 'rgba(53,100,73,.22)' };
+  /** Paint districts and buildings in the current panel colours (repainted when the theme changes). */
+  function drawMiniBase() {
+    const ink = document.body.classList.contains('ink');
+    miniInk.accent = ink ? '#9CC8A5' : '#356449';
+    miniInk.wedge = ink ? 'rgba(156,200,165,.24)' : 'rgba(53,100,73,.2)';
     const c = miniBase.getContext('2d')!;
-    c.scale(dpr, dpr);
-    c.translate(miniOff[0], miniOff[1]);
-    c.fillStyle = '#2b2f38';
+    c.setTransform(dpr, 0, 0, dpr, dpr * miniOff[0], dpr * miniOff[1]);
+    c.clearRect(-miniOff[0], -miniOff[1], MINI, MINI);
+    c.fillStyle = ink ? '#252C25' : '#ECE9E0';
     c.fillRect(0, 0, m.width * miniScale, m.length * miniScale);
     for (const d of m.districts) {
       if (d[1] < 1 || d[1] > 2) continue;
-      c.fillStyle = d[1] === 1 ? '#3a404b' : '#434a56';
+      c.fillStyle = ink ? (d[1] === 1 ? '#2E362E' : '#353E35') : d[1] === 1 ? '#E2DFD4' : '#D9D6CA';
       c.fillRect(d[2] * miniScale, d[3] * miniScale, (d[4] - d[2]) * miniScale, (d[5] - d[3]) * miniScale);
     }
-    const maxH = Math.max(1, ...m.buildings.map((b) => b[5]));
     for (const b of m.buildings) {
       const t = Math.sqrt(b[5] / maxH);
-      c.fillStyle = b[10] > 0 ? '#ff7a1a' : `rgba(232,217,168,${0.35 + 0.65 * t})`;
+      c.fillStyle = b[10] >= 2 ? (ink ? '#F0A46E' : '#C2581F') : ink ? `rgba(242,241,233,${0.3 + 0.6 * t})` : `rgba(32,35,31,${0.25 + 0.6 * t})`;
       c.fillRect(b[1] * miniScale, b[2] * miniScale, Math.max(1, (b[3] - b[1]) * miniScale), Math.max(1, (b[4] - b[2]) * miniScale));
     }
+    miniKey = '';
   }
   const miniCtx = mini.getContext('2d')!;
   let miniKey = '';
@@ -635,13 +660,13 @@ function main() {
     const px = tx * miniScale, pz = tz * miniScale;
     // View direction: from the camera towards the target, drawn as a short wedge.
     const a = Math.atan2(-dz, -dx);
-    miniCtx.fillStyle = 'rgba(63,208,201,.28)';
+    miniCtx.fillStyle = miniInk.wedge;
     miniCtx.beginPath();
     miniCtx.moveTo(px, pz);
     miniCtx.arc(px, pz, 26, a - 0.45, a + 0.45);
     miniCtx.closePath();
     miniCtx.fill();
-    miniCtx.fillStyle = '#3fd0c9';
+    miniCtx.fillStyle = miniInk.accent;
     miniCtx.beginPath();
     miniCtx.arc(px, pz, 3.2, 0, Math.PI * 2);
     miniCtx.fill();
@@ -939,6 +964,7 @@ function main() {
   function select(i: number) {
     const b = m.buildings[i]!;
     boxFor(b, selBox);
+    selHaloBox.copy(selBox).expandByScalar(0.3);
     selOutline.visible = true;
     const d = districtOf(b[0]);
     card.innerHTML = `<div class="card-h"><button class="path district" data-path="${esc(d)}">${esc(d || m.name)}/</button><button class="icon" id="rv-card-close" aria-label="Close details">${ICON.close}</button></div>${facts(b)}
@@ -1013,6 +1039,7 @@ function main() {
     downAt = { x: e.clientX, y: e.clientY };
     touring = false;
     setMenu(false);
+    setMore(false);
     matches.hidden = true;
   });
   canvas.addEventListener('click', (e) => {
@@ -1094,16 +1121,45 @@ function main() {
   // ---------- Dock buttons, drawer, menus ----------
   const guideBtn = dock.querySelector<HTMLButtonElement>('#rv-guide')!;
   const viewBtn = dock.querySelector<HTMLButtonElement>('#rv-view')!;
+  const moreBtn = dock.querySelector<HTMLButtonElement>('#rv-more')!;
+  /** The visible control a popover belongs to: the button itself, or "More" when it is folded away. */
+  const anchorOf = (b: HTMLElement) => (b.offsetParent ? b : moreBtn);
+  const focusInside = (box: HTMLElement) => box.contains(document.activeElement);
+  function setMore(open: boolean) {
+    dock.classList.toggle('more-open', open);
+    moreBtn.setAttribute('aria-expanded', String(open));
+  }
   function setDrawer(open: boolean) {
+    const wasOpen = !drawer.hidden;
+    const hadFocus = focusInside(drawer);
     drawer.hidden = !open;
     guideBtn.setAttribute('aria-expanded', String(open));
-    if (open) setMenu(false);
+    if (open) {
+      setMenu(false);
+      setMore(false);
+      // Keyboard users land in the drawer; pointer users keep their place.
+      if (!wasOpen && document.activeElement && document.activeElement !== document.body && document.activeElement !== canvas) drawer.querySelector<HTMLElement>('#rv-close')!.focus({ preventScroll: true });
+    } else if (wasOpen && hadFocus) anchorOf(guideBtn).focus();
   }
   function setMenu(open: boolean) {
+    const wasOpen = !viewMenu.hidden;
+    const hadFocus = focusInside(viewMenu);
     viewMenu.hidden = !open;
     viewBtn.setAttribute('aria-expanded', String(open));
-    if (open && window.innerWidth < 720) setDrawer(false);
+    if (open) {
+      setMore(false);
+      if (window.innerWidth < 720) setDrawer(false);
+      // Sit above the control that opened it, inside the viewport.
+      if (window.innerWidth > 720) {
+        const r = anchorOf(viewBtn).getBoundingClientRect();
+        viewMenu.style.left = `${Math.max(16, Math.min(window.innerWidth - viewMenu.offsetWidth - 16, r.right - viewMenu.offsetWidth))}px`;
+      }
+      if (!wasOpen && focusInside(dock)) viewMenu.querySelector<HTMLElement>('[aria-pressed=true]')?.focus({ preventScroll: true });
+    } else if (wasOpen && hadFocus) anchorOf(viewBtn).focus();
   }
+  moreBtn.addEventListener('click', () => setMore(!dock.classList.contains('more-open')));
+  // Picking a tool from the folded group closes the group.
+  dock.querySelector('#rv-more-group')!.addEventListener('click', () => setMore(false));
   guideBtn.addEventListener('click', () => setDrawer(Boolean(drawer.hidden)));
   drawer.querySelector('#rv-close')!.addEventListener('click', () => setDrawer(false));
   viewBtn.addEventListener('click', () => setMenu(Boolean(viewMenu.hidden)));
@@ -1146,13 +1202,42 @@ function main() {
     renderer.toneMappingExposure = on ? 1.6 : 1.1;
     (scene.fog as Fog).color.setHex(on ? STAGE.night.fog : STAGE.day.fog);
     document.body.classList.toggle('night', on);
+    // Distant fog fades into the page backdrop.
+    (scene.fog as Fog).color.setHex(on ? STAGE.night.fog : STAGE.day.fog);
     sun.shadow.needsUpdate = true;
+    applyTheme();
   }
+  // Panels: paper by day, ink at night, unless the viewer picked one (remembered per browser).
+  let panels: 'auto' | 'paper' | 'ink' = 'auto';
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'paper' || saved === 'ink') panels = saved;
+  } catch {
+    // Storage blocked: follow day and night.
+  }
+  function applyTheme() {
+    const ink = panels === 'auto' ? night.value === 1 : panels === 'ink';
+    document.body.classList.toggle('ink', ink);
+    for (const b of viewMenu.querySelectorAll<HTMLButtonElement>('[data-theme]')) b.setAttribute('aria-checked', String(b.dataset.theme === panels));
+    drawMiniBase();
+  }
+  viewMenu.querySelector('.seg')!.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-theme]');
+    if (!b) return;
+    panels = b.dataset.theme as typeof panels;
+    try {
+      if (panels === 'auto') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, panels);
+    } catch {
+      // Not persisted; still applies to this visit.
+    }
+    applyTheme();
+  });
   nightBox.addEventListener('change', () => {
     setNight(nightBox.checked);
     syncUrl();
   });
-  if (night.value) setNight(true);
+  setNight(night.value === 1);
   const labelsBox = viewMenu.querySelector<HTMLInputElement>('#rv-labels')!;
   labelsBox.addEventListener('change', () => (showLabels = labelsBox.checked));
   const flamesBox = viewMenu.querySelector<HTMLInputElement>('#rv-flames')!;
@@ -1234,6 +1319,15 @@ function main() {
   const keys = new Set<string>();
   addEventListener('keydown', (e) => {
     keys.add(e.code);
+    // Escape closes popovers from anywhere except the search box, which handles its own.
+    if (e.key === 'Escape' && e.target !== search && !fly.isLocked) {
+      if (!viewMenu.hidden) return setMenu(false);
+      if (dock.classList.contains('more-open')) {
+        setMore(false);
+        moreBtn.focus();
+        return;
+      }
+    }
     const typing = (e.target as HTMLElement).tagName === 'INPUT';
     if (typing || fly.isLocked || e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key.toLowerCase();
@@ -1264,29 +1358,28 @@ function main() {
     out.width = w;
     out.height = h + strip;
     const ctx = out.getContext('2d')!;
-    ctx.fillStyle = '#1c1e24';
-    ctx.fillRect(0, 0, w, h + strip);
-    // Same backdrop as the page (radial vignette, darker at night).
-    const bg = ctx.createRadialGradient(w / 2, h * 0.32, 0, w / 2, h * 0.32, Math.hypot(w, h) * 0.6);
-    const stops = (night.value ? STAGE.night : STAGE.day).stops;
-    bg.addColorStop(0, stops[0]!);
-    bg.addColorStop(0.55, stops[1]!);
-    bg.addColorStop(1, stops[2]!);
-    ctx.fillStyle = bg;
+    // Same flat backdrop as the page, and a caption strip in the panel colours.
+    const css = getComputedStyle(document.body);
+    const tok = (name: string) => css.getPropertyValue(name).trim();
+    ctx.fillStyle = (night.value ? STAGE.night : STAGE.day).stops[0];
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(canvas, 0, 0);
-    const pad = Math.round(strip * 0.32);
-    const fs = Math.round(strip * 0.34);
-    ctx.fillStyle = '#F6F1E4';
-    ctx.font = `600 ${fs}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = tok('--surface') || '#FFFDF8';
+    ctx.fillRect(0, h, w, strip);
+    ctx.fillStyle = tok('--rule') || '#D7D9CF';
+    ctx.fillRect(0, h, w, Math.max(1, Math.round(h / 900)));
+    const pad = Math.round(strip * 0.42);
+    const fs = Math.round(strip * 0.3);
+    ctx.fillStyle = tok('--text') || '#20231F';
+    ctx.font = `600 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
     ctx.textBaseline = 'middle';
     ctx.fillText(m.name, pad, h + strip / 2);
     const nameW = ctx.measureText(m.name).width;
-    ctx.fillStyle = 'rgba(246,241,228,.66)';
-    ctx.font = `400 ${Math.round(fs * 0.8)}px Inter, sans-serif`;
-    ctx.fillText(`${compact(m.stats.files)} files · ${compact(m.stats.loc)} lines · ${compact(m.stats.buildings)} buildings`, pad * 2 + nameW, h + strip / 2);
-    ctx.fillStyle = '#E8D9A8';
-    ctx.font = `400 ${fs}px Silkscreen, monospace`;
+    ctx.fillStyle = tok('--text-2') || '#596057';
+    ctx.font = `400 ${Math.round(fs * 0.82)}px "JetBrains Mono", ui-monospace, monospace`;
+    ctx.fillText(`${compact(m.stats.files)} files · ${compact(m.stats.loc)} lines · ${compact(m.stats.buildings)} buildings`, pad * 1.6 + nameW, h + strip / 2);
+    ctx.fillStyle = tok('--text') || '#20231F';
+    ctx.font = `800 ${Math.round(fs * 1.15)}px "Bricolage Grotesque", system-ui, sans-serif`;
     ctx.textAlign = 'right';
     ctx.fillText('repoville', w - pad, h + strip / 2);
     const blob = await new Promise<Blob | null>((r) => out.toBlob(r, 'image/png'));
