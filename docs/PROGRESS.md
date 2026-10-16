@@ -8,6 +8,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 05:00: Diff view (#50) and v0.5.0 (#51); action has diff/timelapse inputs (verified locally against the release). Deadline extended to 20:00.
 - 2026-10-16 04:20: v0.4.0. Since 02:15: avatar + visual audit + touch fix (#46), portrait mobile hero (#47), history time-lapse (#48, closes #34; demo on the site).
 - 2026-10-16 02:15: v0.3.0 released (npx verified). Since 01:00: source links + URL view state + legend numbers (#41, closes #29/#31/#32), search inside merged towers (#42, closes #30), accessibility (#43, closes #33), demos re-rendered and site deployed.
 - 2026-10-16 01:00: Codex inventory + triage (#36, issues #28–#35), hardening (#37), GitHub Action `maximilianfeix/repoville@v0` (#38/#39, tag v0; tested locally, not yet on hosted runners), photo button (#27), v0.2.0 released and Paper e2e re-verified on the new geometry.
@@ -38,6 +39,16 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [x] `site/` landing page (hero = real city render, demo link, mapping, formats, CLI, Minecraft, metrics honesty, GitHub CTA), deployed to GitHub Pages via a `gh-pages` branch (no workflow scope needed).
 - [x] Demo cities on Pages: React, this repo, one Rust + one Go repo (themes), at `/r/<owner>/<repo>/`.
 - [x] README: centered logo, tagline, real screenshot + GIF, quick start (only verified commands), mapping table, formats, privacy, limits, FAQ, contributing, disclaimer.
+
+### P0 — promotion (approved 2026-10-16; rules first, no spam)
+- [ ] dev.to article (with AI-assistance disclosure as dev.to requires).
+- [ ] X launch thread (video first, link in reply).
+- [ ] Awesome-list PRs where the tool fits (code visualization, git, Minecraft, three.js).
+- [ ] Reddit: only subreddits that allow self-promotion of open-source tools; respect flair/weekday rules.
+- [ ] Show HN text stays a draft for Maxi (HN asks for human-written comments).
+
+### P0 — visual quality
+- [ ] Texture v2: hue-shifted colour ramps per palette colour instead of grey detail maps (research + Codex variant, compare renders).
 
 ### P0 — next
 - [x] Hardening from the Codex inventory (#37) (docs/engineering/codex-inventory.md §2): symlinks, URL/cache identity, ref cache, RCON deadlines, template names, force-load cleanup, LOD budget, roof validation, chunk retention + doc accuracy fixes.
