@@ -382,10 +382,27 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
       if (shaft !== fp) m.flatRoof(fp, podiumTop + 1, pal.trim, pal.trim);
       const setback = Math.round(H * 0.68);
       const canStep = width(shaft) >= 9 && depth(shaft) >= 9 && H > 60;
-      const windows = grid((y) => y % 4 === 2);
-      const floorLine = (y: number) => (y % 4 === 0 ? pal.trim : null);
+      const piers = shaft !== fp;
+      // Wide towers: glass strips between piers that stand in the free ring one block proud of the shaft.
+      // Shaft column a sits behind footprint column a + 1, and piers take every third footprint column.
+      const windows = piers
+        ? (a: number, len: number, y: number) => a > 0 && a < len - 1 && (a + 1) % 3 !== 0 && y % 8 !== 0
+        : grid((y) => y % 4 === 2);
+      const floorLine = (y: number) => (y % (piers ? 8 : 4) === 0 ? pal.trim : null);
       const lower = canStep ? setback : H;
       m.shell(shaft, podiumTop + 1, lower + 1, pal.towerWall, { window: windows, band: floorLine });
+      if (piers && lower - podiumTop > 6) {
+        const trimId = g.id(pal.trim);
+        for (let z = fp.z0; z < fp.z1; z++) for (let x = fp.x0; x < fp.x1; x++) {
+          const edgeX = x === fp.x0 || x === fp.x1 - 1;
+          const edgeZ = z === fp.z0 || z === fp.z1 - 1;
+          if (!edgeX && !edgeZ) continue;
+          const along = edgeZ ? x - fp.x0 : z - fp.z0;
+          const isPier = (edgeX && edgeZ) || along % 3 === 0;
+          // Piers run up to a 2-block cornice ring at the top of the lower shaft.
+          for (let y = podiumTop + 2; y <= lower; y++) if (isPier || y >= lower - 1) m.put(x, y, z, trimId);
+        }
+      }
       m.floors(shaft, podiumTop + 4, lower + 1, 4);
       let crown = shaft;
       if (canStep) {
