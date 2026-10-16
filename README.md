@@ -63,7 +63,7 @@ Every demo is a single HTML file rendered by Repoville. Click a view to jump str
 | Commits in the last year (churn) | Top 10 % burn on the roof, top 2 % get soul fire |
 | TODO / FIXME / HACK / XXX density | That share of the wall turns to cracked bricks and cobwebs |
 | No commit for over a year | Moss and vines |
-| Language | District theme: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove, Haskell/FP the end |
+| Language | District theme: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove, Haskell/FP the end, Swift/Lua copper town, C#/PHP reef |
 
 Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers are always one click away in the viewer.
 

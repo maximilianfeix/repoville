@@ -121,7 +121,7 @@ function diffRows(built: BuiltCity, diff: RepoDiff | null | undefined) {
 /** Readable signature colour per theme for the time-lapse blocks. */
 const HISTORY_COLORS: Record<Biome, number> = {
   nether: 0xb4453c, plains: 0xe0d6a8, jungle: 0x7fb24a, frozen: 0x8fc6e6, badlands: 0xc4673a, caves: 0x8a8f99,
-  cherry: 0xe2a1b8, end: 0xb48ab4, quarry: 0x9a9a9a, library: 0xb08a52, stone: 0xb0b0a8,
+  cherry: 0xe2a1b8, end: 0xb48ab4, quarry: 0x9a9a9a, library: 0xb08a52, stone: 0xb0b0a8, copper: 0xc4774f, reef: 0x63b5a4,
 };
 
 /** For each merged tower: the files it stands for, as "relative/path\tloc" lines. */

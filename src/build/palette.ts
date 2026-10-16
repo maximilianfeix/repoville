@@ -1,6 +1,6 @@
 import type { Lang } from '../scan/langs.js';
 
-export type Biome = 'nether' | 'plains' | 'jungle' | 'frozen' | 'badlands' | 'caves' | 'cherry' | 'end' | 'quarry' | 'library' | 'stone';
+export type Biome = 'nether' | 'plains' | 'jungle' | 'frozen' | 'badlands' | 'caves' | 'cherry' | 'end' | 'quarry' | 'library' | 'stone' | 'copper' | 'reef';
 
 /**
  * A district theme. Materials are chosen so that every theme shares the
@@ -44,11 +44,14 @@ export const PALETTES: Record<Biome, Palette> = {
   quarry: { biome: 'quarry', wall: 'minecraft:cobblestone', towerWall: 'minecraft:andesite', trim: log('stripped_spruce_log'), roof: 'cobblestone', roofBlock: 'minecraft:cobblestone', glass: 'minecraft:glass', floor: 'minecraft:spruce_planks', ground: 'minecraft:coarse_dirt', accent: 'minecraft:scaffolding[bottom=false,distance=0,waterlogged=false]', mossyWall: 'minecraft:mossy_cobblestone', treeLog: log('spruce_log'), treeLeaves: leaves('spruce_leaves') },
   library: { biome: 'library', wall: 'minecraft:bookshelf', towerWall: 'minecraft:bookshelf', trim: log('quartz_pillar'), roof: 'dark_oak', roofBlock: 'minecraft:dark_oak_planks', glass: 'minecraft:white_stained_glass', floor: 'minecraft:spruce_planks', ground: GRASS, accent: 'minecraft:lectern[facing=south,has_book=false,powered=false]', mossyWall: 'minecraft:moss_block', treeLog: log('birch_log'), treeLeaves: leaves('birch_leaves') },
   stone: { biome: 'stone', wall: 'minecraft:stone_bricks', towerWall: 'minecraft:polished_andesite', trim: 'minecraft:chiseled_stone_bricks', roof: 'stone_brick', roofBlock: 'minecraft:stone_bricks', glass: 'minecraft:glass', floor: 'minecraft:smooth_stone', ground: GRASS, accent: 'minecraft:polished_andesite', mossyWall: 'minecraft:mossy_stone_bricks', treeLog: log('oak_log'), treeLeaves: leaves('oak_leaves') },
+  // Waxed copper: unwaxed copper would oxidise in a world over time.
+  copper: { biome: 'copper', wall: 'minecraft:waxed_cut_copper', towerWall: 'minecraft:waxed_exposed_cut_copper', trim: log('stripped_dark_oak_log'), roof: 'waxed_exposed_cut_copper', roofBlock: 'minecraft:waxed_exposed_cut_copper', glass: 'minecraft:orange_stained_glass', floor: 'minecraft:spruce_planks', ground: GRASS, accent: 'minecraft:waxed_copper_block', mossyWall: 'minecraft:moss_block', treeLog: log('birch_log'), treeLeaves: leaves('birch_leaves') },
+  reef: { biome: 'reef', wall: 'minecraft:prismarine_bricks', towerWall: 'minecraft:prismarine', trim: 'minecraft:dark_prismarine', roof: 'prismarine_brick', roofBlock: 'minecraft:prismarine_bricks', glass: 'minecraft:cyan_stained_glass', floor: 'minecraft:dark_prismarine', ground: 'minecraft:sand', accent: 'minecraft:sea_lantern', mossyWall: 'minecraft:moss_block', treeLog: log('mangrove_log'), treeLeaves: leaves('mangrove_leaves') },
 };
 
 const LANG_BIOME: Record<Lang, Biome> = {
   rust: 'nether', typescript: 'plains', javascript: 'plains', python: 'jungle', go: 'frozen', java: 'badlands', kotlin: 'badlands',
-  c: 'caves', cpp: 'caves', ruby: 'cherry', haskell: 'end', fp: 'end', shell: 'quarry', config: 'quarry', markdown: 'library', other: 'stone',
+  c: 'caves', cpp: 'caves', ruby: 'cherry', swift: 'copper', lua: 'copper', csharp: 'reef', php: 'reef', haskell: 'end', fp: 'end', shell: 'quarry', config: 'quarry', markdown: 'library', other: 'stone',
 };
 
 /**
@@ -99,6 +102,14 @@ export const VARIANTS: Record<Biome, Array<{ wall: string; towerWall: string }>>
   stone: [
     { wall: 'minecraft:stone_bricks', towerWall: 'minecraft:polished_andesite' },
     { wall: 'minecraft:smooth_stone', towerWall: 'minecraft:stone_bricks' },
+  ],
+  copper: [
+    { wall: 'minecraft:waxed_cut_copper', towerWall: 'minecraft:waxed_exposed_cut_copper' },
+    { wall: 'minecraft:waxed_exposed_cut_copper', towerWall: 'minecraft:waxed_cut_copper' },
+  ],
+  reef: [
+    { wall: 'minecraft:prismarine_bricks', towerWall: 'minecraft:prismarine' },
+    { wall: 'minecraft:smooth_sandstone', towerWall: 'minecraft:prismarine_bricks' },
   ],
 };
 

@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "27b0a3f8326337327cbc53ebd06a940041c10045d57f487a259eb48c18a33329",
-  "litematicNbtSha256": "cc3b45a835050b6a2e5c1853d70cea3cb69f424946545bd64c3207d22a2ccd24",
+  "schemNbtSha256": "aae5ad4128b2164a74af6e621521b7d0b752e0e9339b96b7405df72ffa61ee53",
+  "litematicNbtSha256": "9f6a9d0c409a5250d3e05b78214685cd3f2c1fc21720cfc4f4007a2bb7d34505",
   "summary": {
     "dimensions": [
       69,
@@ -59,7 +59,6 @@
       "minecraft:packed_ice",
       "minecraft:light_blue_stained_glass",
       "minecraft:light_blue_terracotta",
-      "minecraft:gravel",
       "minecraft:vine[east=true,north=false,south=false,up=false,west=false]",
       "minecraft:lectern[facing=south,has_book=false,powered=false]",
       "minecraft:stone",
@@ -116,7 +115,7 @@
       "minecraft:air": 285181,
       "minecraft:polished_blackstone": 39,
       "minecraft:polished_deepslate": 237,
-      "minecraft:tuff": 136,
+      "minecraft:tuff": 157,
       "minecraft:polished_andesite": 108,
       "minecraft:grass_block[snowy=false]": 1086,
       "minecraft:blackstone": 147,
@@ -161,7 +160,6 @@
       "minecraft:packed_ice": 116,
       "minecraft:light_blue_stained_glass": 342,
       "minecraft:light_blue_terracotta": 106,
-      "minecraft:gravel": 21,
       "minecraft:vine[east=true,north=false,south=false,up=false,west=false]": 14,
       "minecraft:lectern[facing=south,has_book=false,powered=false]": 1,
       "minecraft:stone": 55,

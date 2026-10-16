@@ -8,7 +8,8 @@ const WOODS = ['oak', 'spruce', 'birch', 'jungle', 'acacia', 'dark_oak', 'cherry
 
 /** Texture file (without .png) for a block state and face. */
 export function mcTextureName(state: string, face: 'top' | 'side'): string {
-  const name = state.replace(/^minecraft:/, '').replace(/\[.*$/, '');
+  // Waxed blocks look exactly like the unwaxed ones.
+  const name = state.replace(/^minecraft:/, '').replace(/\[.*$/, '').replace(/^waxed_/, '');
   const base = name.replace(/_(stairs|slab|fence)$/, '');
   if (base !== name) {
     if (WOODS.includes(base)) return `${base}_planks`;
@@ -16,7 +17,7 @@ export function mcTextureName(state: string, face: 'top' | 'side'): string {
       stone_brick: 'stone_bricks', red_nether_brick: 'red_nether_bricks', nether_brick: 'nether_bricks', deepslate_tile: 'deepslate_tiles',
       deepslate_brick: 'deepslate_bricks', mud_brick: 'mud_bricks', tuff_brick: 'tuff_bricks', end_stone_brick: 'end_stone_bricks', purpur: 'purpur_block',
       quartz: 'quartz_block_side', smooth_quartz: 'quartz_block_bottom', sandstone: 'sandstone', red_sandstone: 'red_sandstone',
-      polished_blackstone_brick: 'polished_blackstone_bricks', brick: 'bricks',
+      polished_blackstone_brick: 'polished_blackstone_bricks', brick: 'bricks', prismarine_brick: 'prismarine_bricks',
     };
     return plural[base] ?? base;
   }

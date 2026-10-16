@@ -527,7 +527,7 @@ function main() {
         <dt>Gold crown</dt><dd>Largest file of its folder</dd>
         <dt>Landmark</dt><dd>A whole folder, merged to keep big repos fast</dd>
       </dl>
-      <p class="fine">Themes follow the language: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove.</p>
+      <p class="fine">Themes follow the language: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove, Swift/Lua copper town, C#/PHP reef.</p>
     </section>
     <section>
       <h3>Keys</h3>

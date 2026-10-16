@@ -3,6 +3,14 @@
  * hand-picked approximations used by the HTML viewer and gallery thumbnails).
  */
 export const BLOCK_COLORS: Record<string, number> = {
+  'minecraft:waxed_exposed_cut_copper_stairs': 0x9b7a65, 'minecraft:waxed_exposed_cut_copper_slab': 0x9b7a65,
+  'minecraft:stripped_dark_oak_log': 0x4a3a28,
+  'minecraft:waxed_cut_copper': 0xbf6b51, 'minecraft:waxed_exposed_cut_copper': 0x9b7a65, 'minecraft:waxed_weathered_cut_copper': 0x6c9a6e,
+  'minecraft:waxed_weathered_cut_copper_stairs': 0x6c9a6e, 'minecraft:waxed_weathered_cut_copper_slab': 0x6c9a6e,
+  'minecraft:waxed_oxidized_cut_copper': 0x4f9a83, 'minecraft:waxed_copper_block': 0xc06c50,
+  'minecraft:prismarine_bricks': 0x63ab9e, 'minecraft:prismarine': 0x649c96, 'minecraft:prismarine_brick_stairs': 0x63ab9e,
+  'minecraft:prismarine_brick_slab': 0x63ab9e, 'minecraft:cyan_stained_glass': 0x4c7f99, 'minecraft:sand': 0xdbcfa3,
+  'minecraft:mangrove_log': 0x54432b, 'minecraft:mangrove_leaves': 0x6a9a3a,
   'minecraft:polished_blackstone_bricks': 0x2e2a30, 'minecraft:cracked_polished_blackstone_bricks': 0x29252b,
   'minecraft:crimson_stem': 0x6a2c3e, 'minecraft:red_stained_glass': 0xa83a3a, 'minecraft:crimson_slab': 0x7e3a56,
   'minecraft:crimson_planks': 0x7e3a56, 'minecraft:crimson_nylium': 0x8a1f1f, 'minecraft:magma_block': 0xc0581c,
