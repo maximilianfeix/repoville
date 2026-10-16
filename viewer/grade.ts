@@ -52,8 +52,8 @@ export function gradeColor(state: string, hex: number): number {
     C2 = Math.min(C * 0.36, 0.034);
     h = toward(h, PLANT_HUE, 0.5);
   } else if (GLASS.test(name)) {
-    // Windows sit inside the wall family: a slightly cool, mid grey.
-    L2 = 0.5 + 0.28 * L;
+    // Windows read as openings in the pale walls: a cool grey a clear step darker than stone.
+    L2 = 0.34 + 0.24 * L;
     C2 = grey ? 0.012 : Math.min(C * 0.25, 0.02);
     if (grey) h = GLASS_HUE;
   } else if (WATER.test(name)) {
