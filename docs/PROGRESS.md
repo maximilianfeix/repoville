@@ -9,6 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 10:30: landing hero video was still the 02:58 recording (pre-v2 textures); re-recorded from the real viewer (#85), site redeployed. Landing page checked at 1440 and 390 px (no overflow). Repo metadata already complete (20 topics).
 - 2026-10-16 09:45: terraces for folders of small towers (#81, research #12 done after a planning agent); golden unchanged by keeping d3 insertion order. Released as v0.9.0 (#83) with re-rendered demos, README media, flyover; site deployed.
 - 2026-10-16 08:30: tried recessed punched windows on test labs; rejected after before/after renders (single inset cells lose the glass colour, read as white notches). Kept the shared `Mason.recessGlass` refactor (#77). Test-lab districts then varied via whites, accent stripes and roofscapes (#79); not released yet.
 - 2026-10-16 07:30: midrise ribbon windows (recessed), bar/fence connections in settle, e2e now checks every distinct block state (#73): Paper WorldEdit/world/live 159/159 each. Released in v0.8.0 (#75) with re-rendered demos, README media and flyover; site deployed.
