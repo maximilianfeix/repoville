@@ -87,12 +87,17 @@ function main() {
   const homeDir = new Vector3(0.74, 0.6, 0.82).normalize();
   // Tall towers on a small map stuck out of the top of the home view; include height in the fit.
   const maxTop = m.buildings.reduce((t, b) => Math.max(t, b[5]), 0);
+  // Aim higher when the city is tall for its size (one or two tall files), and fit a bounding
+  // sphere of the footprint and the height above the target.
+  const lift = maxTop * Math.max(0.25, 0.5 * Math.min(1, maxTop / span));
+  const above = maxTop - lift;
+  const tall = above > span * 0.6;
   const fitDistance = () => {
     const vfov = (camera.fov * Math.PI) / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
-    const r = Math.max(span * 0.6, maxTop * 0.75);
+    const r = Math.max(span * 0.6, above * 1.15);
     // Landscape crops the empty corners of the diorama; portrait needs the full width.
-    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 ? 0.98 : 0.8);
+    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 || tall ? 0.98 : 0.8);
   };
   // Aim at the LOC-weighted downtown rather than the map centre.
   const downtown = new Vector3();
@@ -106,12 +111,42 @@ function main() {
     }
     if (wsum > 0) downtown.multiplyScalar(1 / wsum);
     downtown.clampLength(0, span * 0.18);
-    downtown.y = maxTop * 0.25;
+    downtown.y = lift;
   }
-  const homePos = () => homeDir.clone().multiplyScalar(fitDistance()).add(downtown);
+  // Back off from the footprint fit until the tops of the tallest buildings are in frame.
+  // Top corners of the tallest footprints, with headroom for roofs and crowns.
+  const tops = [...m.buildings].sort((a, b) => b[5] - a[5]).slice(0, 30)
+    .flatMap((b) => [[b[1], b[2]], [b[3], b[2]], [b[1], b[4]], [b[3], b[4]]].map(([x, z]) => new Vector3(x! - m.width / 2, b[5] + 5, z! - m.length / 2)));
+  const probe = new PerspectiveCamera();
+  const ndc = new Vector3();
+  const homeDistance = () => {
+    probe.copy(camera);
+    const fits = (d: number) => {
+      probe.position.copy(homeDir).multiplyScalar(d).add(downtown);
+      probe.lookAt(downtown);
+      probe.updateMatrixWorld();
+      return tops.every((t) => {
+        ndc.copy(t).project(probe);
+        return ndc.z < 1 && ndc.y < 0.88 && Math.abs(ndc.x) < 0.95;
+      });
+    };
+    let lo = fitDistance();
+    if (fits(lo)) return lo;
+    // Large cities: a far tower may poke out rather than shrinking the whole city.
+    const cap = span > 200 ? lo * 1.3 : Infinity;
+    let hi = lo * 2;
+    for (let i = 0; i < 4 && !fits(hi); i++) hi *= 2;
+    for (let i = 0; i < 18; i++) {
+      const mid = (lo + hi) / 2;
+      if (fits(mid)) hi = mid;
+      else lo = mid;
+    }
+    return Math.min(hi, cap);
+  };
+  const homePos = () => homeDir.clone().multiplyScalar(homeDistance()).add(downtown);
   camera.position.copy(homePos());
   // Portrait screens sit further back than 3 spans; keep fog, far plane and zoom-out limit beyond that.
-  const reach = Math.max(span * 3, fitDistance() * 1.25);
+  const reach = Math.max(span * 3, homeDistance() * 1.25);
   scene.fog = new Fog(0x262931, reach * 0.55, reach * 1.35);
   camera.far = reach * 2;
   camera.updateProjectionMatrix();
