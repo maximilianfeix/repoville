@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.0 — 2026-10-16
+
+- **Facades with depth:** wide towers get trim piers on every third column, vertical glass strips between them and a two-block cornice; midrises get recessed ribbon windows, one glass row per floor. The skyline reads as framed buildings instead of boxes with dot grids.
+- **Exports:** iron bars and fences get the connection states the game derives. The Paper end-to-end tests now check one cell of every distinct block state (159 in the test town) and pass for WorldEdit paste, world zip and live builds.
+
 ## 0.7.1 — 2026-10-16
 
 - **Exports match the game exactly:** stair corners get the inner/outer shapes the game derives, leaves get the right `distance`, and grass under solid blocks is written as dirt. Before this, a WorldEdit paste or live build changed a few blocks on the first block update (found by re-running the Paper 1.21.11 e2e: now WorldEdit 66/66, world 64/64, live 64/64).
