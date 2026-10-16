@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0 — 2026-10-16
+
+- **New look.** The viewer HUD is now paper by day and ink at night: opaque panels, hairline rules, a text wordmark, mono values, a compact phone toolbar with a bottom-sheet guide, and an Auto/Paper/Ink choice under View. The city sits on the same paper backdrop.
+- **Calmer city.** Block colours are graded in the viewer (hue kept, chroma and value compressed, darker roofs, quieter textures and light), so a frame reads like an architectural model; fire and selection stay bright. Exports are unchanged.
+- **Website and README** rebuilt in the same system, with an inspection strip of real React files, real CLI output and banners rendered from real captures.
+
 ## 0.13.0 — 2026-10-16
 
 - **Framing:** the home view backs off until the tops of the tallest buildings are in frame, so small repos with one tall file are no longer cut off (large cities unchanged).
