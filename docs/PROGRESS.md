@@ -8,6 +8,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 06:10: pixel textures v2 (#54), README media + flyover re-rendered (#55), v0.6.0 released (#56, release tarball verified: 0.6.0 with pixel layers), site redeployed. Awesome-list PRs opened (author disclosed): dictcp/awesome-git#215, bs-community/awesome-minecraft#81, AxiomeCG/awesome-threejs#62, toolleeo/awesome-cli-apps-in-a-csv#515.
 - 2026-10-16 05:00: Diff view (#50) and v0.5.0 (#51); action has diff/timelapse inputs (verified locally against the release). Deadline extended to 20:00.
 - 2026-10-16 04:20: v0.4.0. Since 02:15: avatar + visual audit + touch fix (#46), portrait mobile hero (#47), history time-lapse (#48, closes #34; demo on the site).
 - 2026-10-16 02:15: v0.3.0 released (npx verified). Since 01:00: source links + URL view state + legend numbers (#41, closes #29/#31/#32), search inside merged towers (#42, closes #30), accessibility (#43, closes #33), demos re-rendered and site deployed.
@@ -43,12 +44,13 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 ### P0 — promotion (approved 2026-10-16; rules first, no spam)
 - [ ] dev.to article (with AI-assistance disclosure as dev.to requires).
 - [ ] X launch thread (video first, link in reply).
-- [ ] Awesome-list PRs where the tool fits (code visualization, git, Minecraft, three.js).
+- [x] Awesome-list PRs where the tool fits (git #215, Minecraft #81, three.js #62, CLI apps #515). [ ] Later, with stars: awesome-dataviz (50+), awesome-voxel.
 - [ ] Reddit: only subreddits that allow self-promotion of open-source tools; respect flair/weekday rules.
 - [ ] Show HN text stays a draft for Maxi (HN asks for human-written comments).
 
 ### P0 — visual quality
-- [ ] Texture v2: hue-shifted colour ramps per palette colour instead of grey detail maps (research + Codex variant, compare renders).
+- [x] Texture v2: hue-shifted colour ramps per palette colour (#54, v0.6.0).
+- [ ] Texture v3 pass: roof tiles/shingle rows, window glass reflections, water caustics, path/street wear.
 
 ### P0 — next
 - [x] Hardening from the Codex inventory (#37) (docs/engineering/codex-inventory.md §2): symlinks, URL/cache identity, ref cache, RCON deadlines, template names, force-load cleanup, LOD budget, roof validation, chunk retention + doc accuracy fixes.
