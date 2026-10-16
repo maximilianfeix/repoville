@@ -20,6 +20,8 @@ export interface RenderConfig {
   gallery: boolean;
   /** Embed a commit-history time-lapse in the viewer (reads line deltas of the whole history). */
   timelapse: boolean;
+  /** Base ref for the Diff view (e.g. origin/main); CLI only. */
+  diff?: string;
   palette?: Partial<Record<Biome, Partial<Palette>>>;
 }
 

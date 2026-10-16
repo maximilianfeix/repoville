@@ -23,6 +23,12 @@ inputs:
   version:
     description: Repoville release tag to run (e.g. v0.2.0) or "latest".
     default: latest
+  diff:
+    description: Base ref for a Diff view (e.g. origin/main in a pull request). Empty = no diff.
+    default: ''
+  timelapse:
+    description: Add the History time-lapse view (true/false).
+    default: 'false'
 outputs:
   dir:
     description: Output folder with index.html.
@@ -46,4 +52,6 @@ runs:
         RV_FORMATS: ${{ inputs.formats }}
         RV_VERSION: ${{ inputs.version }}
         RV_REPO: ${{ github.repository }}
+        RV_DIFF: ${{ inputs.diff }}
+        RV_TIMELAPSE: ${{ inputs.timelapse }}
       run: bash "${{ github.action_path }}/action/render.sh"

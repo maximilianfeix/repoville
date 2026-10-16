@@ -3,7 +3,7 @@
 # Inputs come from env (see action.yml); outputs go to $GITHUB_OUTPUT when set.
 set -euo pipefail
 
-: "${RV_PATH:=.}" "${RV_OUT:=repoville-city}" "${RV_SINCE:=1y}" "${RV_MAX:=4000}" "${RV_FORMATS:=}" "${RV_VERSION:=latest}" "${RV_REPO:=}"
+: "${RV_PATH:=.}" "${RV_OUT:=repoville-city}" "${RV_SINCE:=1y}" "${RV_MAX:=4000}" "${RV_FORMATS:=}" "${RV_VERSION:=latest}" "${RV_REPO:=}" "${RV_DIFF:=}" "${RV_TIMELAPSE:=false}"
 
 if [ "$(git -C "$RV_PATH" rev-parse --is-shallow-repository 2>/dev/null || echo false)" = "true" ]; then
   echo "::warning::Shallow checkout: churn and age need history. Use actions/checkout with fetch-depth: 0."
@@ -18,7 +18,10 @@ fi
 formats="html"
 [ -n "$RV_FORMATS" ] && formats="html,$RV_FORMATS"
 
-npx --yes --package="$url" repoville "$RV_PATH" -o "$RV_OUT" --format "$formats" --since "$RV_SINCE" --max-buildings "$RV_MAX" --gallery
+extra=()
+[ -n "$RV_DIFF" ] && extra+=(--diff "$RV_DIFF")
+[ "$RV_TIMELAPSE" = "true" ] && extra+=(--timelapse)
+npx --yes --package="$url" repoville "$RV_PATH" -o "$RV_OUT" --format "$formats" --since "$RV_SINCE" --max-buildings "$RV_MAX" --gallery ${extra[@]+"${extra[@]}"}
 
 # Normalise names for Pages: index.html + city.png at the top of the folder.
 html=$(find "$RV_OUT" -maxdepth 1 -name '*.html' | head -n 1)

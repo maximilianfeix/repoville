@@ -5,6 +5,7 @@ import { deflateSync } from 'fflate';
 import { colorOf } from '../build/colors.js';
 import type { Biome } from '../build/palette.js';
 import type { Timeline } from '../history/timeline.js';
+import type { RepoDiff } from '../history/diff.js';
 import type { BuiltCity } from '../build/city.js';
 import type { VoxelGrid } from '../build/voxel-grid.js';
 import { files, type CityTree } from '../model/city.js';
@@ -86,6 +87,35 @@ export interface HtmlInput {
   /** The tree before LOD, used to index files inside merged towers. */
   full?: CityTree;
   timeline?: Timeline | null;
+  diff?: RepoDiff | null;
+}
+
+/** Per building change status; files inside merged towers roll up into the tower. */
+function diffRows(built: BuiltCity, diff: RepoDiff | null | undefined) {
+  if (!diff) return null;
+  const index = new Map(built.buildings.map((b, i) => [b.path, i]));
+  const towers = built.buildings.map((b, i) => [b.path, i] as const).filter(([, i]) => built.buildings[i]!.merged);
+  const rows = new Map<number, [number, 'A' | 'M', number, number]>();
+  const deleted: string[] = [];
+  for (const [path, c] of [...diff.changes.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+    if (c.status === 'deleted') {
+      deleted.push(path);
+      continue;
+    }
+    let i = index.get(path);
+    let merged = false;
+    if (i === undefined) {
+      const t = towers.find(([p]) => path.startsWith(p + '/'));
+      if (!t) continue;
+      i = t[1];
+      merged = true;
+    }
+    const row = rows.get(i) ?? [i, merged ? 'M' : c.status === 'added' ? 'A' : 'M', 0, 0];
+    row[2] += c.added;
+    row[3] += c.removed;
+    rows.set(i, row);
+  }
+  return { base: diff.base, baseCommit: diff.baseCommit, files: [...rows.values()].sort((a, b) => a[0] - b[0]), deleted: deleted.slice(0, 200), deletedCount: deleted.length };
 }
 
 /** Readable signature colour per theme for the time-lapse blocks. */
@@ -151,6 +181,7 @@ export function buildViewerMeta(input: HtmlInput, height: number): ViewerMeta {
     textured: input.textured,
     source: input.source ?? null,
     merged: mergedIndex(built, input.full),
+    diff: diffRows(built, input.diff),
     timeline: input.timeline
       ? {
           times: input.timeline.times,
@@ -290,7 +321,9 @@ body.ready .progress{opacity:0}
 .facts dd{margin:0;font:600 13px var(--mono)}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .tag{font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid}
-.tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}.tag.gold{color:#f6d03d;border-color:rgba(246,208,61,.5)}
+.tag.lava{color:var(--lava);border-color:rgba(255,122,26,.5)}.tag.red{color:#ff8a7f;border-color:rgba(217,56,43,.55)}.tag.moss{color:var(--moss-hi);border-color:rgba(78,140,58,.6)}.tag.dia{color:var(--dia);border-color:rgba(63,208,201,.5)}
+.metric-legend details{margin-top:6px;text-align:left;font:11px var(--mono);max-height:160px;overflow:auto}
+.tag.gold{color:#f6d03d;border-color:rgba(246,208,61,.5)}
 .inner-note{font:12px var(--mono);color:var(--sand);margin:-4px 0 8px;word-break:break-all}
 .card-a{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .card-a a.small{text-decoration:none;color:var(--dia)}

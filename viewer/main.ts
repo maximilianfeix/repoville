@@ -52,7 +52,7 @@ function loadPayload(): Payload {
   return decodePayload(inflateSync(bytes));
 }
 
-type Metric = 'none' | 'churn' | 'age' | 'todos' | 'history';
+type Metric = 'none' | 'churn' | 'age' | 'todos' | 'history' | 'diff';
 
 function main() {
   const p = loadPayload();
@@ -391,6 +391,9 @@ function main() {
     churn: `<b>Churn</b> commits per file in ${esc(m.since)}: column height and colour. Activity, not quality.`,
     age: '<b>Age</b> days since the last commit, as colour; height stays the building height. Old is not bad.',
     todos: '<b>TODO density</b> TODO / FIXME / HACK / XXX markers per line, as height and colour.',
+    diff: m.diff
+      ? `<b>Diff</b> vs ${esc(m.diff.base)} (${esc(m.diff.baseCommit.slice(0, 7))}): <span style="color:#3FD0C9">${m.diff.files.filter((f) => f[1] === 'A').length} added</span>, <span style="color:#FF7A1A">${m.diff.files.filter((f) => f[1] === 'M').length} changed</span>, ${m.diff.deletedCount} deleted${m.diff.deleted.length ? ` <details><summary>deleted files</summary>${m.diff.deleted.slice(0, 30).map(esc).join('<br>')}${m.diff.deletedCount > 30 ? '<br>…' : ''}</details>` : ''}`
+      : '',
     history: '<b>History</b> the city growing commit by commit (line counts from git, scaled to today\'s heights).',
   };
 
@@ -434,6 +437,7 @@ function main() {
     <button data-metric="age" aria-pressed="false">Age</button>
     <button data-metric="todos" aria-pressed="false">TODO density</button>
     ${m.timeline ? '<button data-metric="history" aria-pressed="false">History (time-lapse)</button>' : ''}
+    ${m.diff ? '<button data-metric="diff" aria-pressed="false">Diff</button>' : ''}
     <div class="menu-h">Scene</div>
     <label><input type="checkbox" id="rv-textures" checked> Pixel textures</label>
     <label title="Loads the original block textures from jsDelivr at runtime"><input type="checkbox" id="rv-mc"> Minecraft textures</label>
@@ -566,6 +570,24 @@ function main() {
       cityMeshes.forEach((c) => (c.visible = true));
       return;
     }
+    if (next === 'diff' && m.diff) {
+      const changed = new Map(m.diff.files.map((f) => [f[0], f]));
+      const maxLines = Math.max(1, ...m.diff.files.map((f) => f[2] + f[3]));
+      m.buildings.forEach((b, i) => {
+        const f = changed.get(i);
+        tmpM.makeScale(b[3] - b[1], f ? b[5] + 1 : Math.max(1, b[5] * 0.25), b[4] - b[2]);
+        tmpM.setPosition(b[1] + ox, 0.05, b[2] + oz);
+        metricMesh.setMatrixAt(i, tmpM);
+        const c = !f ? tmpC.set(0x3a4252) : f[1] === 'A' ? tmpC.set(0x3fd0c9) : tmpC.set(0x8a5a2b).lerp(new Color(0xff7a1a), Math.sqrt((f[2] + f[3]) / maxLines));
+        metricMesh.setColorAt(i, c);
+      });
+      metricLegend.querySelector('.ramp')?.remove();
+      metricMesh.instanceMatrix.needsUpdate = true;
+      if (metricMesh.instanceColor) metricMesh.instanceColor.needsUpdate = true;
+      metricMesh.visible = true;
+      cityMeshes.forEach((c) => (c.visible = false));
+      return;
+    }
     if (next === 'history') {
       metricMesh.visible = false;
       cityMeshes.forEach((c) => (c.visible = false));
@@ -672,6 +694,8 @@ function main() {
     const [path, , , , , height, loc, churn, todos, last, fireLvl, mossy, lang, style, merged, landmark] = b;
     const tags: string[] = [];
     if (landmark) tags.push('<span class="tag gold">largest in its folder</span>');
+    const ch = m.diff?.files.find((f) => m.buildings[f[0]] === b);
+    if (ch) tags.push(`<span class="tag dia">${ch[1] === 'A' ? 'new' : 'changed'} · +${fmt(ch[2])} −${fmt(ch[3])}</span>`);
     if (fireLvl === 2) tags.push('<span class="tag lava">soul fire · top 2% churn</span>');
     else if (fireLvl === 1) tags.push('<span class="tag lava">on fire · top 10% churn</span>');
     if (todos > 0) tags.push(`<span class="tag red">${todos} TODO${todos === 1 ? '' : 's'}</span>`);
@@ -1160,7 +1184,7 @@ function main() {
   if (hash.startsWith('f=')) whenReady(() => focusPath(hash.slice(2)));
   else if (hash === 'tour') whenReady(tour);
   const view = params.get('view');
-  if (view === 'churn' || view === 'age' || view === 'todos' || (view === 'history' && tl)) whenReady(() => setMetric(view));
+  if (view === 'churn' || view === 'age' || view === 'todos' || (view === 'history' && tl) || (view === 'diff' && m.diff)) whenReady(() => setMetric(view));
   if (params.get('ui') === 'off') document.body.classList.add('no-ui');
 }
 
