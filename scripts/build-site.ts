@@ -61,6 +61,7 @@ await shot('pallets/flask', 'flask.jpg', 1280, 800);
 await shot('facebook/react', 'react-clean.jpg', 1440, 900, 'ui=off&quality=high', 'f=packages/react-dom');
 await shot('maximilianfeix/repoville', 'repoville.jpg', 1280, 800);
 await shot('facebook/react', 'react-churn.jpg', 1280, 800, 'ui=off&view=churn&quality=low', 'f=packages/react-reconciler');
+await shot('facebook/react', 'hero-portrait.jpg', 900, 1125, 'ui=off&quality=high', 'f=packages/react-reconciler');
 await shot('facebook/react', 'react-night.jpg', 1440, 900, 'ui=off&quality=high&time=night', 'f=packages/react-reconciler/src/ReactFiberWorkLoop.js');
 await shot('BurntSushi/ripgrep', 'ripgrep-closeup.jpg', 1440, 900, 'ui=off&quality=high', 'f=README.md');
 await shot('BurntSushi/ripgrep', 'ripgrep-mc.jpg', 1440, 900, 'ui=off&quality=high&mc=1', 'f=README.md');
