@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.1 — 2026-10-16
+
+- **Quieter roofs:** a burning roof has one fire near its centre with one plume of flames, instead of specks over the whole deck; flat roofs carry one to four rooftop units instead of up to twelve.
+
 ## 0.14.0 — 2026-10-16
 
 - **New look.** The viewer HUD is now paper by day and ink at night: opaque panels, hairline rules, a text wordmark, mono values, a compact phone toolbar with a bottom-sheet guide, and an Auto/Paper/Ink choice under View. The city sits on the same paper backdrop.
