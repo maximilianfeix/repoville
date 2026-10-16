@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0 — 2026-10-16
+
+- **Framing:** the home view backs off until the tops of the tallest buildings are in frame, so small repos with one tall file are no longer cut off (large cities unchanged).
+- **Docs:** [docs/BUILDINGS.md](docs/BUILDINGS.md) shows all nine building families with real renders.
+- **Viewer:** Home/End and Escape in the search results.
+
 ## 0.12.0 — 2026-10-16
 
 - **New themes:** Swift and Lua build a copper town (waxed copper, so worlds never oxidise it), C# and PHP a prismarine reef on sand. These languages used to fall back to plain stone.
