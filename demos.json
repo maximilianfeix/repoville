@@ -7,7 +7,7 @@
   {
     "slug": "torvalds/linux",
     "blurb": "C · 96k files, folded into 4k buildings",
-    "stats": "torvalds/linux as a walkable city: 95,948 files, 33,795,018 lines of code."
+    "stats": "torvalds/linux as a walkable city: 95,858 files, 33,779,818 lines of code."
   },
   {
     "slug": "BurntSushi/ripgrep",
@@ -27,6 +27,6 @@
   {
     "slug": "maximilianfeix/repoville",
     "blurb": "TypeScript · this project",
-    "stats": "repoville as a walkable city: 116 files, 8,021 lines of code."
+    "stats": "repoville as a walkable city: 120 files, 8,590 lines of code."
   }
 ]
