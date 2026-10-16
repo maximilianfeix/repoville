@@ -3,12 +3,17 @@
 Updated by each autopilot iteration. Newest notes at the top of each section.
 
 ## Needs Maxi
-- Post launch/x-post.md on X (image docs/media/hero-react.jpg), or allow browser posting for this session.
-- Upload site-dist/media/social.png (new paper design) as the repo social preview.
-- X launch: which account should post the thread (`launch/x-thread.md`)? Chrome is logged into @44errrr; nothing was posted.
-- `gh auth refresh -h github.com -u maximilianfeix -s workflow` — without it no `.github/workflows/*` can be pushed (CI, Pages workflow).
-- Upload `assets/brand/social-preview.png` as the repo's social preview (Settings → General; no API for it).
-- npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
+- Post `launch/x-post.md` on X from @44errrr (image `docs/media/hero-react.jpg`); browser posting was blocked for the agent. Reddit/HN/dev.to drafts are in `launch/` for you to post yourself.
+- Upload `site-dist/media/social.png` (paper design) as the repo social preview (Settings → General; no API).
+- `gh auth refresh -h github.com -u maximilianfeix -s workflow` so CI and the Pages workflow can be pushed.
+- npm: `npm login` and ok to publish `repoville` (name was free on 2026-10-15).
+
+## Final report (autopilot ended 2026-10-16 20:36)
+- Released v0.6.0 → v0.14.3 today; PRs up to #125 merged; 93 tests; Paper 1.21.11 e2e (WorldEdit, world, live) pass for every distinct block state.
+- City: pixel textures v2, roofscapes, streets, tower piers, ribbon midrises, terraces, suburb greens, copper/reef themes, game-accurate block states, calm graded palette, one fire per roof, readable windows.
+- Viewer: paper/ink HUD, mini-map, phone layout, height-aware framing, search keys.
+- Website and README rebuilt in the editorial paper style after the master prompt (docs/brand/MASTER-PROMPT.md).
+- Promotion: four awesome-list PRs open without review yet (git #215, Minecraft #81, three.js #62, CLI apps #515); 1 star. No social posts were published.
 
 ## Done
 - 2026-10-16 18:45: windows had nearly vanished in the calm grade; darker glass (#122), site redeployed. Released v0.14.3 (#124).
