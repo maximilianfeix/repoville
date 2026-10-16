@@ -330,6 +330,8 @@ body.ready .progress{opacity:0}
 .tip{position:absolute;left:0;top:0;display:none;padding:5px 8px;background:var(--panel-solid);border:1px solid var(--line-hi);border-radius:5px;font-size:12px;white-space:nowrap}
 .tip b{font:600 12px var(--mono);margin-right:8px}
 .tip span{color:var(--mute)}
+.minimap{position:absolute;left:16px;bottom:30px;width:168px;height:168px;background:var(--panel);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.minimap[hidden]{display:none}
 .foot{position:absolute;right:16px;bottom:30px;max-width:230px;font-size:10.5px;line-height:1.35;color:rgba(246,241,228,.66);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
 .foot a{color:var(--dia);pointer-events:auto}
 .labels{position:absolute;inset:0}
@@ -363,6 +365,7 @@ body.night{background:radial-gradient(120% 90% at 50% 30%,#1b2238 0%,#11131b 60%
  .card{left:10px;right:10px;width:auto;bottom:80px}
  .metric-legend{top:66px}
  .foot{display:none}
+ .minimap{display:none!important}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 `;
