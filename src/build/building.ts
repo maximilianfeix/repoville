@@ -205,6 +205,20 @@ class Mason {
     return y + 1;
   }
 
+  /** Moves wall glass between y0 and y1 one block inward, leaving a shadowed recess (needs an interior). */
+  recessGlass(r: Rect, y0: number, y1: number, glass: string): void {
+    if (width(r) < 4 || depth(r) < 4) return;
+    const glassId = this.g.id(glass);
+    for (let y = y0; y < y1; y++) for (let z = r.z0; z < r.z1; z++) for (let x = r.x0; x < r.x1; x++) {
+      if (this.g.get(x, y, z) !== glassId) continue;
+      const ix = x === r.x0 ? 1 : x === r.x1 - 1 ? -1 : 0;
+      const iz = z === r.z0 ? 1 : z === r.z1 - 1 ? -1 : 0;
+      if (!ix === !iz) continue; // corners and interior cells stay
+      this.g.set(x, y, z, 0);
+      this.g.set(x + ix, y, z + iz, glassId);
+    }
+  }
+
   /**
    * Roof furniture on a flat deck, so a skyline of flat roofs reads as many
    * buildings instead of one material: gravel, green or pale decks, HVAC
@@ -370,17 +384,7 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
         band: (y) => (y === H ? pal.trim : null),
       });
       m.floors(fp, 3, H + 1, 3);
-      if (width(fp) >= 4 && depth(fp) >= 4) {
-        const glassId = g.id(pal.glass);
-        for (let y = 4; y < H - 1; y += 3) for (let z = fp.z0; z < fp.z1; z++) for (let x = fp.x0; x < fp.x1; x++) {
-          if (g.get(x, y, z) !== glassId) continue;
-          const ix = x === fp.x0 ? 1 : x === fp.x1 - 1 ? -1 : 0;
-          const iz = z === fp.z0 ? 1 : z === fp.z1 - 1 ? -1 : 0;
-          if (!ix === !iz) continue; // corners and interior cells stay
-          g.set(x, y, z, 0);
-          g.set(x + ix, y, z + iz, glassId);
-        }
-      }
+      m.recessGlass(fp, 4, H - 1, pal.glass);
       m.door(fp);
       const deckTop = m.flatRoof(fp, H + 1, pal.floor, pal.trim);
       m.roofscape(fp, deckTop);
