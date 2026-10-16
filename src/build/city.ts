@@ -5,6 +5,7 @@ import { addCrosswalks, addFire, addMoss, addRuins, churnThresholds, fireLevel, 
 import { BLOCKS, biomeFor, PALETTES, VARIANTS, type Biome, type Palette } from './palette.js';
 import { fnv1a, mulberry32, rngFor } from './rng.js';
 import { VoxelGrid } from './voxel-grid.js';
+import { settle } from './settle.js';
 
 export interface BuildingFact {
   path: string;
@@ -308,6 +309,9 @@ export function buildCity(city: CityTree, layout: CityLayout, opts: BuildOptions
       if (z < b.lot.z1 && !occ(x, z) && grid.get(x, 0, z) === grass && grid.get(x, 1, z) === 0) grid.set(x, 1, z, bush);
     }
   }
+
+  // Match the states the game derives on block updates (stair corners, leaf distance).
+  settle(grid);
 
   const districtFacts = layout.districts.map((d) => ({ path: d.path, name: d.name, depth: d.depth, ...d.rect }));
   return { grid, buildings, districts: districtFacts, thresholds };

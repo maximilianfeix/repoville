@@ -16,7 +16,7 @@ import { checkBlocks, MC, withServer } from './server.js';
 const out = mkdtempSync(join(tmpdir(), 'rv-world-'));
 const res = await render({ dir: fixture('town'), name: 'town', remote: false }, { ...DEFAULTS, out, formats: ['world'], mc: MC });
 const zip = unzipSync(readFileSync(res.outputs[0]!.file));
-const expectations = sampleBlocks(res.built.grid, [0, WORLD_GROUND_Y, 0], 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]']);
+const expectations = sampleBlocks(res.built.grid, [0, WORLD_GROUND_Y, 0], 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]', 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]']);
 
 const failures = await withServer(
   {

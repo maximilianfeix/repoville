@@ -15,7 +15,7 @@ import { checkBlocks, MC, withServer } from './server.js';
 const city = await analyze(fixture('town'), { sinceDays: 365 });
 const built = buildCity(city, layoutCity(city));
 const at: [number, number, number] = [32, -61, 32];
-const expectations = sampleBlocks(built.grid, at, 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]']);
+const expectations = sampleBlocks(built.grid, at, 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]', 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]']);
 const password = process.env.E2E_RCON_PW ?? 'e2e-live-' + Math.random().toString(36).slice(2);
 process.env.E2E_FORCE_PW = password;
 

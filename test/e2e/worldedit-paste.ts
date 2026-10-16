@@ -15,7 +15,7 @@ const out = mkdtempSync(join(tmpdir(), 'rv-e2e-'));
 const res = await render({ dir: fixture('town'), name: 'town', remote: false }, { ...DEFAULTS, out, formats: ['schem'], mc: MC });
 const schem = res.outputs[0]!.file;
 const origin: [number, number, number] = [0, -60, 0];
-const expectations = sampleBlocks(res.built.grid, origin, 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]', 'minecraft:cracked_stone_bricks', 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]']);
+const expectations = sampleBlocks(res.built.grid, origin, 60, ['minecraft:soul_fire', 'minecraft:oak_sign[rotation=0,waterlogged=false]', 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]', 'minecraft:cracked_stone_bricks', 'minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]']);
 
 const failures = await withServer(
   {

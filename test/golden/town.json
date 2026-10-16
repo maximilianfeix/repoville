@@ -1,6 +1,6 @@
 {
-  "schemNbtSha256": "b4dc75a60092d502d0f6f5946c1c70c536b7765b65c92591ca5d58775328f32d",
-  "litematicNbtSha256": "5f0063b290dc3eb6f2e3c45f69f37e033c6a0874517593e167ce35af9ec08047",
+  "schemNbtSha256": "778d8d28068f69916e204ceae80181ca6b54253e947a834be9b72332623db13c",
+  "litematicNbtSha256": "f9f2bf4d461fbfb0b752b9d6df1e399b033f98d46e3e074e1dc7bc8a8e959f10",
   "summary": {
     "dimensions": [
       69,
@@ -94,7 +94,16 @@
       "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]",
       "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]",
       "minecraft:oak_log[axis=y]",
-      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]"
+      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]",
+      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=outer_left,waterlogged=false]",
+      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=outer_right,waterlogged=false]",
+      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=outer_right,waterlogged=false]",
+      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=outer_left,waterlogged=false]",
+      "minecraft:azalea_leaves[distance=7,persistent=true,waterlogged=false]",
+      "minecraft:jungle_leaves[distance=2,persistent=true,waterlogged=false]",
+      "minecraft:oak_leaves[distance=2,persistent=true,waterlogged=false]",
+      "minecraft:birch_leaves[distance=2,persistent=true,waterlogged=false]",
+      "minecraft:dirt"
     ],
     "blockCounts": {
       "minecraft:air": 285417,
@@ -102,7 +111,7 @@
       "minecraft:polished_deepslate": 450,
       "minecraft:tuff": 328,
       "minecraft:polished_andesite": 108,
-      "minecraft:grass_block[snowy=false]": 776,
+      "minecraft:grass_block[snowy=false]": 620,
       "minecraft:blackstone": 147,
       "minecraft:snow_block": 91,
       "minecraft:coarse_dirt": 120,
@@ -116,7 +125,7 @@
       "minecraft:andesite": 21,
       "minecraft:diorite": 28,
       "minecraft:oak_sign[rotation=0,waterlogged=false]": 1,
-      "minecraft:azalea_leaves[distance=1,persistent=true,waterlogged=false]": 23,
+      "minecraft:azalea_leaves[distance=1,persistent=true,waterlogged=false]": 10,
       "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]": 17,
       "minecraft:chiseled_stone_bricks": 16,
       "minecraft:glass": 48,
@@ -170,16 +179,25 @@
       "minecraft:red_concrete": 32,
       "minecraft:iron_bars[east=false,north=false,south=false,waterlogged=false,west=false]": 24,
       "minecraft:sea_lantern": 18,
-      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]": 8,
-      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]": 8,
+      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]": 4,
+      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]": 4,
       "minecraft:red_nether_brick_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]": 4,
       "minecraft:red_nether_brick_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]": 4,
       "minecraft:red_nether_brick_slab[type=bottom,waterlogged=false]": 1,
       "minecraft:birch_log[axis=y]": 5,
-      "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]": 13,
-      "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]": 26,
+      "minecraft:birch_leaves[distance=1,persistent=true,waterlogged=false]": 9,
+      "minecraft:jungle_leaves[distance=1,persistent=true,waterlogged=false]": 18,
       "minecraft:oak_log[axis=y]": 18,
-      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]": 52
+      "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]": 37,
+      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=outer_left,waterlogged=false]": 2,
+      "minecraft:red_nether_brick_stairs[facing=south,half=bottom,shape=outer_right,waterlogged=false]": 2,
+      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=outer_right,waterlogged=false]": 2,
+      "minecraft:red_nether_brick_stairs[facing=north,half=bottom,shape=outer_left,waterlogged=false]": 2,
+      "minecraft:azalea_leaves[distance=7,persistent=true,waterlogged=false]": 13,
+      "minecraft:jungle_leaves[distance=2,persistent=true,waterlogged=false]": 8,
+      "minecraft:oak_leaves[distance=2,persistent=true,waterlogged=false]": 15,
+      "minecraft:birch_leaves[distance=2,persistent=true,waterlogged=false]": 4,
+      "minecraft:dirt": 156
     },
     "fire": [
       "src/hot.ts:2"
