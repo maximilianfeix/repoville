@@ -27,7 +27,7 @@ Show HN: Repoville – turn any Git repo into a walkable Minecraft-style city
    - Say it plainly: fire is activity, not bad code; moss is stable, not rotten.
 
 3. **What's new in v0.6.0:** procedural pixel textures v2. Every block state gets its own 16×16 tile with hue-shifted colour ramps, grass sides, log rings and per-family facades. No Mojang assets bundled; `?textures=classic` restores the old look.
-   - Roofscapes (flat roofs with gravel/green decks, HVAC units, water tanks) are on `main` but landed after the v0.6.0 tag and are not in the demos yet. Mention them as "just landed" or leave them out.
+   - v0.7.0 adds roofscapes (gravel/green decks, HVAC units, water tanks), crosswalks and plaza benches, animated water; the demos show them.
 
 4. **Output:**
    - One self-contained HTML file with a three.js viewer: search, building cards, metric views (churn / age / TODO), night mode, History time-lapse, Diff view for branches.

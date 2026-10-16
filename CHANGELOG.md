@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 — 2026-10-16
+
+- **Roofscapes:** flat roofs get gravel, green or pale decks, stair housings, HVAC units scaled to the roof and timber water tanks; landmark crowns get roof-material caps.
+- **Streets:** zebra crossings at junctions, worn sidewalk slabs, plaza benches and lawn beds.
+- **Viewer:** animated pixel-art water ripples (still under reduced motion), warmer night windows, a soft day backdrop (also in Photo exports), district labels no longer overlap, and the whole city fits on portrait phone screens.
+
 ## 0.6.0 — 2026-10-16
 
 - **Pixel textures v2** in the viewer: every block state gets a procedurally painted 16×16 tile (hue-shifted colour ramps, grass sides, log rings, per-family facades). Still no Mojang assets bundled. `?textures=classic` restores the old look; GPUs with too few texture layers fall back automatically.
