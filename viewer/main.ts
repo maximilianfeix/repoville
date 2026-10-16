@@ -1007,7 +1007,11 @@ function main() {
     const i = items.indexOf(document.activeElement as HTMLElement);
     if (e.key === 'ArrowDown') items[Math.min(items.length - 1, i + 1)]?.focus();
     if (e.key === 'ArrowUp') (i <= 0 ? search : items[i - 1])?.focus();
-    if (e.key.startsWith('Arrow')) e.preventDefault();
+    // Enter needs nothing extra: results are buttons, so the browser clicks the focused one.
+    if (e.key === 'Home') items[0]?.focus();
+    if (e.key === 'End') items[items.length - 1]?.focus();
+    if (e.key === 'Escape') search.focus();
+    if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End') e.preventDefault();
   });
 
   // ---------- Dock buttons, drawer, menus ----------
