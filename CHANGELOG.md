@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 — 2026-10-16
+
+- **Pixel textures v2** in the viewer: every block state gets a procedurally painted 16×16 tile (hue-shifted colour ramps, grass sides, log rings, per-family facades). Still no Mojang assets bundled. `?textures=classic` restores the old look; GPUs with too few texture layers fall back automatically.
+- README screenshots, flyover GIF and the demo site re-rendered with the new textures.
+
 ## 0.5.0 — 2026-10-16
 
 - **Diff view** (`--diff <ref>`): what a branch changed, as a city. New buildings glow Diamond, changed ones Lava; deleted files are listed. The GitHub Action gains `diff` and `timelapse` inputs for pull-request previews.
