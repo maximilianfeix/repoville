@@ -125,6 +125,12 @@ export const BLOCKS = {
   roadLane: 'minecraft:tuff',
   roadDeep: 'minecraft:dirt_path',
   sidewalk: 'minecraft:smooth_stone',
+  /** Patched and worn sidewalk slabs, mixed sparsely into the sidewalk. */
+  sidewalkWorn: 'minecraft:andesite',
+  sidewalkPatch: 'minecraft:diorite',
+  crosswalk: 'minecraft:white_concrete',
+  /** Plaza bench: back to the north, seat facing south. */
+  bench: 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]',
   plaza: 'minecraft:polished_andesite',
   grass: GRASS,
   fence: 'minecraft:dark_oak_fence[east=false,north=false,south=false,waterlogged=false,west=false]',

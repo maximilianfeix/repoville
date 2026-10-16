@@ -48,7 +48,7 @@ export const BLOCK_COLORS: Record<string, number> = {
   'minecraft:dark_oak_fence': 0x42301a, 'minecraft:lightning_rod': 0xb87333, 'minecraft:bricks': 0x966153,
   'minecraft:poppy': 0xc8302b, 'minecraft:dandelion': 0xf2d83a, 'minecraft:azalea_leaves': 0x5d7c2a, 'minecraft:water': 0x3f76e4,
   'minecraft:cherry_stairs': 0xe2b2ac, 'minecraft:jungle_stairs': 0xa0734d, 'minecraft:oak_stairs': 0xa88754,
- 'minecraft:stone': 0x7d7d7d, 'minecraft:vine': 0x3f7a1f, 'minecraft:dirt': 0x866043,
+ 'minecraft:stone': 0x7d7d7d, 'minecraft:diorite': 0xbcbcbc, 'minecraft:vine': 0x3f7a1f, 'minecraft:dirt': 0x866043,
 };
 
 export function colorOf(state: string): number {
