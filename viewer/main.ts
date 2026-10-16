@@ -454,6 +454,10 @@ function main() {
       ${h.oldestCorner ? `<h3><i class="dot moss"></i>Mossy corner</h3><ul><li>${link(h.oldestCorner.path)}<span>${h.oldestCorner.ageDays === null ? 'untouched 3+ years' : `untouched ${fmt(h.oldestCorner.ageDays)} days`}</span></li></ul>` : ''}
     </section>
     <section>
+      <h3>Districts</h3>
+      <ul class="districts" id="rv-districts"></ul>
+    </section>
+    <section>
       <h3>Legend</h3>
       <dl class="legend">
         <dt>Folder</dt><dd>District with a name sign and plaza</dd>
@@ -543,6 +547,10 @@ function main() {
     for (const b of m.buildings) if (b[0].startsWith(d[0] + '/')) top = Math.max(top, b[5]);
     return { node, pos: new Vector3((d[2] + d[4]) / 2 + ox, Math.min(top + 8, 70), (d[3] + d[5]) / 2 + oz), path: d[0] };
   });
+  // Keyboard-reachable list of the same districts the floating labels show.
+  drawer.querySelector('#rv-districts')!.innerHTML = labelDistricts
+    .map((d) => `<li><button class="path" data-path="${esc(d[0])}">${esc(d[0])}/</button></li>`)
+    .join('');
   let showLabels = true;
   const projected = new Vector3();
   function placeLabels() {
@@ -654,9 +662,17 @@ function main() {
     return ` <a class="small" href="${esc(href)}" target="_blank" rel="noopener">Open source ↗</a>`;
   }
 
+  let focusBeforeCard: HTMLElement | null = null;
   function closeCard() {
+    const wasOpen = !card.hidden;
     card.hidden = true;
     selOutline.visible = false;
+    if (wasOpen && focusBeforeCard) {
+      // The origin may be a search hit that has been hidden since; fall back to the search box.
+      const target = document.contains(focusBeforeCard) && focusBeforeCard.offsetParent ? focusBeforeCard : search;
+      target.focus();
+    }
+    focusBeforeCard = null;
   }
   function select(i: number) {
     const b = m.buildings[i]!;
@@ -666,6 +682,12 @@ function main() {
     card.innerHTML = `<div class="card-h"><button class="path district" data-path="${esc(d)}">${esc(d || m.name)}/</button><button class="icon" id="rv-card-close" aria-label="Close details">${ICON.close}</button></div>${facts(b)}
       <div class="card-a"><button class="small" id="rv-link">Copy link</button>${sourceLink(b)}</div>`;
     card.hidden = false;
+    // Keyboard users land in the card; focus returns where it came from on close.
+    const active = document.activeElement as HTMLElement | null;
+    if (active && active !== document.body && active !== canvas && !card.contains(active)) {
+      focusBeforeCard = active;
+      (card.querySelector('#rv-card-close') as HTMLElement).focus({ preventScroll: true });
+    }
     card.querySelector('#rv-card-close')!.addEventListener('click', closeCard);
     card.querySelector('#rv-link')!.addEventListener('click', async (e) => {
       const btn = e.currentTarget as HTMLButtonElement;
