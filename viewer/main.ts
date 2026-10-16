@@ -90,7 +90,8 @@ function main() {
   const span = Math.max(m.width, m.length);
 
   const camera = new PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.5, span * 6);
-  const homeDir = new Vector3(0.74, 0.6, 0.82).normalize();
+  // Portrait screens look down more steeply, so the diorama fills the height instead of a thin band.
+  const homeDir = (window.innerWidth < window.innerHeight ? new Vector3(0.74, 1.35, 0.82) : new Vector3(0.74, 0.6, 0.82)).normalize();
   // Tall towers on a small map stuck out of the top of the home view; include height in the fit.
   const maxTop = m.buildings.reduce((t, b) => Math.max(t, b[5]), 0);
   // Aim higher when the city is tall for its size (one or two tall files), and fit a bounding
@@ -103,7 +104,7 @@ function main() {
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     const r = Math.max(span * 0.6, above * 1.15);
     // Landscape crops the empty corners of the diorama; portrait needs the full width.
-    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 || tall ? 0.98 : 0.8);
+    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 ? 1.1 : tall ? 0.98 : 0.8);
   };
   // Aim at the LOC-weighted downtown rather than the map centre.
   const downtown = new Vector3();
@@ -832,6 +833,8 @@ function main() {
     const dist = camera.position.distanceTo(orbit.target);
     // Labels come sorted by district area; a smaller district's label yields when it would overlap.
     const placed: Array<[number, number, number, number]> = [];
+    // Small screens: a few large districts only, so labels never cover the city.
+    const maxLabels = w < 720 ? 5 : Infinity;
     for (const l of labels) {
       projected.copy(l.pos).project(camera);
       let show = showLabels && !fly.isLocked && projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05 && camera.position.distanceTo(l.pos) < dist * 2.2;
@@ -845,7 +848,7 @@ function main() {
         const [lw, lh] = l.size;
         x = Math.min(Math.max(x, lw / 2 + 8), w - lw / 2 - 8); // keep edge labels on screen
         const r: [number, number, number, number] = [x - lw / 2 - 4, y - lh - 2, x + lw / 2 + 4, y + 2];
-        if (placed.some((p) => r[0] < p[2] && r[2] > p[0] && r[1] < p[3] && r[3] > p[1])) show = false;
+        if (placed.length >= maxLabels || placed.some((p) => r[0] < p[2] && r[2] > p[0] && r[1] < p[3] && r[3] > p[1])) show = false;
         else placed.push(r);
       }
       l.node.style.display = show ? 'block' : 'none';
