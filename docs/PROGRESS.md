@@ -9,6 +9,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 07:00: facade research (viewer meshes stairs/slabs as cubes → depth only from whole-block offsets); wide towers get piers, glass strips and a cornice (#71). Next: ribbon windows on midrises, recessed punched windows on testlabs (research #3).
 - 2026-10-16 07:00: Paper e2e re-run after v0.7.0 found real mismatches (WorldEdit/live 2 failures: stair corner shapes, leaf distance; grass under floors). Settle pass with vanilla rules (#68), v0.7.1 released (#69). Paper 1.21.11: WorldEdit 66/66, world 64/64, live 64/64. X not posted: browser is logged into @44errrr, not a confirmed Repoville/Maxi account.
 - 2026-10-16 06:25: street detail via worktree agent (#65: crosswalks, sidewalk wear, plaza benches), v0.7.0 released (#66; demos, README media, flyover re-rendered; site deployed; v0 tag moved). Launch drafts committed for 0.7.0 (drafts only).
 - 2026-10-16 06:10: on main since v0.6.0: roofscapes (#58), animated pixel-snapped water (#59), day vignette + matching Photo export (#60), label collision culling (#61), portrait framing fix (fit was clamped by maxDistance; fog/far now scale) + on-screen edge labels (#62), warmer night windows (#63). Launch drafts refreshed in launch/ (uncommitted until the next release). Street-level detail pass running in a worktree.
