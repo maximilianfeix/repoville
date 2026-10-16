@@ -8,6 +8,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 04:20: v0.4.0. Since 02:15: avatar + visual audit + touch fix (#46), portrait mobile hero (#47), history time-lapse (#48, closes #34; demo on the site).
 - 2026-10-16 02:15: v0.3.0 released (npx verified). Since 01:00: source links + URL view state + legend numbers (#41, closes #29/#31/#32), search inside merged towers (#42, closes #30), accessibility (#43, closes #33), demos re-rendered and site deployed.
 - 2026-10-16 01:00: Codex inventory + triage (#36, issues #28–#35), hardening (#37), GitHub Action `maximilianfeix/repoville@v0` (#38/#39, tag v0; tested locally, not yet on hosted runners), photo button (#27), v0.2.0 released and Paper e2e re-verified on the new geometry.
 - 2026-10-16 00:20 (tick 3): class massing (#25): footprints widen up to height/1.8 when the lot has room, so small files are houses with roofs instead of posts; height unchanged. Night mode (#24), v0.1.0 released with npx-from-release (#22/#23).
@@ -42,7 +43,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - [x] Hardening from the Codex inventory (#37) (docs/engineering/codex-inventory.md §2): symlinks, URL/cache identity, ref cache, RCON deadlines, template names, force-load cleanup, LOD budget, roof validation, chunk retention + doc accuracy fixes.
 - [x] GitHub Action (#28 → #38). [ ] First real run on a hosted runner (needs a workflow file → workflow scope).
 - [x] Open in source (#29), merged search (#30), legend numbers (#31), view state (#32), a11y (#33).
-- [ ] Churn-view image on the site: frame tighter (currently a small plane in a dark box).
+- [x] Churn-view image framed on react-reconciler.
 - [ ] Shader-based facade windows to cut quads (perf-research #3); packed attributes (#2).
 - [x] Class massing (#1). [ ] Suburb rows (#12).
 - [ ] npm pack dry run + cold `npx` test from a tarball.

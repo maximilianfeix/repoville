@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 2026-10-16
+
+- **History time-lapse** (`--timelapse`): a History view where the city grows commit by commit, with play, scrubber and date.
+- Landing page: dedicated portrait hero on phones; avatar PNG in `assets/brand/`; Fly is hidden on touch-only devices.
+
 ## 0.3.0 — 2026-10-16
 
 - **GitHub Action** `maximilianfeix/repoville@v0`: render your repo's city on every push and publish it to Pages.
