@@ -1125,6 +1125,14 @@ function main() {
     const ctx = out.getContext('2d')!;
     ctx.fillStyle = '#1c1e24';
     ctx.fillRect(0, 0, w, h + strip);
+    // Same backdrop as the page (radial vignette, darker at night).
+    const bg = ctx.createRadialGradient(w / 2, h * 0.32, 0, w / 2, h * 0.32, Math.hypot(w, h) * 0.6);
+    const stops = night.value ? ['#1b2238', '#11131b', '#0b0c10'] : ['#2d313b', '#1f2128', '#15161b'];
+    bg.addColorStop(0, stops[0]!);
+    bg.addColorStop(0.55, stops[1]!);
+    bg.addColorStop(1, stops[2]!);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
     ctx.drawImage(canvas, 0, 0);
     const pad = Math.round(strip * 0.32);
     const fs = Math.round(strip * 0.34);
