@@ -82,7 +82,6 @@ function main() {
 
   const scene = new Scene();
   const span = Math.max(m.width, m.length);
-  scene.fog = new Fog(0x262931, span * 1.6, span * 4);
 
   const camera = new PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.5, span * 6);
   const homeDir = new Vector3(0.74, 0.6, 0.82).normalize();
@@ -90,7 +89,8 @@ function main() {
     const vfov = (camera.fov * Math.PI) / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     const r = span * 0.6;
-    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * 0.8;
+    // Landscape crops the empty corners of the diorama; portrait needs the full width.
+    return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2)) * (camera.aspect < 1 ? 0.98 : 0.8);
   };
   // Aim at the LOC-weighted downtown rather than the map centre.
   const downtown = new Vector3();
@@ -107,13 +107,18 @@ function main() {
   }
   const homePos = () => homeDir.clone().multiplyScalar(fitDistance()).add(downtown);
   camera.position.copy(homePos());
+  // Portrait screens sit further back than 3 spans; keep fog, far plane and zoom-out limit beyond that.
+  const reach = Math.max(span * 3, fitDistance() * 1.25);
+  scene.fog = new Fog(0x262931, reach * 0.55, reach * 1.35);
+  camera.far = reach * 2;
+  camera.updateProjectionMatrix();
 
   const orbit = new OrbitControls(camera, canvas);
   orbit.enableDamping = true;
   orbit.dampingFactor = 0.08;
   orbit.maxPolarAngle = Math.PI * 0.47;
   orbit.minDistance = 6;
-  orbit.maxDistance = span * 3;
+  orbit.maxDistance = reach;
   orbit.screenSpacePanning = false;
   orbit.target.copy(downtown);
   orbit.update();
@@ -686,7 +691,7 @@ function main() {
     for (const l of labels) {
       projected.copy(l.pos).project(camera);
       let show = showLabels && !fly.isLocked && projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05 && camera.position.distanceTo(l.pos) < dist * 2.2;
-      const x = ((projected.x + 1) / 2) * w;
+      let x = ((projected.x + 1) / 2) * w;
       const y = ((1 - projected.y) / 2) * hh;
       if (show) {
         if (!l.size) {
@@ -694,6 +699,7 @@ function main() {
           l.size = [l.node.offsetWidth, l.node.offsetHeight];
         }
         const [lw, lh] = l.size;
+        x = Math.min(Math.max(x, lw / 2 + 8), w - lw / 2 - 8); // keep edge labels on screen
         const r: [number, number, number, number] = [x - lw / 2 - 4, y - lh - 2, x + lw / 2 + 4, y + 2];
         if (placed.some((p) => r[0] < p[2] && r[2] > p[0] && r[1] < p[3] && r[3] > p[1])) show = false;
         else placed.push(r);
