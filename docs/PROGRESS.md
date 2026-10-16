@@ -11,6 +11,7 @@ Updated by each autopilot iteration. Newest notes at the top of each section.
 - npm: `npm login` + ok to publish `repoville` (name still free on 2026-10-15). Domain `repoville.dev` not registered.
 
 ## Done
+- 2026-10-16 17:00: roofs still looked noisy in close-ups: one fire cluster per roof + single flame plume, 1–4 rooftop units (#113). v0.14.1 released, README media and site re-rendered, Paper e2e 158/158.
 - 2026-10-16 18:00: redesign after "sieht hässlich aus": Codex wrote docs/brand/MASTER-PROMPT.md from spillage/hexvero/proxy-scraper; calmer render (#107), paper/ink HUD (#108), site + README + brand (#109), v0.14.0 released (#110), site deployed, repo description updated. X post prepared (launch/x-post.md, #111) but posting from the browser was blocked by the auto-mode classifier; no stray likes/posts on @44errrr (checked).
 - 2026-10-16 15:15: mini-map with camera marker and click-to-fly (#105, closes #3). Not released yet. Only v2 issue #8 remains open.
 - 2026-10-16 14:30: docs/BUILDINGS.md with real renders of all nine families (#100, closes #6); home view now backs off until tall building tops are in frame (small repos with one tall file were cut off). Search Home/End/Escape (#102, closes #7). Released v0.13.0 (#103), site redeployed. Open good-first-issues left: #3 mini-map, #8 agents-as-villagers (v2).
