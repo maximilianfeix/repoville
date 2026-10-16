@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 — 2026-10-16
+
+- **GitHub Action** `maximilianfeix/repoville@v0`: render your repo's city on every push and publish it to Pages.
+- **Viewer:** "Open source ↗" on building cards (GitHub/GitLab at the rendered commit), search finds files inside merged landmark towers, shareable view state in the URL, numeric metric legend, Photo button (branded PNG), keyboard district list and card focus handling.
+- **Hardening** (from an independent review): symlinks are never followed, exact-host URL parsing and collision-free clone cache, per-ref checkouts, RCON deadlines and packet limits, content-hashed live templates with guaranteed force-load cleanup, stricter palette validation, accurate docs.
+
 ## 0.2.0 — 2026-10-16
 
 - **Night mode** in the viewer (View → Night or `?time=night`): moonlight and windows lit one by one.
