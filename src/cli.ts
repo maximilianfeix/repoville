@@ -51,6 +51,7 @@ program
   .option('--textured', 'open the viewer with Minecraft textures (fetched by the browser at runtime)')
   .option('--open', 'open the 3D preview when done')
   .option('--gallery', 'also write gallery/<owner>-<repo>/ for a gallery PR')
+  .option('--timelapse', 'embed a time-lapse of the whole git history in the viewer')
   .addOption(new Option('--ref <commit>', 'render this commit of a remote repo'))
   .addOption(new Option('--refresh', 'fetch the latest commit for a cached remote repo'))
   .action(async (target: string, o: Record<string, string | boolean | string[] | undefined>) => {
@@ -77,6 +78,7 @@ program
       textured: Boolean(o.textured ?? fileCfg.textured),
       open: Boolean(o.open),
       gallery: Boolean(o.gallery),
+      timelapse: Boolean(o.timelapse ?? fileCfg.timelapse),
       palette: fileCfg.palette,
     };
     if (!Number.isInteger(cfg.maxBuildings) || cfg.maxBuildings < 1) throw new Error('--max-buildings must be a positive integer');

@@ -52,7 +52,7 @@ function loadPayload(): Payload {
   return decodePayload(inflateSync(bytes));
 }
 
-type Metric = 'none' | 'churn' | 'age' | 'todos';
+type Metric = 'none' | 'churn' | 'age' | 'todos' | 'history';
 
 function main() {
   const p = loadPayload();
@@ -391,6 +391,7 @@ function main() {
     churn: `<b>Churn</b> commits per file in ${esc(m.since)}: column height and colour. Activity, not quality.`,
     age: '<b>Age</b> days since the last commit, as colour; height stays the building height. Old is not bad.',
     todos: '<b>TODO density</b> TODO / FIXME / HACK / XXX markers per line, as height and colour.',
+    history: '<b>History</b> the city growing commit by commit (line counts from git, scaled to today\'s heights).',
   };
 
   // ---------- Hover and selection outlines ----------
@@ -432,6 +433,7 @@ function main() {
     <button data-metric="churn" aria-pressed="false">Churn</button>
     <button data-metric="age" aria-pressed="false">Age</button>
     <button data-metric="todos" aria-pressed="false">TODO density</button>
+    ${m.timeline ? '<button data-metric="history" aria-pressed="false">History (time-lapse)</button>' : ''}
     <div class="menu-h">Scene</div>
     <label><input type="checkbox" id="rv-textures" checked> Pixel textures</label>
     <label title="Loads the original block textures from jsDelivr at runtime"><input type="checkbox" id="rv-mc"> Minecraft textures</label>
@@ -490,6 +492,55 @@ function main() {
   ui.prepend(labelLayer);
   ui.append(brand, stats, metricLegend, card, tip, viewMenu, matches, dock, drawer, foot);
 
+  // ---------- History time-lapse ----------
+  const tl = m.timeline;
+  const tlHeights = tl ? Uint8Array.from(atob(tl.heights), (c) => c.charCodeAt(0)) : null;
+  const tlFrames = tl ? tl.times.length : 0;
+  const historyMesh = new InstancedMesh(boxGeo, new MeshLambertMaterial(), m.buildings.length);
+  historyMesh.visible = false;
+  historyMesh.frustumCulled = false;
+  scene.add(historyMesh);
+  if (tl) m.buildings.forEach((_, i) => historyMesh.setColorAt(i, tmpC.setHex(tl.colors[i] ?? 0x888888)));
+  const tlBar = el('div', { class: 'timeline' });
+  tlBar.hidden = true;
+  tlBar.innerHTML = `<button class="icon" id="rv-tl-play" aria-label="Play">${ICON.tour}</button><input type="range" id="rv-tl" min="0" max="${Math.max(0, tlFrames - 1)}" step="0.01" value="0" aria-label="Time"><span id="rv-tl-date"></span>`;
+  ui.append(tlBar);
+  const tlRange = tlBar.querySelector<HTMLInputElement>('#rv-tl')!;
+  const tlDate = tlBar.querySelector<HTMLSpanElement>('#rv-tl-date')!;
+  let tlPos = 0;
+  let tlPlaying = false;
+  function drawHistory(pos: number) {
+    if (!tlHeights) return;
+    const f0 = Math.floor(pos);
+    const f1 = Math.min(tlFrames - 1, f0 + 1);
+    const k = pos - f0;
+    const n = m.buildings.length;
+    for (let i = 0; i < n; i++) {
+      const b = m.buildings[i]!;
+      const h0 = tlHeights[f0 * n + i]!;
+      const h1 = tlHeights[f1 * n + i]!;
+      const hgt = h0 + (h1 - h0) * k;
+      // Not built yet: collapse the instance entirely.
+      if (hgt <= 0) tmpM.makeScale(0, 0, 0);
+      else tmpM.makeScale(b[3] - b[1], hgt, b[4] - b[2]);
+      tmpM.setPosition(b[1] + ox, 0.05, b[2] + oz);
+      historyMesh.setMatrixAt(i, tmpM);
+    }
+    historyMesh.instanceMatrix.needsUpdate = true;
+    if (historyMesh.instanceColor) historyMesh.instanceColor.needsUpdate = true;
+    tlDate.textContent = day(tl!.times[Math.min(tlFrames - 1, Math.round(pos))]!);
+    tlRange.value = String(pos);
+  }
+  tlRange.addEventListener('input', () => {
+    tlPos = Number(tlRange.value);
+    tlPlaying = false;
+    drawHistory(tlPos);
+  });
+  tlBar.querySelector('#rv-tl-play')!.addEventListener('click', () => {
+    if (tlPos >= tlFrames - 1) tlPos = 0;
+    tlPlaying = !tlPlaying;
+  });
+
   /** Keep the URL in sync with the view so shared links reopen it as seen. */
   function syncUrl() {
     const q = new URLSearchParams(location.search);
@@ -508,12 +559,23 @@ function main() {
     for (const b of viewMenu.querySelectorAll<HTMLButtonElement>('[data-metric]')) b.setAttribute('aria-pressed', String(b.dataset.metric === next));
     metricLegend.innerHTML = `${METRIC_TEXT[next]}<span class="ramp" aria-hidden="true"></span>`;
     metricLegend.hidden = next === 'none';
+    historyMesh.visible = next === 'history';
+    tlBar.hidden = next !== 'history';
     if (next === 'none') {
       metricMesh.visible = false;
       cityMeshes.forEach((c) => (c.visible = true));
       return;
     }
-    RAMP = RAMPS[next];
+    if (next === 'history') {
+      metricMesh.visible = false;
+      cityMeshes.forEach((c) => (c.visible = false));
+      metricLegend.querySelector('.ramp')?.remove();
+      tlPos = 0;
+      tlPlaying = !reduceMotion;
+      drawHistory(0);
+      return;
+    }
+    RAMP = RAMPS[next as 'churn' | 'age' | 'todos'];
     metricLegend.querySelector<HTMLElement>('.ramp')!.style.background = `linear-gradient(90deg,${RAMP.map((c) => '#' + c.getHexString()).join(',')})`;
     const values = m.buildings.map((b) => (next === 'churn' ? b[7] : next === 'todos' ? (b[6] ? b[8] / b[6] : 0) : b[9] < 0 ? 3 * 365 : (m.headTime - b[9]) / DAY));
     const sorted = values.filter((v) => v > 0).sort((a, b) => a - b);
@@ -1062,6 +1124,11 @@ function main() {
       orbit.update();
     }
     flames.visible = flamesBox.checked && metric === 'none';
+    if (metric === 'history' && tlPlaying) {
+      tlPos = Math.min(tlFrames - 1, tlPos + dt * 6);
+      drawHistory(tlPos);
+      if (tlPos >= tlFrames - 1) tlPlaying = false;
+    }
     if (!reduceMotion && flames.visible && burning.length) {
       const pos = fireGeo.getAttribute('position') as BufferAttribute;
       const tt = now / 1000;
@@ -1093,7 +1160,7 @@ function main() {
   if (hash.startsWith('f=')) whenReady(() => focusPath(hash.slice(2)));
   else if (hash === 'tour') whenReady(tour);
   const view = params.get('view');
-  if (view === 'churn' || view === 'age' || view === 'todos') whenReady(() => setMetric(view));
+  if (view === 'churn' || view === 'age' || view === 'todos' || (view === 'history' && tl)) whenReady(() => setMetric(view));
   if (params.get('ui') === 'off') document.body.classList.add('no-ui');
 }
 

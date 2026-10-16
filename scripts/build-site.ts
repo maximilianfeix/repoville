@@ -15,7 +15,7 @@ export const DEMOS = [
   { slug: 'BurntSushi/ripgrep', target: 'BurntSushi/ripgrep', blurb: 'Rust · the nether district' },
   { slug: 'junegunn/fzf', target: 'junegunn/fzf', blurb: 'Go · frozen peaks' },
   { slug: 'pallets/flask', target: 'pallets/flask', blurb: 'Python · jungle' },
-  { slug: 'maximilianfeix/repoville', target: ROOT, blurb: 'TypeScript · this project' },
+  { slug: 'maximilianfeix/repoville', target: ROOT, blurb: 'TypeScript · this project', extra: ['--timelapse'] },
 ];
 
 const skip = process.argv.includes('--skip-render');
@@ -29,7 +29,7 @@ for (const d of DEMOS) {
   const html = join(dir, 'city.html');
   if (!skip || !existsSync(html)) {
     rmSync(dir, { recursive: true, force: true });
-    const log = execFileSync('node', [join(ROOT, 'dist', 'cli.js'), d.target, '-o', dir, '--format', 'html'], { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+    const log = execFileSync('node', [join(ROOT, 'dist', 'cli.js'), d.target, '-o', dir, '--format', 'html', ...((d as { extra?: string[] }).extra ?? [])], { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
     void log;
     const produced = execFileSync('ls', [dir]).toString().split('\n').find((f) => f.endsWith('.html'))!;
     cpSync(join(dir, produced), html);

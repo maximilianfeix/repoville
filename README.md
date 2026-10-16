@@ -59,6 +59,10 @@ Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers 
   </tr>
 </table>
 
+### History
+
+`--timelapse` adds a **History** view to the viewer: buildings rise as files appear and grow with their line counts, frame by frame across the git history ([try it on this repo](https://maximilianfeix.github.io/repoville/r/maximilianfeix/repoville/?view=history)). It reads line deltas with one `git log --numstat`; on a blobless remote clone the first run downloads the file history (ripgrep: about 3.5 minutes once, then about 1 s).
+
 ### After dark
 
 <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/?time=night#f=packages/react-reconciler/src/ReactFiberWorkLoop.js"><img src="docs/media/react-night.png" alt="React's downtown at night: towers with warmly lit windows" width="100%"></a>
@@ -115,6 +119,7 @@ node dist/cli.js [build] <path|owner/repo|url>
   --include / --exclude    glob filters, repeatable
   --seed <n>               decoration seed
   --ref <commit>           render a specific commit of a remote repo
+  --timelapse              add a History view: the city growing over the git history
 node dist/cli.js badge [owner/repo]   print the README badge
 MC_RCON_PW=… node dist/cli.js live <repo> --rcon localhost:25575 --world-dir /srv/mc/world --at 0,-60,0
 ```

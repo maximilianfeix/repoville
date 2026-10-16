@@ -9,22 +9,26 @@ import { chromium } from 'playwright';
 
 const args = process.argv.slice(2);
 const noUi = args.includes('--no-ui');
-const [html, out, ...stops] = args.filter((a) => a !== '--no-ui');
+const extra = args.find((a) => a.startsWith('--query='))?.slice(8) ?? '';
+const hold = Number(args.find((a) => a.startsWith('--hold='))?.slice(7) ?? 0);
+const [html, out, ...stops] = args.filter((a) => !a.startsWith('--'));
 if (!html || !out) throw new Error('usage: record-flyover.ts <city.html> <out> <paths…>');
 const dir = mkdtempSync(join(tmpdir(), 'rv-rec-'));
 const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir, size: { width: 1280, height: 720 } } });
 const page = await ctx.newPage();
-await page.goto(pathToFileURL(html).href + '?quality=high' + (noUi ? '&ui=off' : ''));
+await page.goto(pathToFileURL(html).href + '?quality=high' + (noUi ? '&ui=off' : '') + (extra ? `&${extra}` : ''));
 await page.waitForFunction('window.__repoville && window.__repoville.ready', null, { timeout: 180_000 });
 const t0 = Date.now();
-await page.waitForTimeout(1800);
+await page.waitForTimeout(1800 + hold);
 for (const stop of stops) {
   await page.evaluate(`window.__repoville.focus(${JSON.stringify(stop)})`);
   await page.waitForTimeout(3600);
 }
-await page.evaluate('window.__repoville.fit()');
-await page.waitForTimeout(2400);
+if (!hold) {
+  await page.evaluate('window.__repoville.fit()');
+  await page.waitForTimeout(2400);
+}
 const recorded = (Date.now() - t0) / 1000;
 await ctx.close();
 await browser.close();
