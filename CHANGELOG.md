@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0 — 2026-10-16
+
+- **Terraces:** a folder made mostly of small files (townhouse class) is laid out as rows along lanes, back gardens meeting, files in path order, instead of scattered lots.
+- **Test labs:** each lab picks one of three whites, an accent stripe and roof furniture, so test-heavy districts are no longer one white field.
+- Export palettes no longer contain unused block states.
+
 ## 0.8.0 — 2026-10-16
 
 - **Facades with depth:** wide towers get trim piers on every third column, vertical glass strips between them and a two-block cornice; midrises get recessed ribbon windows, one glass row per floor. The skyline reads as framed buildings instead of boxes with dot grids.
