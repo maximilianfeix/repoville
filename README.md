@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/flyover.gif" alt="A real recording of the viewer: flying over the facebook/react city, into the burning ReactFiberWorkLoop.js tower (5,268 lines, soul fire, 46 TODOs) and to a mossy corner." width="100%"></a>
+  <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/"><img src="docs/media/flyover.gif" alt="A real recording of the viewer: flying over the facebook/react city, into the burning ReactFiberWorkLoop.js tower (5,268 lines, soul fire, 46 TODOs), then over to react-dom. Rendered with the v2 pixel textures." width="100%"></a>
 </p>
 
 <p align="center"><b>No install:</b> <a href="https://maximilianfeix.github.io/repoville/r/facebook/react/">walk React in your browser</a> · <b>On your repo:</b> <a href="#quick-start">one <code>npx</code> command</a> · <b>Show it off:</b> <code>repoville badge</code></p>
