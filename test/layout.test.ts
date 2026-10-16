@@ -175,3 +175,27 @@ describe('applyLod', () => {
 });
 
 void (null as unknown as Node);
+
+describe('terraces', () => {
+  it('lays a folder of small towers out as rows of equal depth in path order', () => {
+    const lib: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'lib', path: 'lib', children: [] };
+    for (let i = 0; i < 10; i++) lib.children.push(file(`lib/m${String(i).padStart(2, '0')}.ts`, 30 + i * 3));
+    const root: DirNode = { kind: 'dir', churn: 0, directChurn: 0, name: 'r', path: '', children: [lib, file('big.ts', 4000)] };
+    const layout = layoutCity(tree(root));
+    const rows = layout.buildings.filter((b) => b.file.path.startsWith('lib/'));
+    expect(rows).toHaveLength(10);
+    const alongX = rows.every((b) => b.footprint.z1 - b.footprint.z0 === 6);
+    const depth = (b: (typeof rows)[number]) => (alongX ? b.footprint.z1 - b.footprint.z0 : b.footprint.x1 - b.footprint.x0);
+    expect(rows.every((b) => depth(b) === 6)).toBe(true);
+    // Within each band (same front coordinate) buildings run in path order.
+    const front = (b: (typeof rows)[number]) => (alongX ? b.footprint.z0 : b.footprint.x0);
+    const along = (b: (typeof rows)[number]) => (alongX ? b.footprint.x0 : b.footprint.z0);
+    const bands = new Map<number, typeof rows>();
+    for (const b of rows) bands.set(front(b), [...(bands.get(front(b)) ?? []), b]);
+    expect(bands.size).toBeLessThan(10);
+    for (const band of bands.values()) {
+      const byPath = [...band].sort((a, b) => (a.file.path < b.file.path ? -1 : 1));
+      expect(byPath.map(along)).toEqual([...byPath.map(along)].sort((a, b) => a - b));
+    }
+  });
+});
