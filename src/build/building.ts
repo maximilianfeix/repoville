@@ -204,6 +204,57 @@ class Mason {
     }
     return y + 1;
   }
+
+  /**
+   * Roof furniture on a flat deck, so a skyline of flat roofs reads as many
+   * buildings instead of one material: gravel, green or pale decks, HVAC
+   * units, a stair housing and, on wider roofs, a timber water tank.
+   */
+  roofscape(r: Rect, deckTop: number): void {
+    const inner = inset(r, 1);
+    if (width(inner) < 3 || depth(inner) < 3) return;
+    const rng = this.rng;
+    const area = width(inner) * depth(inner);
+    const roll = rng();
+    const green = this.pal.biome !== 'nether' && this.pal.biome !== 'end';
+    const deck = roll < 0.3 ? 'minecraft:gravel' : roll < 0.48 && green ? 'minecraft:moss_block' : roll < 0.66 ? BLOCKS.roofBox : null;
+    if (deck) this.fill(inner, deckTop - 1, deckTop, deck);
+    const free = (x: number, z: number, w: number, d: number) => {
+      for (let zz = z; zz < z + d; zz++) for (let xx = x; xx < x + w; xx++) if (this.g.get(xx, deckTop, zz) !== 0) return false;
+      return true;
+    };
+    const spot = (w: number, d: number): [number, number] | null => {
+      if (width(inner) < w || depth(inner) < d) return null;
+      for (let tries = 0; tries < 6; tries++) {
+        const x = inner.x0 + Math.floor(rng() * (width(inner) - w + 1));
+        const z = inner.z0 + Math.floor(rng() * (depth(inner) - d + 1));
+        if (free(x, z, w, d)) return [x, z];
+      }
+      return null;
+    };
+    // Stair housing in the trim material.
+    const sh = spot(2, 3);
+    if (sh) this.fill({ x0: sh[0], z0: sh[1], x1: sh[0] + 2, z1: sh[1] + 3 }, deckTop, deckTop + 2, this.pal.trim);
+    // Water tank on legs, only where the roof is wide enough to carry it.
+    const tanks = width(inner) >= 6 && depth(inner) >= 6 && rng() < 0.55 ? (area >= 200 ? 2 : 1) : 0;
+    for (let k = 0; k < tanks; k++) {
+      const t = spot(2, 2);
+      if (t) {
+        const tank = { x0: t[0], z0: t[1], x1: t[0] + 2, z1: t[1] + 2 };
+        this.fill(tank, deckTop, deckTop + 1, BLOCKS.ironBars);
+        this.fill(tank, deckTop + 1, deckTop + 3, 'minecraft:spruce_planks');
+        this.fill(tank, deckTop + 3, deckTop + 4, slab('spruce'));
+      }
+    }
+    // HVAC units, more on larger decks (about one per 30 cells, at most 12).
+    const units = Math.min(12, 1 + Math.floor((area / 30) * (0.6 + rng() * 0.8)));
+    for (let i = 0; i < units; i++) {
+      const along = rng() < 0.5;
+      const u = along ? spot(2, 1) : spot(1, 2);
+      if (!u) break;
+      this.fill({ x0: u[0], z0: u[1], x1: u[0] + (along ? 2 : 1), z1: u[1] + (along ? 1 : 2) }, deckTop, deckTop + 1, 'minecraft:light_gray_concrete');
+    }
+  }
 }
 
 /** Windows on every other column, `rows` decides which levels are glass. */
@@ -319,11 +370,7 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
       m.floors(fp, 3, H + 1, 3);
       m.door(fp);
       const deckTop = m.flatRoof(fp, H + 1, pal.floor, pal.trim);
-      if (width(fp) >= 5 && depth(fp) >= 5) {
-        const bx = fp.x0 + 1 + Math.floor(rng() * (width(fp) - 4));
-        const bz = fp.z0 + 1 + Math.floor(rng() * (depth(fp) - 4));
-        m.fill({ x0: bx, z0: bz, x1: bx + 2, z1: bz + 2 }, deckTop, deckTop + 2, BLOCKS.roofBox);
-      }
+      m.roofscape(fp, deckTop);
       break;
     }
     case 'tower':
@@ -368,8 +415,9 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
           const az = crown.z0 + Math.floor(depth(crown) / 2);
           for (let y = deckTop; y < deckTop + 4; y++) m.put(ax, y, az, BLOCKS.ironBars);
           m.put(ax, deckTop + 4, az, BLOCKS.antenna);
-        } else if (width(crown) >= 5) {
-          m.fill({ x0: crown.x0 + 1, z0: crown.z0 + 1, x1: crown.x0 + 3, z1: crown.z0 + 3 }, deckTop, deckTop + 2, BLOCKS.roofBox);
+          m.roofscape(crown, deckTop);
+        } else {
+          m.roofscape(crown, deckTop);
         }
       }
       break;
@@ -384,11 +432,12 @@ export function buildShell(g: VoxelGrid, b: BuildingLayout, pal: Palette, style:
     for (let yy = y; yy <= m.top; yy++) for (let z = tier.z0; z < tier.z1; z++) for (let x = tier.x0; x < tier.x1; x++) g.set(x, yy, z, 0);
     // At most three tiers, so the crown never reads as extra height.
     for (let t = 0; t < 3 && width(tier) >= 3 && depth(tier) >= 3; t++) {
-      m.shell(tier, y, y + 2, pal.trim, { trim: pal.trim, window: (a, len, yy) => yy === y + 1 && a > 0 && a < len - 1 && a % 2 === 1 });
-      m.fill(tier, y + 2, y + 3, pal.trim);
+      m.shell(tier, y, y + 2, pal.towerWall, { window: (a, len, yy) => yy === y + 1 && a > 0 && a < len - 1 && a % 2 === 1 });
+      m.fill(tier, y + 2, y + 3, pal.roofBlock);
       tier = inset(tier, 1);
       y += 3;
     }
+    m.roofscape(inset(tier, -1), y);
     const cx = fp.x0 + Math.floor(width(fp) / 2);
     const cz = fp.z0 + Math.floor(depth(fp) / 2);
     m.put(cx, y, cz, 'minecraft:gold_block');
