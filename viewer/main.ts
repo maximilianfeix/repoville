@@ -271,7 +271,7 @@ function main() {
           if (night > 0.5 && abs(layer - glassLayer) < 0.5 && vUp < 0.5) {
             vec2 cell = floor(st + 0.001);
             float h = fract(sin(dot(cell, vec2(12.9898, 78.233)) + pid) * 43758.5453);
-            if (h < 0.6) diffuseColor.rgb = vec3(1.0, 0.6, 0.24) * (0.8 + 0.6 * h) * 1.7;
+            if (h < 0.6) diffuseColor.rgb = vec3(1.0, 0.5, 0.16) * (0.55 + 0.4 * h) * (0.7 + 0.5 * dot(diffuseColor.rgb, vec3(0.3, 0.5, 0.2)));
           }
           // Water surface: two slow crossing ripples and a soft glint where they meet.
           if (abs(layer - waterLayer) < 0.5 && vUp > 0.5) {
@@ -284,7 +284,7 @@ function main() {
         }`,
       )
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-        if (night > 0.5 && abs(mod(vTex.z, 64.0) - glassLayer) < 0.5 && vUp < 0.5 && diffuseColor.r > 0.9) totalEmissiveRadiance = diffuseColor.rgb * 0.55;`);
+        if (night > 0.5 && abs(mod(vTex.z, 64.0) - glassLayer) < 0.5 && vUp < 0.5 && diffuseColor.r > 0.35 && diffuseColor.b < 0.4 * diffuseColor.r) totalEmissiveRadiance = diffuseColor.rgb * 0.6;`);
   };
   const ox = -m.width / 2;
   const oz = -m.length / 2;
