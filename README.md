@@ -65,6 +65,8 @@ Every demo is a single HTML file rendered by Repoville. Click a view to jump str
 | No commit for over a year | Moss and vines |
 | Language | District theme: TS/JS plains, Rust nether, Python jungle, Go frozen peaks, Java/Kotlin badlands, C/C++ deep caves, Ruby cherry grove, Haskell/FP the end, Swift/Lua copper town, C#/PHP reef |
 
+All nine building families, each with a real render: [docs/BUILDINGS.md](docs/BUILDINGS.md).
+
 Fire means activity, not bad code. Moss means stable, not rotten. Exact numbers are always one click away in the viewer.
 
 <table>
